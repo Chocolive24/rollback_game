@@ -1,0 +1,11 @@
+{
+    "name": "rollback-game",
+    "version-string": "1.0",
+    "dependencies": [
+          "raylib", "gtest",
+        {
+            "name": "imgui",
+            "features": ["opengl3-binding", "docking-experimental"]
+        }
+      ]
+}

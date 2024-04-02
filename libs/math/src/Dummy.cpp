@@ -1,0 +1,1 @@
+// This file exists only to be able to build a math.lib file with CMake.
