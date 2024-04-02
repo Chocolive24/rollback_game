@@ -1,6 +1,7 @@
 /**
  * @headerfile Metrics.h
- * This file defines a collection of metrics.
+ * This file defines a collection of metrics to facilitate the development between
+ * physics and graphics.
  *
  * @author Olivier
  */
@@ -41,7 +42,7 @@ namespace Metrics
     template <typename T>
     [[nodiscard]] constexpr Math::Vec2<T> PixelsToMeters(const Math::Vec2<T> pixelPos) noexcept
     {
-        return Math::Vec2<T>(pixelPos.X * PixelsToMetersRatio, -pixelPos.Y * PixelsToMetersRatio);
+        return Math::Vec2<T>(pixelPos.X * PixelsToMetersRatio, pixelPos.Y * PixelsToMetersRatio);
     }
 
     /**
@@ -65,6 +66,6 @@ namespace Metrics
     template <typename T>
     [[nodiscard]] constexpr Math::Vec2<T> MetersToPixels(const Math::Vec2<T> meterPos) noexcept
     {
-        return Math::Vec2<T>(meterPos.X * MetersToPixelsRatio, -meterPos.Y * MetersToPixelsRatio);
+        return Math::Vec2<T>(meterPos.X * MetersToPixelsRatio, meterPos.Y * MetersToPixelsRatio);
     }
 }

@@ -68,8 +68,15 @@ if (USE_TRACY)
     target_link_libraries(physics PRIVATE tracyClient)
 endif()
 
+# Create the game library.
+file(GLOB_RECURSE GAME_SRC_FILES game/include/*.h game/src/*.cpp)
+add_library(game ${GAME_SRC_FILES})
+set_target_properties(game PROPERTIES LINKER_LANGUAGE CXX)
+target_include_directories(game PUBLIC game/include/)
+target_link_libraries(game PRIVATE raylib imgui::imgui rl_imgui math common physics)
+
 add_executable(main main.cpp)
-target_link_libraries(main PRIVATE raylib imgui::imgui rl_imgui math common physics)
+target_link_libraries(main PRIVATE raylib imgui::imgui rl_imgui math common physics game)
 
 if (EMSCRIPTEN)
         ## The local resources path needs to be mapped to /data virtual path
