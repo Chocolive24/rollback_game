@@ -1,9 +1,7 @@
 #include "player_controller.h"
 
-#include <iostream>
-#include <raylib.h>
-
 #include "game_constants.h"
+#include "inputs_manager.h"
 
 void PlayerController::Init() noexcept {
   const auto& body_ref = world_->CreateBody();
@@ -27,18 +25,19 @@ void PlayerController::Update() const noexcept {
 }
 
 void PlayerController::PollInputs() noexcept {
+  const auto inputs = game::GetPlayerInputs(1);
   move_direction_ = Math::Vec2F::Zero();
 
-  if (IsKeyDown(KEY_W)) {
+  if (inputs & static_cast<std::uint8_t>(game::PlayerInputTypes::kUp)) {
     move_direction_ += Math::Vec2F::Down();
   }
-  if (IsKeyDown(KEY_A)) {
+  if (inputs & static_cast<std::uint8_t>(game::PlayerInputTypes::kLeft)) {
     move_direction_ += Math::Vec2F::Left();
   }
-  if (IsKeyDown(KEY_S)) {
+  if (inputs & static_cast<std::uint8_t>(game::PlayerInputTypes::kDown)) {
     move_direction_ += Math::Vec2F::Up();
   }
-  if (IsKeyDown(KEY_D)) {
+  if (inputs & static_cast<std::uint8_t>(game::PlayerInputTypes::kRight)) {
     move_direction_ += Math::Vec2F::Right();
   }
 }
