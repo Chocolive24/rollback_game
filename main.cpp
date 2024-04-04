@@ -18,7 +18,7 @@ void DrawMainFrame(void* renderer) noexcept {
 
 int main() {
   // Init raylib window.
-  SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+ // SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   InitWindow(1280, 720, "Rollback Game");
 
   // Init game renderer.
