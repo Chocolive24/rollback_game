@@ -12,10 +12,12 @@ public:
   constexpr explicit Engine(Application* app) noexcept : application_(app){}
   void Run() noexcept;
 
+  static Math::Vec2I window_size() noexcept { return window_size_; }
+
 private:
   void Setup() noexcept;
   void TearDown() noexcept;
 
   Application* application_ = nullptr;
-  Math::Vec2I window_size_{1280, 720};
+  inline static Math::Vec2I window_size_{1280, 720};
 };

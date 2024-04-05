@@ -1,5 +1,8 @@
 #pragma once
-#include "client_application.h"
+
+#include "app_interface.h"
+
+#include <raylib.h>
 
 class DebugInputsApp final : public Application {
 public:
@@ -10,4 +13,6 @@ public:
   void TearDown() noexcept override;
 
 private:
+  RenderTexture2D client_1_tex_{};
+  RenderTexture2D client_2_tex_{};
 };

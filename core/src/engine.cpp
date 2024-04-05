@@ -51,7 +51,7 @@ void Engine::Run() noexcept {
       ImGui_ImplRaylib_NewFrame();
       ImGui::NewFrame();
 
-      ImGui::ShowDemoWindow();
+      application_->DrawImGui();
 
       // Rendering
       ImGui::Render();
