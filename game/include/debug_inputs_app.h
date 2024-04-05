@@ -4,6 +4,23 @@
 
 #include <raylib.h>
 
+#include "Vec2.h"
+
+class DebugInputsClient {
+public:
+  void Init(Math::Vec2I render_tex_size) noexcept;
+  void Update() noexcept;
+  void Draw() noexcept;
+  void Deinit() noexcept;
+
+  [[nodiscard]] const RenderTexture2D& render_texture() const noexcept {
+    return render_texture_;
+  }
+
+private:
+ RenderTexture2D render_texture_{};
+};
+
 class DebugInputsApp final : public Application {
 public:
   void Setup() noexcept override;
@@ -13,6 +30,6 @@ public:
   void TearDown() noexcept override;
 
 private:
-  RenderTexture2D client_1_tex_{};
-  RenderTexture2D client_2_tex_{};
+  DebugInputsClient client_1_{};
+  DebugInputsClient client_2_{};
 };
