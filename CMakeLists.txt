@@ -73,7 +73,7 @@ file(GLOB_RECURSE CORE_SRC_FILES core/include/*.h core/src/*.cpp)
 add_library(core ${CORE_SRC_FILES})
 set_target_properties(core PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories(core PUBLIC core/include/)
-target_link_libraries(core PUBLIC raylib imgui::imgui rl_imgui)
+target_link_libraries(core PUBLIC raylib imgui::imgui rl_imgui math common)
 
 # Create the game library.
 file(GLOB_RECURSE GAME_SRC_FILES game/include/*.h game/src/*.cpp)
@@ -82,8 +82,11 @@ set_target_properties(game PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories(game PUBLIC game/include/)
 target_link_libraries(game PUBLIC math common physics core)
 
-add_executable(main main/main.cpp)
-target_link_libraries(main PRIVATE game)
+add_executable(client main/client_entry_point.cpp)
+target_link_libraries(client PRIVATE game)
+
+add_executable(debug_inputs main/debug_inputs_entry_point.cpp)
+target_link_libraries(debug_inputs PRIVATE game)
 
 if (EMSCRIPTEN)
         ## The local resources path needs to be mapped to /data virtual path

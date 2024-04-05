@@ -1,6 +1,8 @@
 #include "engine.h"
 
 #include <raylib.h>
+#include <imgui.h>
+#include <imgui_impl_raylib.h>
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
@@ -31,8 +33,32 @@ void Engine::Run() noexcept {
   //SetTargetFPS(60);
 
   while (!WindowShouldClose()) {
+    ClearBackground(BLACK);
+
+    if (IsWindowResized()) {
+      window_size_.X = GetScreenWidth();
+      window_size_.Y = GetScreenHeight();
+    }
+
     application_->Update();
-    application_->Draw();
+
+    ImGui_ImplRaylib_ProcessEvents();
+
+    BeginDrawing(); {
+      application_->Draw();
+
+      // Start the Dear ImGui frame
+      ImGui_ImplRaylib_NewFrame();
+      ImGui::NewFrame();
+
+      ImGui::ShowDemoWindow();
+
+      // Rendering
+      ImGui::Render();
+      ImGui_ImplRaylib_RenderDrawData(ImGui::GetDrawData());
+    }
+    EndDrawing();
+
   }
 
 #endif
@@ -42,12 +68,34 @@ void Engine::Run() noexcept {
 
 void Engine::Setup() noexcept {
   SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
-  InitWindow(1280, 720, "Rollback Game");
+  InitWindow(window_size_.X, window_size_.Y, "Rollback Game");
+
+  // Setup Dear ImGui context
+  ImGui::CreateContext();
+  ImGuiIO& io = ImGui::GetIO();
+  (void)io;
+  io.ConfigFlags |=
+      ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
+  io.ConfigFlags |=
+      ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
+
+  // Setup Platform/Renderer backends
+  ImGui_ImplRaylib_Init();
+
+  // required to be called to cache the font texture with raylib
+  Imgui_ImplRaylib_BuildFontAtlas();
+
+  // Setup Dear ImGui style
+  ImGui::StyleColorsDark();
 
   application_->Setup();
 }
 
 void Engine::TearDown() noexcept {
   application_->TearDown();
+
+  ImGui_ImplRaylib_Shutdown();
+  ImGui::DestroyContext();
+
   CloseWindow();
 }

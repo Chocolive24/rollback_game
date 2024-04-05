@@ -12,5 +12,6 @@ public:
   virtual void Setup() noexcept = 0;
   virtual void Update() noexcept = 0;
   virtual void Draw() noexcept = 0;
+  virtual void DrawImGui() noexcept = 0;
   virtual void TearDown() noexcept = 0;
 };

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "app_interface.h"
+#include "Vec2.h"
 
 /**
  * \brief Engine is the class which creates the main window and run an application
@@ -16,4 +17,5 @@ private:
   void TearDown() noexcept;
 
   Application* application_ = nullptr;
+  Math::Vec2I window_size_{1280, 720};
 };
