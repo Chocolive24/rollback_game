@@ -3,7 +3,7 @@
 #include "game_manager.h"
 
 /**
- * \brief GameRenderer is a class that inherits from GameManager to update and render
+ * \brief ClientApplication is a class that inherits from GameManager to update and render
  * the state of the game.
  */
 class GameRenderer final : public GameManager {

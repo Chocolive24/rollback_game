@@ -1,7 +1,7 @@
 #pragma once
 
 #include "game_constants.h"
-#include "player_controller.h""
+#include "player_controller.h"
 #include "World.h"
 
 /**
@@ -18,12 +18,13 @@ public:
   virtual ~GameManager() noexcept = default;
 
   virtual void Init() noexcept;
-  void PollInputs() noexcept;
   void Update() noexcept;
   virtual void Deinit() noexcept;
 
 protected:
   PhysicsEngine::World world_{};
   PlayerController player_controller_{&world_};
-  
+
+private:
+  void PollInputs() noexcept;
 };
