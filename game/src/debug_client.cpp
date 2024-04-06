@@ -1,4 +1,5 @@
 #include "debug_client.h"
+#include "debug_server.h"
 #include "engine.h"
 
 void DebugClient::Init(int client_idx,
@@ -8,14 +9,17 @@ void DebugClient::Init(int client_idx,
 }
 
 void DebugClient::Update() noexcept {
-  inputs_ = game::GetPlayerInputs(client_idx_);
+  inputs_ = inputs::GetPlayerInputs(client_idx_);
 
   if (IsWindowResized()) {
     auto new_tex_size = Engine::window_size();
     new_tex_size.X /= 2;
-    render_texture_.texture.width = new_tex_size.X;
-    render_texture_.texture.height = new_tex_size.Y;
+    UnloadRenderTexture(render_texture_);
+    render_texture_ = LoadRenderTexture(new_tex_size.X, new_tex_size.Y);
   }
+
+  SendInputs(inputs::FrameInputs{inputs_, current_frame_});
+  current_frame_++;
 }
 
 void DebugClient::Draw() noexcept {
@@ -25,51 +29,70 @@ void DebugClient::Draw() noexcept {
 
     const auto tex_center = Math::Vec2I(render_texture_.texture.width / 2,
                                         render_texture_.texture.height / 2);
+    const auto client_1_txt_pos_x = tex_center.X - tex_center.X / 2;
+    const auto client_2_txt_pos_x = tex_center.X + tex_center.X / 2;
 
-    const char* client_idx_txt = TextFormat("Client_%02i", client_idx_);
+    const char* client_idx_txt = TextFormat("Client %i", client_idx_);
     DrawText(client_idx_txt, tex_center.X - MeasureText(client_idx_txt, kFontSize) / 2, 
         75.f, kFontSize, WHITE);
 
-    Color key_color =
-        inputs_ & static_cast<game::PlayerInputs>(game::PlayerInputTypes::kUp)
-            ? WHITE
-            : DARKGRAY;
-    DrawText("UP", tex_center.X - MeasureText("UP", kFontSize) / 2, 1 * kTextOffsetY, kFontSize, key_color);
+    DrawText("Client 1",
+             client_1_txt_pos_x -  MeasureText(client_idx_txt, kFontSize) / 2,
+             175.f, kFontSize, WHITE);
+    DrawText("Client 2",
+             client_2_txt_pos_x - MeasureText(client_idx_txt, kFontSize) / 2,
+             175.f, kFontSize, WHITE);
 
-    key_color =
-        inputs_ & static_cast<game::PlayerInputs>(game::PlayerInputTypes::kLeft)
-            ? WHITE
-            : DARKGRAY;
-    DrawText("LEFT", tex_center.X - MeasureText("LEFT", kFontSize) / 2,
-             2 * kTextOffsetY, kFontSize, key_color);
+    for (int i = 0; i < game_constants::kMaxPlayerCount; i++) {
+      int text_pos_x = i == 0 ? client_1_txt_pos_x : client_2_txt_pos_x;
 
-    key_color =
-        inputs_ & static_cast<game::PlayerInputs>(game::PlayerInputTypes::kDown)
-            ? WHITE
-            : DARKGRAY;
-    DrawText("DOWN", tex_center.X - MeasureText("DOWN", kFontSize) / 2,
-             3 * kTextOffsetY, kFontSize, key_color);
+      if (i == 0)
+        text_pos_x = client_idx_ == 1 ? client_1_txt_pos_x : client_2_txt_pos_x;
+      else
+        text_pos_x = client_idx_ == 1 ? client_2_txt_pos_x : client_1_txt_pos_x;
 
-    key_color = inputs_ & static_cast<game::PlayerInputs>(
-                              game::PlayerInputTypes::kRight)
-                    ? WHITE
-                    : DARKGRAY;
-    DrawText("RIGHT", tex_center.X - MeasureText("RIGHT", kFontSize) / 2,
-             4 * kTextOffsetY, kFontSize, key_color);
+      const inputs::PlayerInputs inputs = i == 0 ? inputs_ : other_client_inputs_;
+      
+
+      Color key_color = inputs & static_cast<inputs::PlayerInputs>(
+                                      inputs::PlayerInputTypes::kUp)
+                            ? WHITE
+                            : DARKGRAY;
+      DrawText("UP", text_pos_x - MeasureText("UP", kFontSize) / 2,
+               kStartTextPosY + 1 * kTextOffsetY, kFontSize, key_color);
+
+      key_color = inputs & static_cast<inputs::PlayerInputs>(
+                                inputs::PlayerInputTypes::kLeft)
+                      ? WHITE
+                      : DARKGRAY;
+      DrawText("LEFT", text_pos_x - MeasureText("LEFT", kFontSize) / 2,
+               kStartTextPosY + 2 * kTextOffsetY, kFontSize, key_color);
+
+      key_color = inputs & static_cast<inputs::PlayerInputs>(
+                                inputs::PlayerInputTypes::kDown)
+                      ? WHITE
+                      : DARKGRAY;
+      DrawText("DOWN", text_pos_x - MeasureText("DOWN", kFontSize) / 2,
+               kStartTextPosY + 3 * kTextOffsetY, kFontSize, key_color);
+
+      key_color = inputs & static_cast<inputs::PlayerInputs>(
+                                inputs::PlayerInputTypes::kRight)
+                      ? WHITE
+                      : DARKGRAY;
+      DrawText("RIGHT", text_pos_x - MeasureText("RIGHT", kFontSize) / 2,
+               kStartTextPosY + 4 * kTextOffsetY, kFontSize, key_color);
+    }
   }
   EndTextureMode();
 }
 
 void DebugClient::Deinit() noexcept {
-  UnloadRenderTexture(render_texture_);
+  UnloadRenderTexture(render_texture_); }
+
+void DebugClient::SendInputs(inputs::FrameInputs inputs) noexcept {
+  server_->ReceiveInputs(inputs, client_idx_);
 }
 
-void DebugClient::SendPacket(game::PlayerInputs inputs,
-                                   DebugClient* receiver) noexcept {
-  receiver->ReceivePacket(inputs);
-}
-
-game::PlayerInputs DebugClient::ReceivePacket(
-    game::PlayerInputs inputs) noexcept {
-  return game::PlayerInputs();
+void DebugClient::ReceiveInputs(inputs::FrameInputs inputs) noexcept {
+  other_client_inputs_ = inputs.inputs;
 }

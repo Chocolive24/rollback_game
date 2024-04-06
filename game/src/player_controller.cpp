@@ -25,19 +25,19 @@ void PlayerController::Update() const noexcept {
 }
 
 void PlayerController::PollInputs() noexcept {
-  const auto inputs = game::GetPlayerInputs(1);
+  const auto inputs = inputs::GetPlayerInputs(1);
   move_direction_ = Math::Vec2F::Zero();
 
-  if (inputs & static_cast<std::uint8_t>(game::PlayerInputTypes::kUp)) {
+  if (inputs & static_cast<std::uint8_t>(inputs::PlayerInputTypes::kUp)) {
     move_direction_ += Math::Vec2F::Down();
   }
-  if (inputs & static_cast<std::uint8_t>(game::PlayerInputTypes::kLeft)) {
+  if (inputs & static_cast<std::uint8_t>(inputs::PlayerInputTypes::kLeft)) {
     move_direction_ += Math::Vec2F::Left();
   }
-  if (inputs & static_cast<std::uint8_t>(game::PlayerInputTypes::kDown)) {
+  if (inputs & static_cast<std::uint8_t>(inputs::PlayerInputTypes::kDown)) {
     move_direction_ += Math::Vec2F::Up();
   }
-  if (inputs & static_cast<std::uint8_t>(game::PlayerInputTypes::kRight)) {
+  if (inputs & static_cast<std::uint8_t>(inputs::PlayerInputTypes::kRight)) {
     move_direction_ += Math::Vec2F::Right();
   }
 }

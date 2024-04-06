@@ -2,6 +2,7 @@
 
 #include "app_interface.h"
 #include "debug_client.h"
+#include "debug_server.h"
 
 /**
  * \brief DebugApp is a class which simulates the network communications with
@@ -17,6 +18,6 @@ public:
   void TearDown() noexcept override;
 
 private:
-  DebugClient client_1_{};
-  DebugClient client_2_{};
+  DebugServer server_;
+  std::array<DebugClient, game_constants::kMaxPlayerCount> clients_{};
 };

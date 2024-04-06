@@ -6,40 +6,45 @@
 void DebugApp::Setup() noexcept {
   auto texture_size = Engine::window_size();
   texture_size.X /= 2;
-  client_1_.Init(1, texture_size);
-  client_2_.Init(2, texture_size);
+  for (int i = 0; i < game_constants::kMaxPlayerCount; i++) {
+    clients_[i].Init(i + 1, texture_size);
+    clients_[i].RegisterServer(&server_);
+  }
+
+  server_.RegisterClients(&clients_[0], &clients_[1]);
 }
 
 void DebugApp::Update() noexcept {
-  client_1_.Update();
-  client_2_.Update();
+  for (auto& client : clients_)
+  {
+    client.Update();
+  }
 }
 
 void DebugApp::Draw() noexcept {
-  client_1_.Draw();
+  for (int i = 0; i < game_constants::kMaxPlayerCount; i++) {
+    auto& client = clients_[i];
+    client.Draw();
 
-  // NOTE: Render texture must be y-flipped due to default OpenGL coordinates
-  // (left-bottom)
-  const auto client_1_tex = client_1_.render_texture().texture;
-  DrawTextureRec(client_1_tex,
-                 Rectangle{0, 0, static_cast<float>(client_1_tex.width),
-                           static_cast<float>(-client_1_tex.height)},
-                 Vector2{0, 0}, WHITE);
-
-  client_2_.Draw();
-
-  // NOTE: Render texture must be y-flipped due to default OpenGL coordinates
-  // (left-bottom)
-  const auto client_2_tex = client_2_.render_texture().texture;
-  DrawTextureRec(client_2_tex,
-                 Rectangle{0, 0, static_cast<float>(client_2_tex.width),
-                           static_cast<float>(-client_2_tex.height)},
-                 Vector2{static_cast<float>(client_2_tex.width), 0}, WHITE);
+    // NOTE: Render texture must be y-flipped due to default OpenGL coordinates
+    // (left-bottom)
+    const auto client_tex = client.render_texture().texture;
+    const Vector2 pos = i == 0
+                            ? Vector2{0, 0}
+                            : Vector2{static_cast<float>(client_tex.width), 0};
+    
+    DrawTextureRec(client_tex,
+                   Rectangle{0, 0, static_cast<float>(client_tex.width),
+                             static_cast<float>(-client_tex.height)},
+                   pos, WHITE);
+  }
 }
 
-void DebugApp::DrawImGui() noexcept { ImGui::ShowDemoWindow(); }
+void DebugApp::DrawImGui() noexcept { server_.DrawImGui(); }
 
 void DebugApp::TearDown() noexcept {
-  client_1_.Deinit();
-  client_2_.Deinit();
+  for (auto& client : clients_)
+  {
+    client.Deinit();
+  }
 }

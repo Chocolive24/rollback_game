@@ -2,7 +2,7 @@
 
 #include <raylib.h>
 
-namespace game {
+namespace inputs {
 
 PlayerInputs GetPlayerInputs(int player_idx) noexcept {
   switch (player_idx) {
@@ -47,4 +47,4 @@ PlayerInputs GetPlayerInputs(int player_idx) noexcept {
   }
 }
 
-}  // namespace game
+}  // namespace inputs
