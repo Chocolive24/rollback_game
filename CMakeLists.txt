@@ -83,10 +83,10 @@ target_include_directories(game PUBLIC game/include/)
 target_link_libraries(game PUBLIC math common physics core)
 # Link Photon library
 if(WIN32)
-    target_link_libraries(game PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/externals/photon/libs/Photon-cpp_vc17_release_windows_md_Win32.lib)
-    target_link_libraries(game PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/externals/photon/libs/Common-cpp_vc17_release_windows_md_Win32.lib)
-    target_include_directories(game PUBLIC externals/photon/Photon-cpp/inc)
-    target_include_directories(game PUBLIC externals/photon/Common-cpp/inc)
+    target_link_libraries(game PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/externals/photon/libs/Photon-cpp_vc17_release_windows_md_x64.lib)
+    target_link_libraries(game PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/externals/photon/libs/Common-cpp_vc17_release_windows_md_x64.lib)
+    target_include_directories(game PUBLIC externals/photon/)
+    target_include_directories(game PUBLIC externals/photon/)
 endif()
 
 add_executable(client_app main/client_entry_point.cpp)
@@ -94,6 +94,9 @@ target_link_libraries(client_app PRIVATE game)
 
 add_executable(debug_app main/debug_app_entry_point.cpp)
 target_link_libraries(debug_app PRIVATE game)
+
+add_executable(photon_sample main/photon_sample.cpp)
+target_link_libraries(photon_sample PRIVATE game)
 
 if (EMSCRIPTEN)
         ## The local resources path needs to be mapped to /data virtual path
