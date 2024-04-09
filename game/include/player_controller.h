@@ -14,8 +14,13 @@ public:
   void PollInputs() noexcept;
 
   PhysicsEngine::ColliderRef col_ref_{};
+  PhysicsEngine::ColliderRef can_jump_col_ref_{};
+  bool can_jump_ = true;
 
-private:
+ private:
  PhysicsEngine::World* world_ = nullptr;
+
  Math::Vec2F move_direction_{};
+ bool is_jumping_ = false;
+
 };

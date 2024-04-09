@@ -33,9 +33,9 @@ void GameRenderer::Draw() noexcept {
 #endif
   }
 
-  for (const auto& player_controller : player_controllers_) {
+  //for (const auto& player_controller : player_controllers_) {
     const auto& body_ref =
-        world_.GetCollider(player_controller.col_ref_).GetBodyRef();
+        world_.GetCollider(player_controller_.col_ref_).GetBodyRef();
     const auto& body = world_.GetBody(body_ref);
     auto ball_pos = body.Position();
     ball_pos = Metrics::MetersToPixels(ball_pos);
@@ -50,8 +50,17 @@ void GameRenderer::Draw() noexcept {
 #ifdef DEBUG
     DrawRectangleLines(ball_pos.X - radius * 0.5f, ball_pos.Y - radius * 0.5f,
                        radius, radius, RED);
+    const auto& col = world_.GetCollider(player_controller_.can_jump_col_ref_);
+    const auto circle = std::get<Math::CircleF>(col.Shape());
+    const auto pixel_pos = Metrics::MetersToPixels(circle.Center());
+    const auto pos = ball_pos + pixel_pos;
+    const auto pixel_radius = Metrics::MetersToPixels(circle.Radius());
+
+    DrawCircleLines(ball_pos.X, ball_pos.Y + radius * 0.5f, pixel_radius, RED);
 #endif
-  }
+
+ // }
+
 }
 
 void GameRenderer::Deinit() noexcept {

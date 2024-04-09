@@ -13,6 +13,7 @@ namespace game_constants {
 
   constexpr float kPlayerColLength = 0.65f;
   constexpr float kPlayerSpeedMoveFactor = 5.f;
+  constexpr float kPlayerJumpMagnitude = 200.f;
   constexpr Math::Vec2F kPlayerStartPos = Math::Vec2F(6.40f, 1.60f);
 
   constexpr std::uint8_t kPlatformCount = 1;

@@ -9,7 +9,8 @@ enum class PlayerInputTypes : std::uint8_t {
   kDown = 1 << 1,
   kRight = 1 << 2,
   kLeft = 1 << 3,
-  kShoot = 1 << 4
+  kShoot = 1 << 4,
+  kJump = 1 << 5
 };
 
 /**

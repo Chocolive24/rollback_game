@@ -24,6 +24,9 @@ PlayerInputs GetPlayerInputs(int player_idx) noexcept {
       if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
         player_1_inputs |= static_cast<std::uint8_t>(PlayerInputTypes::kShoot);
       }
+      if (IsKeyPressed(KEY_SPACE)) {
+        player_1_inputs |= static_cast<std::uint8_t>(PlayerInputTypes::kJump);
+      }
       return player_1_inputs;
     }
 
@@ -44,6 +47,9 @@ PlayerInputs GetPlayerInputs(int player_idx) noexcept {
       }
       if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
         player_2_inputs |= static_cast<std::uint8_t>(PlayerInputTypes::kShoot);
+      }
+      if (IsKeyPressed(KEY_SPACE)) {
+        player_2_inputs |= static_cast<std::uint8_t>(PlayerInputTypes::kJump);
       }
       return player_2_inputs;
     }

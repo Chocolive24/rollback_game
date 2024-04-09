@@ -1,5 +1,7 @@
 #include "player_controller.h"
 
+#include <iostream>
+
 #include "game_constants.h"
 #include "inputs.h"
 
@@ -15,6 +17,12 @@ void PlayerController::Init() noexcept {
                                      game_constants::kPlayerColLength * 0.5f);
   collider.SetShape(Math::RectangleF(-half_size, half_size));
   collider.SetRestitution(0.1f);
+
+  can_jump_col_ref_ = world_->CreateCollider(body_ref);
+  auto& can_jump_col = world_->GetCollider(can_jump_col_ref_);
+
+  can_jump_col.SetShape(Math::CircleF(Math::Vec2F::Zero(), 1.f));
+  can_jump_col.SetIsTrigger(true);
 }
 
 void PlayerController::Update() const noexcept {
@@ -33,16 +41,29 @@ void PlayerController::PollInputs() noexcept {
   const auto inputs = inputs::GetPlayerInputs(1);
   move_direction_ = Math::Vec2F::Zero();
 
-  if (inputs & static_cast<std::uint8_t>(inputs::PlayerInputTypes::kUp)) {
+  if (inputs & static_cast<inputs::PlayerInputs>(inputs::PlayerInputTypes::kUp)) {
     move_direction_ += Math::Vec2F::Down();
   }
-  if (inputs & static_cast<std::uint8_t>(inputs::PlayerInputTypes::kLeft)) {
+  if (inputs & static_cast<inputs::PlayerInputs>(inputs::PlayerInputTypes::kLeft)) {
     move_direction_ += Math::Vec2F::Left();
   }
-  if (inputs & static_cast<std::uint8_t>(inputs::PlayerInputTypes::kDown)) {
+  if (inputs & static_cast<inputs::PlayerInputs>(inputs::PlayerInputTypes::kDown)) {
     move_direction_ += Math::Vec2F::Up();
   }
-  if (inputs & static_cast<std::uint8_t>(inputs::PlayerInputTypes::kRight)) {
+  if (inputs & static_cast<inputs::PlayerInputs>(inputs::PlayerInputTypes::kRight)) {
     move_direction_ += Math::Vec2F::Right();
+  }
+
+  if (inputs & static_cast<inputs::PlayerInputs>(inputs::PlayerInputTypes::kJump)) {
+    if (!can_jump_) {
+      return;
+    }
+
+    is_jumping_ = true;
+    can_jump_ = false;
+    const auto& body_ref = world_->GetCollider(col_ref_).GetBodyRef();
+    auto& body = world_->GetBody(body_ref);
+
+    body.ApplyForce(Math::Vec2F::Down() * game_constants::kPlayerJumpMagnitude);
   }
 }

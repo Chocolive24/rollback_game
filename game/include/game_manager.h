@@ -24,15 +24,15 @@ public:
 
 protected:
   PhysicsEngine::World world_{};
-  std::array<PlayerController, game_constants::kMaxPlayerCount - 1> player_controllers_;
+  PlayerController player_controller_;
+  //std::array<PlayerController, game_constants::kMaxPlayerCount> player_controllers_;
   PlatformsManager platforms_manager_{};
 
   void OnTriggerEnter(
       PhysicsEngine::ColliderRef colliderRefA,
-      PhysicsEngine::ColliderRef colliderRefB) noexcept override {}
-  void OnTriggerStay(
-      PhysicsEngine::ColliderRef colliderRefA,
-      PhysicsEngine::ColliderRef colliderRefB) noexcept override {}
+      PhysicsEngine::ColliderRef colliderRefB) noexcept override;
+  void OnTriggerStay(PhysicsEngine::ColliderRef colliderRefA,
+                     PhysicsEngine::ColliderRef colliderRefB) noexcept override;
   void OnTriggerExit(
       PhysicsEngine::ColliderRef colliderRefA,
       PhysicsEngine::ColliderRef colliderRefB) noexcept override {}
