@@ -1,6 +1,7 @@
 #include "debug_client.h"
 #include "debug_server.h"
 #include "engine.h"
+#include "Random.h"
 
 void DebugClient::Init(int client_idx,
                        Math::Vec2I render_tex_size) noexcept {
@@ -81,6 +82,14 @@ void DebugClient::Draw() noexcept {
                       : DARKGRAY;
       DrawText("RIGHT", text_pos_x - MeasureText("RIGHT", kFontSize) / 2,
                kStartTextPosY + 4 * kTextOffsetY, kFontSize, key_color);
+
+      key_color = inputs & static_cast<inputs::PlayerInputs>(
+                               inputs::PlayerInputTypes::kShoot)
+                      ? WHITE
+                      : DARKGRAY;
+
+      DrawText("SHOOT", text_pos_x - MeasureText("SHOOT", kFontSize) / 2,
+               kStartTextPosY + 5 * kTextOffsetY, kFontSize, key_color);
     }
   }
   EndTextureMode();
@@ -90,7 +99,9 @@ void DebugClient::Deinit() noexcept {
   UnloadRenderTexture(render_texture_); }
 
 void DebugClient::SendInputs(inputs::FrameInputs inputs) noexcept {
-  server_->ReceiveInputs(inputs, client_idx_);
+  const auto delay = Math::Random::Range(server_->min_packet_delay, server_->max_packet_delay);
+  const inputs::DebugInputs debug_inputs{inputs, delay, client_idx_};
+  server_->ReceiveInputs(debug_inputs);
 }
 
 void DebugClient::ReceiveInputs(inputs::FrameInputs inputs) noexcept {

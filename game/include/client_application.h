@@ -1,6 +1,6 @@
 #pragma once
 
-#include "app_interface.h"
+#include "application.h"
 #include "game_renderer.h"
 
 class ClientApplication final : public Application {

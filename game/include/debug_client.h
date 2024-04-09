@@ -1,6 +1,6 @@
 #pragma once
 
-#include "inputs_manager.h"
+#include "inputs.h"
 #include "Vec2.h"
 
 #include <raylib.h>

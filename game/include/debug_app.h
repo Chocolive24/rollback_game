@@ -1,6 +1,6 @@
 #pragma once
 
-#include "app_interface.h"
+#include "application.h"
 #include "debug_client.h"
 #include "debug_server.h"
 

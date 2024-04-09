@@ -1,6 +1,6 @@
 #pragma once
 
-#include "app_interface.h"
+#include "application.h"
 #include "Vec2.h"
 
 /**
@@ -10,6 +10,7 @@
 class Engine {
 public:
   constexpr explicit Engine(Application* app) noexcept : application_(app){}
+  void ProcessFrame();
   void Run() noexcept;
 
   static Math::Vec2I window_size() noexcept { return window_size_; }

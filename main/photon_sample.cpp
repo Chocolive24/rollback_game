@@ -1,72 +1,27 @@
-#include "Photon-cpp/inc/LitePeer.h"
+#include "LoadBalancing-cpp/inc/Client.h"
 
-#include <iostream>
+#include <stdlib.h>
 
-class Listener final : public ExitGames::Photon::PhotonListener {
+class Listener : public ExitGames::LoadBalancing::Listener {
 public:
-  void debugReturn(int debugLevel, const ExitGames::Common::JString& string) override {
-   //std::cout << "debug return " << debugLevel << " " << string << '\n';
-  }
-  ~Listener() override = default;
-  void onOperationResponse(const ExitGames::Photon::OperationResponse& operationResponse) override {
-   if (operationResponse.getReturnCode() == ExitGames::Photon::StatusCode::CONNECT) {
-     std::cout << "Joined room successfully." << std::endl;
-   } else if (operationResponse.getReturnCode() ==
-              ExitGames::Photon::StatusCode::DISCONNECT) {
-     std::cout << "Left room successfully." << std::endl;
-   }
-   // Handle other operation responses as needed
-  }
-  void onStatusChanged(int statusCode) override {
-   std::cout << "onStatusChanged : " << statusCode << '\n';
-  }
-  void onEvent(const ExitGames::Photon::EventData& eventData) override {
-   std::cout << "onEvent " << eventData.toString() << '\n';
-  }
-  void onMessage(const ExitGames::Common::Object&) override{}
-  void onRawMessage(nByte*, int) override{}
-  void onPingResponse(const ExitGames::Common::JString& ping, unsigned) override {
-   std::cout << ping << '\n';
-  }
+  void debugReturn(int debugLevel, const ExitGames::Common::JString& string) override{}
+  void connectionErrorReturn(int errorCode) override{}
+  void clientErrorReturn(int errorCode) override{}
+  void warningReturn(int warningCode) override{}
+  void serverErrorReturn(int errorCode) override{}
+  void joinRoomEventAction(int playerNr, const ExitGames::Common::JVector<int>& playernrs,
+    const ExitGames::LoadBalancing::Player& player) override{}
+  void leaveRoomEventAction(int playerNr, bool isInactive) override{}
+  void customEventAction(int playerNr, nByte eventCode, const ExitGames::Common::Object& eventContent) override{}
+  void connectReturn(int errorCode, const ExitGames::Common::JString& errorString,
+    const ExitGames::Common::JString& region, const ExitGames::Common::JString& cluster) override{}
+  void disconnectReturn() override{}
+  void leaveRoomReturn(int errorCode, const ExitGames::Common::JString& errorString) override{}
 };
-
+//
 int main() {
-  Listener listener;
-  ExitGames::Lite::LitePeer peer(listener);
-
-  if (!peer.connect("127.0.0.1:5055"))
-  {
-    std::cerr << "Could not connect to server\n";
-  }
-
-  std::cout << "connected\n";
-
-  while (true)
-  {
-    peer.opRaiseEvent(true, "Hello", 1);
-    //peer.service();
-    //peer.pingServer("127.0.0.1 : 5055", 10);
-  }
-
-  //// Main loop
-  //for (int i = 0; i < 100; ++i) {
-  // // Regularly call service() to handle events and send operations
-  // peer.service();
-
-  // peer.pingServer("localhost", 10);
-
-  // // Send data (event) in the game
-  // peer.opRaiseEvent(true, "Hello, world!", 1);
-
-  // // Handle other game logic as needed
-
-  // // Sleep or delay
-  // // This is just for demonstration purposes, in a real application,
-  // // you may have some other logic or input handling here.
-  // std::this_thread::sleep_for(std::chrono::milliseconds(100));
-  //}
-
-  peer.disconnect();
-
+//  Listener listener{};
+//  ExitGames::LoadBalancing::Listener* listenr_ptr = &listener;
+//  ExitGames::LoadBalancing::Client client(*listenr_ptr);
   return EXIT_SUCCESS;
 }

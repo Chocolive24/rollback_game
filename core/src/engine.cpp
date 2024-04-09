@@ -14,10 +14,8 @@
  *  current application's frame.
  */
 #ifdef __EMSCRIPTEN__
-void DrawMainFrame(void* app) noexcept {
-  const auto application = static_cast<Application*>(app);
-  application->Update();
-  application->Draw();
+void DrawMainFrame(void* engine) noexcept {
+  static_cast<Engine*>(engine)->ProcessFrame();
 }
 #endif
 
@@ -27,38 +25,11 @@ void Engine::Run() noexcept {
   // If emscripten is called, let the web browser decide the target fps and give
   // the main loop function to emscripten.
 #ifdef __EMSCRIPTEN__
-  emscripten_set_main_loop_arg(DrawMainFrame, application_, 0, 1);
+  emscripten_set_main_loop_arg(DrawMainFrame, this, 0, 1);
 
 #else
-  //SetTargetFPS(60);
-
   while (!WindowShouldClose()) {
-    ClearBackground(BLACK);
-
-    if (IsWindowResized()) {
-      window_size_.X = GetScreenWidth();
-      window_size_.Y = GetScreenHeight();
-    }
-
-    application_->Update();
-
-    ImGui_ImplRaylib_ProcessEvents();
-
-    BeginDrawing(); {
-      application_->Draw();
-
-      // Start the Dear ImGui frame
-      ImGui_ImplRaylib_NewFrame();
-      ImGui::NewFrame();
-
-      application_->DrawImGui();
-
-      // Rendering
-      ImGui::Render();
-      ImGui_ImplRaylib_RenderDrawData(ImGui::GetDrawData());
-    }
-    EndDrawing();
-
+    ProcessFrame();
   }
 
 #endif
@@ -66,8 +37,43 @@ void Engine::Run() noexcept {
   TearDown();
 }
 
+void Engine::ProcessFrame() {
+  ClearBackground(BLACK);
+
+  if (IsWindowResized()) {
+    window_size_.X = GetScreenWidth();
+    window_size_.Y = GetScreenHeight();
+  }
+
+  application_->Update();
+
+  ImGui_ImplRaylib_ProcessEvents();
+
+  BeginDrawing();
+  {
+    application_->Draw();
+
+    // Start the Dear ImGui frame
+    ImGui_ImplRaylib_NewFrame();
+    ImGui::NewFrame();
+
+    application_->DrawImGui();
+
+    // Rendering
+    ImGui::Render();
+    ImGui_ImplRaylib_RenderDrawData(ImGui::GetDrawData());
+  }
+  EndDrawing();
+}
+
 void Engine::Setup() noexcept {
-  SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
+  unsigned config_flags = FLAG_WINDOW_RESIZABLE;
+
+#ifndef __EMSCRIPTEN__
+  config_flags |= FLAG_VSYNC_HINT;
+#endif
+
+  SetConfigFlags(config_flags);
   InitWindow(window_size_.X, window_size_.Y, "Rollback Game");
 
   // Setup Dear ImGui context

@@ -1,7 +1,9 @@
 #pragma once
 
 #include "game_manager.h"
-#include "inputs_manager.h"
+#include "inputs.h"
+
+#include <vector>
 
 class DebugClient;
 
@@ -17,13 +19,15 @@ public:
   void TearDown() noexcept;
 
   void SendInputs(inputs::FrameInputs inputs, DebugClient* client) noexcept;
-  void ReceiveInputs(inputs::FrameInputs inputs, int client_idx) noexcept;
+  void ReceiveInputs(inputs::DebugInputs inputs) noexcept;
+
+  std::vector<inputs::DebugInputs> inputs_packet_queue{};
+  float min_packet_delay = 0.1f;
+  float max_packet_delay = 0.3f;
+  float packet_loss_percentage = 0.1f;
 
 private:
  GameManager game_manager_{};
- std::array<DebugClient*, game_constants::kMaxPlayerCount> clients_{};
 
- float delay_ = 0.1f;
- float delay_time_ = 0.f;
- float packet_loss_percentage_ = 0.10f;
+ std::array<DebugClient*, game_constants::kMaxPlayerCount> clients_{};
 };

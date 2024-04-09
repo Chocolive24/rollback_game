@@ -1,7 +1,7 @@
 #include "player_controller.h"
 
 #include "game_constants.h"
-#include "inputs_manager.h"
+#include "inputs.h"
 
 void PlayerController::Init() noexcept {
   const auto& body_ref = world_->CreateBody();

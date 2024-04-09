@@ -22,17 +22,41 @@ if (USE_TRACY)
     add_library(tracyClient STATIC externals/tracy_profiler/TracyClient.cpp)
 endif()
 
+if (NOT EMSCRIPTEN)
+    # Create the photon library.
+    file(GLOB_RECURSE PHOTON_SRC_FILES externals/photon/*.h externals/photon/*.cpp)
+    add_library(photon ${PHOTON_SRC_FILES})
+    set_target_properties(photon PROPERTIES LINKER_LANGUAGE CXX)
+    target_include_directories(photon PUBLIC externals/photon)
+endif()
 
 set(data_dir "${CMAKE_SOURCE_DIR}/data")
 
-set(data_files)
 file(GLOB_RECURSE DATA_FILES
             "data/*.json"
             "data/*.png"
             "data/*.jpg"
             "data/*.wav"
             )
-list(APPEND data_files ${DATA_FILES})
+foreach(DATA ${DATA_FILES})
+    get_filename_component(FILE_NAME ${DATA} NAME)
+    get_filename_component(PATH_NAME ${DATA} DIRECTORY)
+    get_filename_component(EXTENSION ${DATA} EXT)
+
+    file(RELATIVE_PATH PATH_NAME "${CMAKE_CURRENT_SOURCE_DIR}" ${PATH_NAME})
+    set(DATA_OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${PATH_NAME}/${FILE_NAME}")
+
+    add_custom_command(
+                OUTPUT ${DATA_OUTPUT}
+                COMMAND ${CMAKE_COMMAND} -E copy
+                ${DATA}
+                ${DATA_OUTPUT}
+                DEPENDS ${DATA})
+
+    list(APPEND Data_OUTPUT_FILES  ${DATA_OUTPUT})
+endforeach(DATA)
+
+add_custom_target(data_target DEPENDS ${Data_OUTPUT_FILES})
 
 # Create the rlImGui library.
 file(GLOB_RECURSE RLIMGUI_FILES libs/rlImGui/include/*.h libs/rlImGui/src/*.cpp)
@@ -81,28 +105,26 @@ add_library(game ${GAME_SRC_FILES})
 set_target_properties(game PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories(game PUBLIC game/include/)
 target_link_libraries(game PUBLIC math common physics core)
-# Link Photon library
-if(WIN32)
-    target_link_libraries(game PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/externals/photon/libs/Photon-cpp_vc17_release_windows_md_x64.lib)
-    target_link_libraries(game PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/externals/photon/libs/Common-cpp_vc17_release_windows_md_x64.lib)
-    target_include_directories(game PUBLIC externals/photon/)
-    target_include_directories(game PUBLIC externals/photon/)
+if (NOT EMSCRIPTEN)
+    target_link_libraries(game PUBLIC photon)
 endif()
+add_dependencies(game data_target)
 
 add_executable(client_app main/client_entry_point.cpp)
 target_link_libraries(client_app PRIVATE game)
-
-add_executable(debug_app main/debug_app_entry_point.cpp)
-target_link_libraries(debug_app PRIVATE game)
-
-add_executable(photon_sample main/photon_sample.cpp)
-target_link_libraries(photon_sample PRIVATE game)
-
 if (EMSCRIPTEN)
-        ## The local resources path needs to be mapped to /data virtual path
-        #string(APPEND data_dir "@data")
-        #set_target_properties(main PROPERTIES LINK_FLAGS "--preload-file ${data_dir}")
+        # The local resources path needs to be mapped to /data virtual path
+        string(APPEND data_dir "@data")
+        set_target_properties(client_app PROPERTIES LINK_FLAGS "--preload-file ${data_dir}")
 endif ()
 
+if (NOT EMSCRIPTEN)
+    add_executable(debug_app main/debug_app_entry_point.cpp)
+    target_link_libraries(debug_app PRIVATE game)
+
+    add_executable(photon_sample main/photon_sample.cpp)
+    target_link_libraries(photon_sample PRIVATE game)
+endif()
+
 # Copy all of the resource files to the destination
-#(COPY ${data_files} DESTINATION "data/")
+#file(COPY ${data_files} DESTINATION "data/")

@@ -19,6 +19,8 @@ void DebugApp::Update() noexcept {
   {
     client.Update();
   }
+
+  server_.Update();
 }
 
 void DebugApp::Draw() noexcept {
@@ -47,4 +49,6 @@ void DebugApp::TearDown() noexcept {
   {
     client.Deinit();
   }
+
+  server_.TearDown();
 }
