@@ -1,6 +1,7 @@
 #pragma once
 
 #include "game_constants.h"
+#include "platforms_manager.h"
 #include "player_controller.h"
 #include "World.h"
 
@@ -23,7 +24,8 @@ public:
 
 protected:
   PhysicsEngine::World world_{};
-  std::array<PlayerController, game_constants::kMaxPlayerCount> player_controllers_;
+  std::array<PlayerController, game_constants::kMaxPlayerCount - 1> player_controllers_;
+  PlatformsManager platforms_manager_{};
 
   void OnTriggerEnter(
       PhysicsEngine::ColliderRef colliderRefA,

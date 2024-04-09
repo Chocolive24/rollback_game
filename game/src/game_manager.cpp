@@ -1,12 +1,15 @@
 #include "game_manager.h"
 
 void GameManager::Init() noexcept {
-  world_.Init(/*Math::Vec2F(0.f, 5.81f)*/);
+  world_.Init(Math::Vec2F(0.f, 5.81f));
+  world_.SetContactListener(this);
 
   for (std::size_t i = 0; i < game_constants::kMaxPlayerCount; i++) {
     player_controllers_[i].RegisterWorld(&world_);
     player_controllers_[i].Init();
   }
+
+  platforms_manager_.Init(&world_);
 }
 
 void GameManager::PollInputs() noexcept {

@@ -7,9 +7,14 @@ void PlayerController::Init() noexcept {
   const auto& body_ref = world_->CreateBody();
   auto& body = world_->GetBody(body_ref);
   body.SetPosition(game_constants::kPlayerStartPos);
+  body.SetDamping(0.3f);
   col_ref_ = world_->CreateCollider(body_ref);
   auto& collider = world_->GetCollider(col_ref_);
-  collider.SetShape(Math::CircleF(body.Position(), game_constants::kPlayerColRadius));
+
+  constexpr auto half_size = Math::Vec2F(game_constants::kPlayerColLength * 0.5f,
+                                     game_constants::kPlayerColLength * 0.5f);
+  collider.SetShape(Math::RectangleF(-half_size, half_size));
+  collider.SetRestitution(0.1f);
 }
 
 void PlayerController::Update() const noexcept {

@@ -3,6 +3,14 @@ set(CMAKE_CXX_STANDARD 17)
 
 project(rollback_game)
 
+# Add a CMake option to enable or disable Tracy Profiler
+option(USE_DEBUG "Use Debug Mode" OFF)
+
+# Check if the build type is Debug or RelWithDebInfo
+if(USE_DEBUG)
+    add_compile_definitions(DEBUG)
+endif()
+
 if (EMSCRIPTEN)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Os -s USE_GLFW=3 -s ASSERTIONS=1 -s WASM=1 -s ASYNCIFY -s ALLOW_MEMORY_GROWTH=1 --no-heap-copy")
     set(CMAKE_EXECUTABLE_SUFFIX ".html")
@@ -11,6 +19,9 @@ endif ()
 find_package(raylib REQUIRED)
 find_package(ImGui CONFIG REQUIRED)
 find_package(GTest CONFIG REQUIRED)
+
+# Add a CMake option to enable or disable Tracy Profiler
+option(USE_TRACY "Use Tracy Profiler" OFF)
 
 if (USE_TRACY)
     # Enable Tracy profiling by setting the preprocessor directive
