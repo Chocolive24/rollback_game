@@ -1,5 +1,7 @@
 #pragma once
 
+#include <raylib.h>
+
 #include "game_manager.h"
 
 /**
@@ -11,4 +13,7 @@ public:
   void Init() noexcept override;
   void Draw() noexcept;
   void Deinit() noexcept override;
+
+private:
+  Camera2D camera_{};
 };

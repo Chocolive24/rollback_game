@@ -139,3 +139,14 @@ endif()
 
 # Copy all of the resource files to the destination
 #file(COPY ${data_files} DESTINATION "data/")
+
+# Tests.
+file(GLOB_RECURSE GAME_TEST_FILES game/tests/*.cpp)
+foreach(test_file ${GAME_TEST_FILES} )
+    get_filename_component(test_name ${test_file} NAME_WE)
+
+    add_executable(${test_name} ${test_file})
+
+    target_link_libraries(${test_name} PRIVATE common core game)
+    target_link_libraries(${test_name} PRIVATE GTest::gtest GTest::gtest_main)
+endforeach()

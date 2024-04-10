@@ -16,12 +16,13 @@ void PlayerController::Init() noexcept {
   constexpr auto half_size = Math::Vec2F(game_constants::kPlayerColLength * 0.5f,
                                      game_constants::kPlayerColLength * 0.5f);
   collider.SetShape(Math::RectangleF(-half_size, half_size));
-  collider.SetRestitution(0.1f);
+  collider.SetRestitution(0.f);
 
   can_jump_col_ref_ = world_->CreateCollider(body_ref);
   auto& can_jump_col = world_->GetCollider(can_jump_col_ref_);
 
-  can_jump_col.SetShape(Math::CircleF(Math::Vec2F::Zero(), 1.f));
+  can_jump_col.SetShape(Math::CircleF(Math::Vec2F(0.f, 0.f), 0.1f));
+  can_jump_col.SetOffset(Math::Vec2F(0.f, half_size.Y));
   can_jump_col.SetIsTrigger(true);
 }
 
@@ -55,7 +56,7 @@ void PlayerController::PollInputs() noexcept {
   }
 
   if (inputs & static_cast<inputs::PlayerInputs>(inputs::PlayerInputTypes::kJump)) {
-    if (!can_jump_) {
+    if (is_jumping_) {
       return;
     }
 
@@ -66,4 +67,23 @@ void PlayerController::PollInputs() noexcept {
 
     body.ApplyForce(Math::Vec2F::Down() * game_constants::kPlayerJumpMagnitude);
   }
+
+   if (inputs & static_cast<inputs::PlayerInputs>(inputs::PlayerInputTypes::kShoot)) {
+    Shoot();
+  }
+}
+
+void PlayerController::Shoot() noexcept {
+  //const auto& body_ref = world_->GetCollider(col_ref_).GetBodyRef();
+  //const auto& body = world_->GetBody(body_ref);
+
+  //const auto& proj_body_ref = world_->CreateBody();
+  //auto& proj_body = world_->GetBody(proj_body_ref);
+  //proj_body.SetPosition(body.Position() + Math::Vec2F(0.5f, 0.f));
+
+  //const auto& col_ref = world_->CreateCollider(proj_body_ref);
+  //auto& collider = world_->GetCollider(col_ref);
+
+  //collider.SetShape(Math::CircleF(Math::Vec2F::Zero(), 0.1f));
+  //collider.SetRestitution(0.f);
 }

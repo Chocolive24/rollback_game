@@ -1,5 +1,7 @@
 #include "game_manager.h"
 
+#include <iostream>
+
 void GameManager::Init() noexcept {
   world_.Init(Math::Vec2F(0.f, 5.81f));
   world_.SetContactListener(this);
@@ -41,16 +43,24 @@ void GameManager::Deinit() noexcept {
 
 void GameManager::OnTriggerEnter(PhysicsEngine::ColliderRef colliderRefA,
   PhysicsEngine::ColliderRef colliderRefB) noexcept {
-  if (colliderRefA == player_controller_.can_jump_col_ref_ || 
-      colliderRefB == player_controller_.can_jump_col_ref_) {
-    player_controller_.can_jump_ = true;
+  if (colliderRefA == platforms_manager_.platform_col_refs[0] ||
+      colliderRefB == platforms_manager_.platform_col_refs[0]) {
+
+    if (colliderRefA == player_controller_.can_jump_col_ref_ ||
+        colliderRefB == player_controller_.can_jump_col_ref_) {
+      std::cout << "trigger enter \n";
+      player_controller_.can_jump_ = true;
+      player_controller_.is_jumping_ = false;
+    }
   }
 }
 
 void GameManager::OnTriggerStay(PhysicsEngine::ColliderRef colliderRefA,
   PhysicsEngine::ColliderRef colliderRefB) noexcept {
-  //if (colliderRefA == player_controller_.can_jump_col_ref_ ||
-  //    colliderRefB == player_controller_.can_jump_col_ref_) {
-  //  player_controller_.can_jump_ = true;
-  //}
+
+}
+
+void GameManager::OnTriggerExit(PhysicsEngine::ColliderRef colliderRefA,
+  PhysicsEngine::ColliderRef colliderRefB) noexcept {
+  std::cout << "trigger exit\n";
 }

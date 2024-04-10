@@ -15,15 +15,34 @@ void DebugServer::Setup() noexcept {
 void DebugServer::Update() noexcept {
   //game_manager_.Update();
 
-  for (auto& packet_inputs : inputs_packet_queue) {
-    
-    packet_inputs.delay -= GetFrameTime();
+  auto it = inputs_packet_queue.begin();
 
-    if (packet_inputs.delay <= 0.f) {
-      const auto other_client_idx = packet_inputs.client_idx == 1 ? 1 : 0;
-      clients_[other_client_idx]->ReceiveInputs(packet_inputs.frame_inputs);
+  while (it != inputs_packet_queue.end())
+  {
+    it->delay -= GetFrameTime();
+
+    if (it->delay <= 0.f) {
+      const auto other_client_idx = it->client_idx == 1 ? 1 : 0;
+      clients_[other_client_idx]->ReceiveInputs(it->frame_inputs);
+      it = inputs_packet_queue.erase(it);
+    } else
+    {
+      ++it;
     }
   }
+
+  //for (auto& packet_inputs : inputs_packet_queue) {
+  //  
+  //  packet_inputs.delay -= GetFrameTime();
+
+  //  if (packet_inputs.delay <= 0.f) {
+  //    const auto other_client_idx = packet_inputs.client_idx == 1 ? 1 : 0;
+  //    clients_[other_client_idx]->ReceiveInputs(packet_inputs.frame_inputs);
+  //    auto it = std::find(inputs_packet_queue.begin(),
+  //                        inputs_packet_queue.end(), packet_inputs);
+  //    inputs_packet_queue.erase(it);
+  //  }
+  //}
 }
 
 void DebugServer::DrawImGui() noexcept {

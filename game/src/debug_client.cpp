@@ -1,4 +1,7 @@
 #include "debug_client.h"
+
+#include <iostream>
+
 #include "debug_server.h"
 #include "engine.h"
 #include "Random.h"
@@ -99,11 +102,23 @@ void DebugClient::Deinit() noexcept {
   UnloadRenderTexture(render_texture_); }
 
 void DebugClient::SendInputs(inputs::FrameInputs inputs) noexcept {
-  const auto delay = Math::Random::Range(server_->min_packet_delay, server_->max_packet_delay);
+  const auto delay = Math::Random::Range(server_->min_packet_delay, 
+                                              server_->max_packet_delay);
   const inputs::DebugInputs debug_inputs{inputs, delay, client_idx_};
+  if (inputs.inputs != 0)
+  {
+    std::cout << "client " << client_idx_ << " sent inputs from frame nbr " << 
+   " " << inputs.frame_nbr << '\n';
+  }
   server_->ReceiveInputs(debug_inputs);
 }
 
 void DebugClient::ReceiveInputs(inputs::FrameInputs inputs) noexcept {
   other_client_inputs_ = inputs.inputs;
+
+  if (inputs.inputs != 0)
+  {
+    std::cout << "client " << client_idx_ << " received inputs from frame nbr " << 
+    " " << inputs.frame_nbr << '\n';
+  }
 }

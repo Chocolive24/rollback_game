@@ -31,5 +31,5 @@ namespace texture_manager {
 void CreateAllSprites() noexcept;
 void DestroyAllSprites() noexcept;
 
-inline Sprite penguin{};
+extern Sprite penguin;
 }

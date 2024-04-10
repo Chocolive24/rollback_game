@@ -12,5 +12,5 @@ void PlatformsManager::Init(PhysicsEngine::World* world) noexcept {
   constexpr auto kMainPlatColHalfSize =
       game_constants::kMainPlatformColSize * 0.5f;
   col.SetShape(Math::RectangleF(-kMainPlatColHalfSize, kMainPlatColHalfSize));
-  col.SetRestitution(1.f);
+  col.SetRestitution(0.f);
 }

@@ -166,7 +166,7 @@ namespace PhysicsEngine
                     const auto circle = std::get<Math::CircleF>(colShape);
                     const auto radius = circle.Radius();
                     const auto simplifiedCircle = Math::RectangleF::FromCenter(
-                            GetBody(collider.GetBodyRef()).Position(),
+                            GetBody(collider.GetBodyRef()).Position() + collider.Offset(),
                             Math::Vec2F(radius, radius));
 
                     _quadTree.Insert(simplifiedCircle, colliderRef);
@@ -180,7 +180,7 @@ namespace PhysicsEngine
                 #endif
 
                     const auto rect = std::get<Math::RectangleF>(colShape) +
-                            GetBody(collider.GetBodyRef()).Position();
+                           GetBody(collider.GetBodyRef()).Position() + collider.Offset();
 
                     _quadTree.Insert(rect, colliderRef);
                     break;
@@ -199,7 +199,7 @@ namespace PhysicsEngine
                                           std::numeric_limits<float>::lowest());
 
                     const auto poly = std::get<Math::PolygonF>(colShape) +
-                            GetBody(collider.GetBodyRef()).Position();
+                        GetBody(collider.GetBodyRef()).Position() + collider.Offset();
 
                     for (const auto& vertex : poly.Vertices())
                     {
@@ -358,8 +358,7 @@ namespace PhysicsEngine
         {
             case Math::ShapeType::Circle:
             {
-                const auto circleA = std::get<Math::CircleF>(colShapeA) + bodyA.Position();
-
+                const auto circleA = std::get<Math::CircleF>(colShapeA) + colA.Offset() + bodyA.Position();
                 switch (static_cast<Math::ShapeType>(colShapeB.index()))
                 {
                     case Math::ShapeType::Circle:
@@ -369,7 +368,7 @@ namespace PhysicsEngine
                         ZoneText(txt.c_str(), txt.size());
                     #endif
 
-                        const auto circleB = std::get<Math::CircleF>(colShapeB) + bodyB.Position();
+                        const auto circleB = std::get<Math::CircleF>(colShapeB) + colB.Offset() + bodyB.Position();
 
                         doCollidersIntersect = Math::Intersect(circleA, circleB);
 
@@ -383,7 +382,7 @@ namespace PhysicsEngine
                             ZoneText(txt.c_str(), txt.size());
                     #endif
                         const auto rectB = std::get<Math::RectangleF>(colShapeB) +
-                                bodyB.Position();
+                                colB.Offset() + bodyB.Position();
 
                         doCollidersIntersect = Math::Intersect(circleA, rectB);
 
@@ -397,7 +396,7 @@ namespace PhysicsEngine
                         ZoneText(txt.c_str(), txt.size());
                     #endif
                         const auto polygonB = std::get<Math::PolygonF>(colShapeB) +
-                                bodyB.Position();
+                            colB.Offset() + bodyB.Position();
 
                         doCollidersIntersect = Math::Intersect(circleA, polygonB);
                         break;
@@ -425,8 +424,9 @@ namespace PhysicsEngine
                             ZoneText(txt.c_str(), txt.size());
                     #endif
 
-                        const auto circleB = std::get<Math::CircleF>(colShapeB) +
-                                             bodyB.Position();
+                        const auto circleB =
+                                std::get<Math::CircleF>(colShapeB) +
+                                colB.Offset() + bodyB.Position();
 
                         doCollidersIntersect = Math::Intersect(rectA, circleB);
 
@@ -441,7 +441,7 @@ namespace PhysicsEngine
                     #endif
 
                         const auto rectB = std::get<Math::RectangleF>(colShapeB) +
-                                bodyB.Position();
+                                colB.Offset() + bodyB.Position();
 
                         doCollidersIntersect = Math::Intersect(rectA, rectB);
 
@@ -456,7 +456,7 @@ namespace PhysicsEngine
                     #endif
 
                         const auto polygonB = std::get<Math::PolygonF>(colShapeB) +
-                                              bodyB.Position();
+                                              colB.Offset() + bodyB.Position();
 
                         doCollidersIntersect = Math::Intersect(rectA, polygonB);
                         break;
@@ -474,7 +474,7 @@ namespace PhysicsEngine
             case Math::ShapeType::Polygon:
             {
                 const auto polygonA = std::get<Math::PolygonF>(colShapeA) +
-                                      bodyA.Position();
+                                      colB.Offset() + bodyA.Position();
 
                 switch (static_cast<Math::ShapeType>(colShapeB.index()))
                 {
@@ -485,7 +485,9 @@ namespace PhysicsEngine
                             ZoneText(txt.c_str(), txt.size());
                     #endif
 
-                        const auto circleB = std::get<Math::CircleF>(colShapeB) + bodyB.Position();
+                        const auto circleB =
+                                std::get<Math::CircleF>(colShapeB) +
+                                colB.Offset() + bodyB.Position();
 
                         doCollidersIntersect = Math::Intersect(polygonA, circleB);
                         break;
@@ -499,7 +501,7 @@ namespace PhysicsEngine
                     #endif
 
                         const auto rectB = std::get<Math::RectangleF>(colShapeB) +
-                                           bodyB.Position();
+                                colB.Offset() + bodyB.Position();
 
                         doCollidersIntersect = Math::Intersect(polygonA, rectB);
                         break;
@@ -513,7 +515,7 @@ namespace PhysicsEngine
                     #endif
 
                         const auto polygonB = std::get<Math::PolygonF>(colShapeB) +
-                                              bodyB.Position();
+                                colB.Offset() + bodyB.Position();
 
                         doCollidersIntersect = Math::Intersect(polygonA, polygonB);
                         break;

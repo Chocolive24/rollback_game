@@ -25,10 +25,12 @@ namespace PhysicsEngine
                      Math::CircleF(Math::Vec2F::Zero(), 0.f)};
         BodyRef _bodyRef{};
 
+        Math::Vec2F _offset = Math::Vec2F::Zero();
         float _restitution{-1.f};
         float _friction{-1.f};
         bool _isTrigger{false};
         bool _enabled{false};
+        
 
     public:
         constexpr Collider() noexcept = default;
@@ -37,7 +39,7 @@ namespace PhysicsEngine
             _restitution = restitution;
             _friction = friction;
             _isTrigger = isTrigger;
-        };
+        }
 
         /**
          * @brief Shape is a method that gives the mathematical shape of the collider.
@@ -132,6 +134,15 @@ namespace PhysicsEngine
         * @param enabled Whether the collider is enabled or not.
         */
         constexpr void SetEnabled(const bool enabled) noexcept { _enabled = enabled; }
+
+        [[nodiscard]] constexpr Math::Vec2F Offset() const noexcept {
+            return _offset;
+        }
+
+    
+        constexpr void SetOffset(const Math::Vec2F offset) noexcept {
+            _offset = offset;
+        }
     };
 
     /**

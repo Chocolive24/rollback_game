@@ -7,7 +7,7 @@ namespace inputs {
 PlayerInputs GetPlayerInputs(int player_idx) noexcept {
   switch (player_idx) {
     case 1: {
-      PlayerInputs player_1_inputs{};
+      PlayerInputs player_1_inputs = 0;
 
       if (IsKeyDown(KEY_W)) {
         player_1_inputs |= static_cast<std::uint8_t>(PlayerInputTypes::kUp);
@@ -21,7 +21,7 @@ PlayerInputs GetPlayerInputs(int player_idx) noexcept {
       if (IsKeyDown(KEY_D)) {
         player_1_inputs |= static_cast<std::uint8_t>(PlayerInputTypes::kRight);
       }
-      if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+      if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         player_1_inputs |= static_cast<std::uint8_t>(PlayerInputTypes::kShoot);
       }
       if (IsKeyPressed(KEY_SPACE)) {
@@ -45,7 +45,7 @@ PlayerInputs GetPlayerInputs(int player_idx) noexcept {
       if (IsKeyDown(KEY_RIGHT)) {
         player_2_inputs |= static_cast<std::uint8_t>(PlayerInputTypes::kRight);
       }
-      if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
+      if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
         player_2_inputs |= static_cast<std::uint8_t>(PlayerInputTypes::kShoot);
       }
       if (IsKeyPressed(KEY_SPACE)) {

@@ -4,6 +4,8 @@
 
 namespace texture_manager {
 
+ Sprite penguin{};
+
 Sprite CreateSprite(std::string_view path, float scale,
                     Pivot pivot = Pivot::kCenter) {
   Sprite sprite{};

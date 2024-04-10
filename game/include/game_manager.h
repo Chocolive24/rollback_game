@@ -33,9 +33,8 @@ protected:
       PhysicsEngine::ColliderRef colliderRefB) noexcept override;
   void OnTriggerStay(PhysicsEngine::ColliderRef colliderRefA,
                      PhysicsEngine::ColliderRef colliderRefB) noexcept override;
-  void OnTriggerExit(
-      PhysicsEngine::ColliderRef colliderRefA,
-      PhysicsEngine::ColliderRef colliderRefB) noexcept override {}
+  void OnTriggerExit(PhysicsEngine::ColliderRef colliderRefA,
+                     PhysicsEngine::ColliderRef colliderRefB) noexcept override;
   void OnCollisionEnter(
       PhysicsEngine::ColliderRef colliderRefA,
       PhysicsEngine::ColliderRef colliderRefB) noexcept override {}
