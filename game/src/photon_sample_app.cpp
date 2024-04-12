@@ -1,6 +1,8 @@
 #include "photon_sample_app.h"
 #include "texture_manager.h"
 
+#include "events.h"
+
 #include <imgui.h>
 
 void PhotonSampleApp::Setup() noexcept {
@@ -49,13 +51,13 @@ void PhotonSampleApp::DrawImGui() noexcept {
     ImGui::Spacing();
 
     if (ImGui::Button("Send event", ImVec2(125, 25))) {
-      nByte eventCode = 1;  // use distinct event codes to distinguish between different types
+      //constexpr Event eventCode(1);  // use distinct event codes to distinguish between different types
               // of events (for example 'move', 'shoot', etc.)
       ExitGames::Common::Hashtable evData;  // organize your payload data in any way you like as long as
                    // it is supported by Photons serialization
-      evData.put(L"message",42);
-      bool sendReliable = false;  // send something reliable if it has to arrive everywhere
-      networkLogic_.RaiseEvent(sendReliable, evData, eventCode);
+      evData.put<nByte, int>(static_cast<nByte>(Key::kJump),42);
+      constexpr bool sendReliable = false;  // send something reliable if it has to arrive everywhere
+      networkLogic_.RaiseEvent(sendReliable, evData, static_cast<nByte>(Event::kJump));
     }
   }
   ImGui::End();

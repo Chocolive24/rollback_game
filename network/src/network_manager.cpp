@@ -1,7 +1,9 @@
 #include "network_manager.h"
 
+#include "events.h"
+
 NetworkManager::NetworkManager(const ExitGames::Common::JString& appID,
-    const ExitGames::Common::JString& appVersion) :
+                               const ExitGames::Common::JString& appVersion) :
 load_balancing_client_(listener_, appID, appVersion) {
   
 }
@@ -9,7 +11,6 @@ load_balancing_client_(listener_, appID, appVersion) {
 void NetworkManager::connect() {
   // connect() is asynchronous - the actual result arrives in the
   // Listener::connectReturn() or the Listener::connectionErrorReturn() callback
-  std::cout << "hello\n";
   if (!load_balancing_client_.connect())
     EGLOG(ExitGames::Common::DebugLevel::ERRORS, L"Could not connect.");
 }
@@ -49,8 +50,8 @@ void NetworkManager::ReceiveEvent(int player_nr, nByte event_code,
     const ExitGames::Common::Object& event_content) noexcept {
   // logging the string representation of the eventContent can be really useful
   // for debugging, but use with care: for big events this might get expensive
-  switch (event_code) {
-    case 1: {
+  switch (static_cast<Event>(event_code)) {
+    case Event::kJump: {
       // you can access the content as a copy (might be a bit expensive for
       // really big data constructs)
       ExitGames::Common::Hashtable content =
@@ -62,7 +63,7 @@ void NetworkManager::ReceiveEvent(int player_nr, nByte event_code,
                 << content.toString(true).UTF8Representation().cstr() << '\n';
 
       // Access the content by key
-      ExitGames::Common::Object* value = content.getValue(L"message");
+      ExitGames::Common::Object* value = content.getValue(static_cast<nByte>(Key::kJump));
       if (value != nullptr) {
         std::cout << "content by key: "
                   << value->toString(true).UTF8Representation().cstr() << '\n';
@@ -77,13 +78,13 @@ void NetworkManager::ReceiveEvent(int player_nr, nByte event_code,
           ExitGames::Common::ValueObject<ExitGames::Common::Hashtable>(
               event_content).getDataAddress();
     } break;
-    case 2: {
+    case Event::kLeft: {
       // of course, the payload does not need to be a Hashtable - how about just
       // sending around for example a plain 64bit integer?
       long long content =
           ExitGames::Common::ValueObject<long long>(event_content).getDataCopy();
     } break;
-    case 3: {
+    case Event::kRight: {
       // or an array of floats?
       float* pContent =
           ExitGames::Common::ValueObject<float*>(event_content).getDataCopy();
