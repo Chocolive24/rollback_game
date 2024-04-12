@@ -1,7 +1,5 @@
 #include "engine.h"
 
-#include "texture_manager.h"
-
 #include <imgui_impl_raylib.h>
 #include <rlImGui.h>
 
@@ -95,7 +93,7 @@ void Engine::Setup() noexcept {
   // Setup Dear ImGui style
   ImGui::StyleColorsDark();
 
-  texture_manager::CreateAllSprites();
+  //texture_manager::CreateAllSprites();
 
   application_->Setup();
 }
@@ -103,10 +101,10 @@ void Engine::Setup() noexcept {
 void Engine::TearDown() noexcept {
   application_->TearDown();
 
-  texture_manager::DestroyAllSprites();
+  //texture_manager::DestroyAllSprites();
 
-   ImGui_ImplRaylib_Shutdown();
+  ImGui_ImplRaylib_Shutdown();
   ImGui::DestroyContext();
 
-   CloseWindow();
+  CloseWindow();
 }

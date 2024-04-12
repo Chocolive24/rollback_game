@@ -1,5 +1,7 @@
 #include "texture_manager.h"
 
+using namespace raylib;
+
 #include <string_view>
 
 namespace texture_manager {

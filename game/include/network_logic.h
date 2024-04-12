@@ -26,8 +26,6 @@ class Listener final : public ExitGames::LoadBalancing::Listener {
 
   void leaveRoomReturn(int errorCode,
                        const ExitGames::Common::JString& errorString) override;
-private:
-  ExitGames::Common::Logger* mLogger = nullptr;
 };
 
 class SampleNetworkLogic {

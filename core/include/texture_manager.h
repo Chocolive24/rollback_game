@@ -1,10 +1,8 @@
 #pragma once
 
-#include <raylib.h>
+#include "raylib_wrapper.h"
 
-#include <cstdint>
-
-enum class Pivot : std::uint8_t {
+enum class Pivot : char {
   kCenter,
   kTopLeft,
   kTopRight,
@@ -16,14 +14,14 @@ enum class Pivot : std::uint8_t {
 
 class Sprite {
  public:
-   Texture2D tex;
-   Vector2 pos;
-   Vector2 origin;
-   Rectangle source;
-   Rectangle dest;
+   raylib::Texture2D tex;
+   raylib::Vector2 pos;
+   raylib::Vector2 origin;
+   raylib::Rectangle source;
+   raylib::Rectangle dest;
 
-  void Draw(Vector2 position, float rotation = 0,
-             Color color = Color{255, 255, 255, 255});
+  void Draw(raylib::Vector2 position, float rotation = 0,
+             raylib::Color color = raylib::Color{255, 255, 255, 255});
 };
 
 namespace texture_manager {

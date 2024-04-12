@@ -1,10 +1,10 @@
 #include "photon_sample_app.h"
-#include "raylib_wrapper.h"
+#include "texture_manager.h"
 
 #include <imgui.h>
 
 void PhotonSampleApp::Setup() noexcept {
-
+  texture_manager::CreateAllSprites();
 }
 
 void PhotonSampleApp::Update() noexcept {
@@ -16,6 +16,8 @@ void PhotonSampleApp::Draw() noexcept {
 
   raylib::DrawRaylibText("Raylib drawing text with photon in the same app.", 
       400, 350, 30, raylib::kWhite);
+
+  texture_manager::penguin.Draw({600, 600});
 }
 
 void PhotonSampleApp::DrawImGui() noexcept {

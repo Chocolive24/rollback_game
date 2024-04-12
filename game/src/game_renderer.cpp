@@ -1,6 +1,8 @@
-#include "game_renderer.h"
 #include "Metrics.h"
+#include "game_renderer.h"
 #include "texture_manager.h"
+
+using namespace raylib;
 
 #include <iostream>
 
