@@ -19,21 +19,35 @@ enum class PlayerInputTypes : std::uint8_t {
  */
 using PlayerInputs = std::uint8_t;
 
-[[nodiscard]] PlayerInputs GetPlayerInputs(int player_idx) noexcept;
+[[nodiscard]] PlayerInputs GetPlayerInputs(int input_profile_id) noexcept;
 
 /**
  * \brief FrameInputs is a struct which contains the inputs off a frame with
  * its number.
  */
-struct FrameInputs {
-  PlayerInputs inputs = 0;
-  std::uint32_t frame_nbr = 0;
+struct FrameInput {
+  PlayerInputs input = 0;
+  short frame_nbr = 0;
+
+};
+
+/**
+ * \brief ClientId 
+ */
+class ClientId {
+public:
+  explicit ClientId(std::int8_t id) noexcept;
+
+  //TODO operator de conversion vers int.
+
+ private:
+  std::int8_t id_ = 0;
 };
 
 struct DebugInputs {
-  FrameInputs frame_inputs{};
+  FrameInput frame_inputs{};
   float delay = 0.f;
   int client_idx = 0;
 };
 
-}  // namespace inputs
+}  // namespace input

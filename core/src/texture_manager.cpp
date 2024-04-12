@@ -1,6 +1,6 @@
 #include "texture_manager.h"
 
-#include "engine.h"
+#include <string_view>
 
 namespace texture_manager {
 

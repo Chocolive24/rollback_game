@@ -35,10 +35,24 @@ endif()
 
 if (NOT EMSCRIPTEN)
     # Create the photon library.
-    file(GLOB_RECURSE PHOTON_SRC_FILES externals/photon/*.h externals/photon/*.cpp)
+    file(GLOB_RECURSE PHOTON_SRC_FILES externals/photon/LoadBalancing-cpp/inc/*.h externals/photon/LoadBalancing-cpp/src/*.cpp)
     add_library(photon ${PHOTON_SRC_FILES})
     set_target_properties(photon PROPERTIES LINKER_LANGUAGE CXX)
     target_include_directories(photon PUBLIC externals/photon)
+    message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
+
+    if(CMAKE_BUILD_TYPE MATCHES Release)
+        target_link_libraries(photon PUBLIC
+            ${CMAKE_CURRENT_SOURCE_DIR}/externals/photon/Common-cpp/lib/Common-cpp_vc17_release_windows_md_x64.lib
+            ${CMAKE_CURRENT_SOURCE_DIR}/externals/photon/Photon-cpp/lib/Photon-cpp_vc17_release_windows_md_x64.lib
+        )
+    else()
+        target_link_libraries(photon PUBLIC
+            ${CMAKE_CURRENT_SOURCE_DIR}/externals/photon/Common-cpp/lib/Common-cpp_vc17_debug_windows_md_x64.lib
+            ${CMAKE_CURRENT_SOURCE_DIR}/externals/photon/Photon-cpp/lib/Photon-cpp_vc17_debug_windows_md_x64.lib
+        )
+    endif()
+   
 endif()
 
 set(data_dir "${CMAKE_SOURCE_DIR}/data")
@@ -141,12 +155,14 @@ endif()
 #file(COPY ${data_files} DESTINATION "data/")
 
 # Tests.
-file(GLOB_RECURSE GAME_TEST_FILES game/tests/*.cpp)
-foreach(test_file ${GAME_TEST_FILES} )
-    get_filename_component(test_name ${test_file} NAME_WE)
+if (NOT EMSCRIPTEN)
+    file(GLOB_RECURSE GAME_TEST_FILES game/tests/*.cpp)
+    foreach(test_file ${GAME_TEST_FILES} )
+        get_filename_component(test_name ${test_file} NAME_WE)
 
-    add_executable(${test_name} ${test_file})
+        add_executable(${test_name} ${test_file})
 
-    target_link_libraries(${test_name} PRIVATE common core game)
-    target_link_libraries(${test_name} PRIVATE GTest::gtest GTest::gtest_main)
-endforeach()
+        target_link_libraries(${test_name} PRIVATE common core game)
+        target_link_libraries(${test_name} PRIVATE GTest::gtest GTest::gtest_main)
+    endforeach()
+endif()

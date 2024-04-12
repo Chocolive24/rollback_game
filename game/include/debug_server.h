@@ -18,7 +18,7 @@ public:
   void DrawImGui() noexcept;
   void TearDown() noexcept;
 
-  void SendInputs(inputs::FrameInputs inputs, DebugClient* client) noexcept;
+  void SendInputs(inputs::FrameInput inputs, DebugClient* client) noexcept;
   void ReceiveInputs(inputs::DebugInputs inputs) noexcept;
 
   std::vector<inputs::DebugInputs> inputs_packet_queue{};

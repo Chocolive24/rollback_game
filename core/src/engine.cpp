@@ -1,10 +1,9 @@
 #include "engine.h"
 
-#include <raylib.h>
-#include <imgui.h>
-#include <imgui_impl_raylib.h>
-
 #include "texture_manager.h"
+
+#include <imgui_impl_raylib.h>
+#include <rlImGui.h>
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
@@ -106,8 +105,8 @@ void Engine::TearDown() noexcept {
 
   texture_manager::DestroyAllSprites();
 
-  ImGui_ImplRaylib_Shutdown();
+   ImGui_ImplRaylib_Shutdown();
   ImGui::DestroyContext();
 
-  CloseWindow();
+   CloseWindow();
 }

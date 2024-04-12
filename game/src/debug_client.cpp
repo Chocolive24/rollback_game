@@ -22,7 +22,7 @@ void DebugClient::Update() noexcept {
     render_texture_ = LoadRenderTexture(new_tex_size.X, new_tex_size.Y);
   }
 
-  SendInputs(inputs::FrameInputs{inputs_, current_frame_});
+  SendInputs(inputs::FrameInput{inputs_, current_frame_});
   current_frame_++;
 }
 
@@ -101,24 +101,24 @@ void DebugClient::Draw() noexcept {
 void DebugClient::Deinit() noexcept {
   UnloadRenderTexture(render_texture_); }
 
-void DebugClient::SendInputs(inputs::FrameInputs inputs) noexcept {
+void DebugClient::SendInputs(const inputs::FrameInput& inputs) noexcept {
   const auto delay = Math::Random::Range(server_->min_packet_delay, 
                                               server_->max_packet_delay);
   const inputs::DebugInputs debug_inputs{inputs, delay, client_idx_};
-  if (inputs.inputs != 0)
+  if (inputs.input != 0)
   {
-    std::cout << "client " << client_idx_ << " sent inputs from frame nbr " << 
+    std::cout << "client " << client_idx_ << " sent input from frame nbr " << 
    " " << inputs.frame_nbr << '\n';
   }
   server_->ReceiveInputs(debug_inputs);
 }
 
-void DebugClient::ReceiveInputs(inputs::FrameInputs inputs) noexcept {
-  other_client_inputs_ = inputs.inputs;
+void DebugClient::ReceiveInputs(inputs::FrameInput inputs) noexcept {
+  other_client_inputs_ = inputs.input;
 
-  if (inputs.inputs != 0)
+  if (inputs.input != 0)
   {
-    std::cout << "client " << client_idx_ << " received inputs from frame nbr " << 
+    std::cout << "client " << client_idx_ << " received input from frame nbr " << 
     " " << inputs.frame_nbr << '\n';
   }
 }

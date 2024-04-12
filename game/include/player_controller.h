@@ -20,7 +20,7 @@ public:
   bool can_jump_ = true;
   bool is_jumping_ = false;
 
- private:
+private:
  PhysicsEngine::World* world_ = nullptr;
 
  Math::Vec2F move_direction_{};

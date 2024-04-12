@@ -20,7 +20,7 @@ TEST(Inputs, CheckInputReceived) {
   inputs::PlayerInputs inputs = 0;
   inputs |= static_cast<std::uint8_t>(inputs::PlayerInputTypes::kUp);
 
-  client1.SendInputs(inputs::FrameInputs{inputs, 0});
+  client1.SendInputs(inputs::FrameInput{inputs, 0});
 
   EXPECT_TRUE(true);
 

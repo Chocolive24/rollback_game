@@ -4,8 +4,8 @@
 
 namespace inputs {
 
-PlayerInputs GetPlayerInputs(int player_idx) noexcept {
-  switch (player_idx) {
+PlayerInputs GetPlayerInputs(int input_profile_id) noexcept {
+  switch (input_profile_id) {
     case 1: {
       PlayerInputs player_1_inputs = 0;
 
@@ -58,4 +58,5 @@ PlayerInputs GetPlayerInputs(int player_idx) noexcept {
   }
 }
 
-}  // namespace inputs
+ClientId::ClientId(std::int8_t id) noexcept { id_ = id; }
+}  // namespace input

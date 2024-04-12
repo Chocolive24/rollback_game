@@ -58,7 +58,7 @@ void DebugServer::TearDown() noexcept {
   //game_manager_.Deinit();
 }
 
-void DebugServer::SendInputs(inputs::FrameInputs,
+void DebugServer::SendInputs(inputs::FrameInput,
                              DebugClient* client) noexcept {}
 
 void DebugServer::ReceiveInputs(inputs::DebugInputs inputs) noexcept {
