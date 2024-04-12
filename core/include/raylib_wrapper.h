@@ -5,10 +5,15 @@
  * some functions have a name conflict with functions from the windows headers
  * included in the photon library.
  * It also recreates the raylib color macros to constexpr variables.
+ * This wrapper is only needed when a file have to include both photon and
+ * raylib stuffs.
  */
 namespace raylib {
 
 #include <raylib.h>
+
+void DrawRaylibText(const char* text, int posX, int posY, int fontSize,
+                    Color color);
 
 constexpr Color kRed{230, 41, 55, 255};
 constexpr Color kBlue{0, 121, 241, 255};
