@@ -26,6 +26,8 @@ class Listener final : public ExitGames::LoadBalancing::Listener {
 
   void leaveRoomReturn(int errorCode,
                        const ExitGames::Common::JString& errorString) override;
+private:
+  ExitGames::Common::Logger* mLogger = nullptr;
 };
 
 class SampleNetworkLogic {
@@ -40,9 +42,11 @@ class SampleNetworkLogic {
 
   void JoinRandomRoom(ExitGames::Common::Hashtable expectedCustomRoomProperties =
           ExitGames::Common::Hashtable());
+  void RaiseEvent(bool priv, const ExitGames::Common::Hashtable& hashtable, nByte byte);
+  void customEventAction(int playerNr, nByte eventCode, const ExitGames::Common::Object& eventContent);
 
- private:
-  ExitGames::LoadBalancing::Client mLoadBalancingClient;
-  Listener mListener; 
-  ExitGames::Common::Logger mLogger;  // accessed by EGLOG()
+private:
+  ExitGames::LoadBalancing::Client load_balancing_client_;
+  Listener listener_;
+  ExitGames::Common::Logger mLogger;  // name must be mLogger because it is accessed by EGLOG()
 };
