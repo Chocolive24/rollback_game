@@ -1,6 +1,7 @@
 #pragma once
+
 #include "application.h"
-#include "network_logic.h"
+#include "network_manager.h"
 
 class PhotonSampleApp final : public Application {
 public:
@@ -11,8 +12,7 @@ public:
   void TearDown() noexcept override;
 
 private:
-  ExitGames::Common::JString appID =
-      L"094ac400-9d70-4877-97b1-6ed7c0b31c4d";  // set your app id here
-  ExitGames::Common::JString appVersion = L"1.0";
-  SampleNetworkLogic networkLogic_{appID, appVersion};
+  ExitGames::Common::JString app_id_ = PHOTON_APP_ID;
+  ExitGames::Common::JString app_version_ = L"1.0";
+  NetworkManager networkLogic_{app_id_, app_version_};
 };

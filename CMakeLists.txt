@@ -3,6 +3,9 @@ set(CMAKE_CXX_STANDARD 17)
 
 project(rollback_game)
 
+set(PHOTON_APP_ID "your_app_id_here" CACHE STRING "Set the photon app id")
+add_definitions("-DPHOTON_APP_ID=\"${PHOTON_APP_ID}\"")
+
 # Add a CMake option to enable or disable Tracy Profiler
 option(USE_DEBUG "Use Debug Mode" OFF)
 
@@ -124,6 +127,13 @@ set_target_properties(core PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories(core PUBLIC core/include/)
 target_link_libraries(core PUBLIC raylib imgui::imgui rl_imgui math common)
 
+# Create the Common library with Math as a dependency
+file(GLOB_RECURSE NETWORK_SRC_FILES network/include/*.h network/src/*.cpp)
+add_library(network ${NETWORK_SRC_FILES})
+set_target_properties(network PROPERTIES LINKER_LANGUAGE CXX)
+target_include_directories(network PUBLIC network/include/)
+target_link_libraries(network PUBLIC photon)
+
 # Create the game library.
 file(GLOB_RECURSE GAME_SRC_FILES game/include/*.h game/src/*.cpp)
 add_library(game ${GAME_SRC_FILES})
@@ -131,7 +141,7 @@ set_target_properties(game PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories(game PUBLIC game/include/)
 target_link_libraries(game PUBLIC math common physics core)
 if (NOT EMSCRIPTEN)
-    target_link_libraries(game PUBLIC photon)
+    target_link_libraries(game PUBLIC network)
 endif()
 add_dependencies(game data_target)
 

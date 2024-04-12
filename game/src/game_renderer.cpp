@@ -8,6 +8,8 @@ using namespace raylib;
 
 void GameRenderer::Init() noexcept {
   GameManager::Init();
+
+  texture_manager::CreateAllSprites();
 }
 
 void GameRenderer::Draw() noexcept {
@@ -86,4 +88,5 @@ void GameRenderer::Draw() noexcept {
 
 void GameRenderer::Deinit() noexcept {
   GameManager::Deinit();
+  texture_manager::DestroyAllSprites();
 }

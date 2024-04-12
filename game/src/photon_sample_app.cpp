@@ -57,8 +57,6 @@ void PhotonSampleApp::DrawImGui() noexcept {
       bool sendReliable = false;  // send something reliable if it has to arrive everywhere
       networkLogic_.RaiseEvent(sendReliable, evData, eventCode);
     }
-
-   
   }
   ImGui::End();
 }
