@@ -1,5 +1,7 @@
 #pragma once
 
+#include "event.h"
+
 #include <Common-cpp/inc/defines.h>
 #include <Common-cpp/inc/Containers/Hashtable.h>
 
@@ -37,7 +39,7 @@ public:
    */
   virtual void RaiseEvent(bool reliable,
                           const ExitGames::Common::Hashtable& data,
-                          nByte event_code) noexcept = 0;
+                          EventCode event_code) noexcept = 0;
 
   /**
    * \brief Receives and processes an incoming event from the network.
@@ -52,7 +54,6 @@ public:
    * received event.
    * \param event_content  The data or payload of the received event.
    */
-  virtual void ReceiveEvent(
-      int player_nr, nByte event_code,
-      const ExitGames::Common::Object& event_content) noexcept = 0;
+  virtual void ReceiveEvent(int player_nr, EventCode event_code,
+    const ExitGames::Common::Object& event_content) noexcept = 0;
 };

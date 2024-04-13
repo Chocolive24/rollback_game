@@ -1,7 +1,7 @@
 #include "photon_sample_app.h"
 #include "texture_manager.h"
 
-#include "events.h"
+#include "event.h"
 
 #include <imgui.h>
 
@@ -10,7 +10,7 @@ void PhotonSampleApp::Setup() noexcept {
 }
 
 void PhotonSampleApp::Update() noexcept {
-  networkLogic_.run();
+  networkLogic_.Service();
 }
 
 void PhotonSampleApp::Draw() noexcept {
@@ -27,19 +27,19 @@ void PhotonSampleApp::DrawImGui() noexcept {
 
   ImGui::Begin("Network UI"); {
     if (ImGui::Button("Connect", ImVec2(125, 25))) {
-      networkLogic_.connect();
+      networkLogic_.Connect();
     }
 
     ImGui::Spacing();
 
     if(ImGui::Button("Disconnect", ImVec2(125, 25))) {
-      networkLogic_.disconnect();
+      networkLogic_.Disconnect();
     }
 
     ImGui::Spacing();
 
-    if (ImGui::Button("Create Room", ImVec2(125, 25))) {
-      networkLogic_.createRoom("MyRoom", 2);
+    if (ImGui::Button("Join or create Room", ImVec2(125, 25))) {
+      networkLogic_.JoinRandomOrCreateRoom();
     }
 
     ImGui::Spacing();
@@ -51,18 +51,15 @@ void PhotonSampleApp::DrawImGui() noexcept {
     ImGui::Spacing();
 
     if (ImGui::Button("Send event", ImVec2(125, 25))) {
-      //constexpr Event eventCode(1);  // use distinct event codes to distinguish between different types
-              // of events (for example 'move', 'shoot', etc.)
-      ExitGames::Common::Hashtable evData;  // organize your payload data in any way you like as long as
-                   // it is supported by Photons serialization
-      evData.put<nByte, int>(static_cast<nByte>(Key::kJump),42);
-      constexpr bool sendReliable = false;  // send something reliable if it has to arrive everywhere
-      networkLogic_.RaiseEvent(sendReliable, evData, static_cast<nByte>(Event::kJump));
+      ExitGames::Common::Hashtable evData;  
+      evData.put<nByte, int>(static_cast<nByte>(EventKey::kJump),42);
+      constexpr bool sendReliable = false; 
+      networkLogic_.RaiseEvent(sendReliable, evData, EventCode::kJump);
     }
   }
   ImGui::End();
 }
 
 void PhotonSampleApp::TearDown() noexcept {
-  networkLogic_.disconnect();
+  networkLogic_.Disconnect();
 }

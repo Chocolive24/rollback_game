@@ -49,7 +49,10 @@ class Listener final : public ExitGames::LoadBalancing::Listener {
 
   void leaveRoomReturn(int errorCode,
                        const ExitGames::Common::JString& errorString) override;
+  void joinRandomOrCreateRoomReturn(int, const ExitGames::Common::Hashtable&, 
+      const ExitGames::Common::Hashtable&, int,
+    const ExitGames::Common::JString&) override;
 
- private:
+private:
   NetworkInterface* network_ = nullptr;
 };

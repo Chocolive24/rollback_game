@@ -2,15 +2,15 @@
 
 #include <Common-cpp/inc/defines.h>
 
-enum class Event : nByte {
-  kLeft,
+enum class EventCode : nByte {
+  kLeft = 0,
   kRight,
   kJump,
   kShoot
 };
 
-enum class Key : nByte {
-  kLeft,
+enum class EventKey : nByte {
+  kLeft = 0,
   kRight,
   kJump,
   kShoot

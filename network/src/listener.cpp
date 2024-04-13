@@ -39,11 +39,10 @@ void Listener::leaveRoomEventAction(int playerNr, bool isInactive) {
             << '\n';
 }
 
-void Listener::customEventAction(
-    int playerNr, nByte eventCode,
+void Listener::customEventAction(int playerNr, nByte eventCode,
     const ExitGames::Common::Object& eventContent) {
   if (network_ != nullptr)
-    network_->ReceiveEvent(playerNr, eventCode, eventContent);
+    network_->ReceiveEvent(playerNr, static_cast<EventCode>(eventCode), eventContent);
 }
 
 void Listener::connectReturn(int errorCode,
@@ -64,4 +63,10 @@ void Listener::leaveRoomReturn(int errorCode,
   std::cout << "Leave room return: error code: " << errorCode
             << " error string: " << errorString.UTF8Representation().cstr()
             << '\n';
+}
+
+void Listener::joinRandomOrCreateRoomReturn(int i, const ExitGames::Common::Hashtable& hashtable,
+  const ExitGames::Common::Hashtable& hashtable1, int i1, const ExitGames::Common::JString& string) {
+  ExitGames::LoadBalancing::Listener::joinRandomOrCreateRoomReturn(i, hashtable, hashtable1, i1, string);
+  std::cout << "Joined or created a room\n";
 }
