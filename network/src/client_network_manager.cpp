@@ -69,7 +69,7 @@ void ClientNetworkManager::ReceiveEvent(int player_nr, EventCode event_code,
             << event_content.toString().UTF8Representation().cstr() << '\n';
 
   switch (event_code) {
-    case EventCode::kJump: {
+    case EventCode::kInput: {
       break;
     }
     default: {

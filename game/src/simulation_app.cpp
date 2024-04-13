@@ -45,8 +45,8 @@ void SimulationApp::DrawImGui() noexcept {
 
   ImGui::Begin("Mock network values.");
   {
-    ImGui::SliderFloat("Min delay", &SimulationClient::min_packet_delay, 0.01f, 1.f);
-    ImGui::SliderFloat("Max delay", &SimulationClient::max_packet_delay, 0.01f, 1.f);
+    ImGui::SliderFloat("Min delay", &SimulationClient::min_packet_delay, 0.f, 1.f);
+    ImGui::SliderFloat("Max delay", &SimulationClient::max_packet_delay, 0.f, 1.f);
     ImGui::SliderFloat("PacketLossPercentage", &SimulationClient::packet_loss_percentage, 0.f,
                        1.f);
   }

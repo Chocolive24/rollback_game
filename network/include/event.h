@@ -11,9 +11,7 @@ enum class EventCode : nByte {
 };
 
 enum class EventKey : nByte {
-  kInput = 0,
-  kLeft,
-  kRight,
-  kJump,
-  kShoot
+  kPlayerInput = 0,
+  kFrameNbr,
+  kDelay,
 };

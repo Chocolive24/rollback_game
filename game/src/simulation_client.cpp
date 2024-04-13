@@ -4,9 +4,8 @@
 #include "Random.h"
 
 #include <iostream>
-#include <Common-cpp/inc/UTF8String.h>
 
-float SimulationClient::min_packet_delay = 0.1f;
+float SimulationClient::min_packet_delay = 0.3f;
 float SimulationClient::max_packet_delay = 0.3f;
 float SimulationClient::packet_loss_percentage = 0.1f;
 
@@ -18,6 +17,7 @@ void SimulationClient::Init(int local_player_id,
 
   local_inputs_.reserve(kBaseInputSize);
   other_client_inputs_.reserve(kBaseInputSize);
+  waiting_input_queue.reserve(kBaseInputSize);
 }
 
 void SimulationClient::RegisterOtherClient(SimulationClient* other_client) noexcept {
@@ -41,9 +41,24 @@ void SimulationClient::Update() noexcept {
   local_inputs_.push_back(simulation_input);
 
   ExitGames::Common::Hashtable event_data;
-  event_data.put(static_cast<nByte>(EventKey::kInput), input);
+  event_data.put(static_cast<nByte>(EventKey::kPlayerInput), input);
+  event_data.put(static_cast<nByte>(EventKey::kFrameNbr), current_frame_);
+  event_data.put(static_cast<nByte>(EventKey::kDelay), delay);
   RaiseEvent(false, EventCode::kInput, event_data);
-  //SendInputs(inputs::FrameInput{inputs_, current_frame_});
+
+  auto it = waiting_input_queue.begin();
+
+  while (it != waiting_input_queue.end()) {
+    it->delay -= raylib::GetFrameTime();
+
+    if (it->delay <= 0.f) {
+      other_client_inputs_.push_back(*it);
+      it = waiting_input_queue.erase(it);
+    }
+    else {
+      ++it;
+    }
+  }
 }
 
 void SimulationClient::Draw() noexcept {
@@ -90,6 +105,11 @@ void SimulationClient::Draw() noexcept {
       if (i == 1 && !other_client_inputs_.empty())
       {
         inputs = other_client_inputs_.back().frame_input.input;
+        if (local_player_id_ == 2)
+        {
+          std::cout << "draw input: " << static_cast<int>(inputs) << '\n';
+          std::cout << "queue size: " << other_client_inputs_.size() << '\n';
+        }
       }
 
       raylib::Color key_color = inputs & static_cast<inputs::PlayerInput>(
@@ -139,15 +159,42 @@ void SimulationClient::Deinit() noexcept {
 void SimulationClient::RaiseEvent(bool reliable,
                                   EventCode event_code,
                                   const ExitGames::Common::Hashtable& event_data) noexcept {
+  if (Math::Random::Range(0.f, 1.f) <= packet_loss_percentage) {
+    return;
+  }
+
   if (other_client_ != nullptr){
-    other_client_->ReceiveEvent(0, event_code, event_data);
+    other_client_->ReceiveEvent(local_player_id_, event_code, event_data);
   }
 }
 
 void SimulationClient::ReceiveEvent(int player_nr, EventCode event_code,
                                     const ExitGames::Common::Hashtable& event_content) noexcept {
+ // std::cout << "received: " << event_content.toString().UTF8Representation().cstr() << '\n';
 
-  std::cout << "received: " << event_content.toString().UTF8Representation().cstr() << '\n';
+  inputs::SimulationInput simulation_input{};
+
+  const auto input_value =
+      event_content.getValue(static_cast<nByte>(EventKey::kPlayerInput));
+  simulation_input.frame_input.input =
+      ExitGames::Common::ValueObject<inputs::PlayerInput>(input_value).getDataCopy();
+
+  if (simulation_input.frame_input.input != 0) {
+    std::cout << "client " << local_player_id_ <<  "received input: "
+    << (int)simulation_input.frame_input.input << '\n';
+  }
+
+  const auto frame_value = event_content.getValue(
+      static_cast<nByte>(EventKey::kFrameNbr));
+  simulation_input.frame_input.frame_nbr =
+      ExitGames::Common::ValueObject<short>(frame_value).getDataCopy();
+
+  const auto delay_value =
+      event_content.getValue(static_cast<nByte>(EventKey::kDelay));
+  simulation_input.delay =
+      ExitGames::Common::ValueObject<float>(delay_value).getDataCopy();
+
+  waiting_input_queue.push_back(simulation_input);
 }
 
 //void SimulationClient::SendInputs(const inputs::FrameInput& inputs) noexcept {

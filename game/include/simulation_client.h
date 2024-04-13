@@ -34,6 +34,7 @@ private:
   raylib::RenderTexture2D render_texture_{};
   std::vector<inputs::SimulationInput> local_inputs_{};
   std::vector<inputs::SimulationInput> other_client_inputs_{};
+  std::vector<inputs::SimulationInput> waiting_input_queue{};
   static constexpr int kBaseInputSize = 1000;
   static constexpr int kStartTextPosY = 200;
   static constexpr int kTextOffsetY = 75;
