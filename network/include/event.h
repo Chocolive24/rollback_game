@@ -3,14 +3,16 @@
 #include <Common-cpp/inc/defines.h>
 
 enum class EventCode : nByte {
-  kLeft = 0,
+  kInput = 0,
+  kLeft,
   kRight,
   kJump,
   kShoot
 };
 
 enum class EventKey : nByte {
-  kLeft = 0,
+  kInput = 0,
+  kLeft,
   kRight,
   kJump,
   kShoot

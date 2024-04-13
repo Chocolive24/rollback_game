@@ -19,16 +19,13 @@ class ClientNetworkManager final : public NetworkInterface {
 
   void JoinRandomRoom(ExitGames::Common::Hashtable expectedCustomRoomProperties =
           ExitGames::Common::Hashtable());
-  void RaiseEvent(bool reliable, const ExitGames::Common::Hashtable& data,
-                  EventCode event_code) noexcept override;
+  void RaiseEvent(bool reliable, EventCode event_code,
+                  const ExitGames::Common::Hashtable& event_data) noexcept override;
   void ReceiveEvent(int player_nr, EventCode event_code,
-                    const ExitGames::Common::Object& event_content) noexcept override;
-
-  void SetIsMaster(const bool is_master) noexcept { is_master_ = is_master; }
+                    const ExitGames::Common::Hashtable& event_content) noexcept override;
 
 private:
   ExitGames::LoadBalancing::Client load_balancing_client_;
   Listener listener_{this};
   ExitGames::Common::Logger mLogger;  // name must be mLogger because it is accessed by EGLOG()
-  bool is_master_ = false;
 };

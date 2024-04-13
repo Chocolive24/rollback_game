@@ -33,13 +33,13 @@ public:
    * specified using the 'reliable' parameter.
    *
    * \param reliable Indicates whether the event should be sent reliably.
-   * \param data     The data to be sent as part of the event.
+   * \param event_data     The data to be sent as part of the event.
    * \param event_code An identifier specifying the type or purpose of the
    * event.
    */
   virtual void RaiseEvent(bool reliable,
-                          const ExitGames::Common::Hashtable& data,
-                          EventCode event_code) noexcept = 0;
+                          EventCode event_code,
+                          const ExitGames::Common::Hashtable& event_data) noexcept = 0;
 
   /**
    * \brief Receives and processes an incoming event from the network.
@@ -55,5 +55,5 @@ public:
    * \param event_content  The data or payload of the received event.
    */
   virtual void ReceiveEvent(int player_nr, EventCode event_code,
-    const ExitGames::Common::Object& event_content) noexcept = 0;
+                            const ExitGames::Common::Hashtable& event_content) noexcept = 0;
 };

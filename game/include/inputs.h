@@ -19,7 +19,7 @@ enum class PlayerInputType : std::uint8_t {
  */
 using PlayerInput = std::uint8_t;
 
-[[nodiscard]] PlayerInput GetPlayerInput(int input_profile_id) noexcept;
+[[nodiscard]] PlayerInput GetPlayerInput(int local_player_id) noexcept;
 
 /**
  * \brief FrameInputs is a struct which contains the inputs off a frame with
@@ -28,7 +28,6 @@ using PlayerInput = std::uint8_t;
 struct FrameInput {
   PlayerInput input = 0;
   short frame_nbr = 0;
-
 };
 
 /**
@@ -42,6 +41,15 @@ public:
 
  private:
   std::int8_t id_ = 0;
+};
+
+/**
+ * \brief SimulationInput is a struct containing a frame input and have a delay value
+ * to simulate the network delay.
+ */
+struct SimulationInput {
+  FrameInput frame_input;
+  float delay = 0.f;
 };
 
 struct DebugInput {

@@ -4,15 +4,28 @@
 #include "Random.h"
 
 #include <iostream>
+#include <Common-cpp/inc/UTF8String.h>
 
-void SimulationClient::Init(int client_idx,
-                       Math::Vec2I render_tex_size) noexcept {
-  client_idx_ = client_idx;
+float SimulationClient::min_packet_delay = 0.1f;
+float SimulationClient::max_packet_delay = 0.3f;
+float SimulationClient::packet_loss_percentage = 0.1f;
+
+void SimulationClient::Init(int local_player_id,
+                            Math::Vec2I render_tex_size) noexcept {
+
+  local_player_id_ = local_player_id;
   render_texture_ = raylib::LoadRenderTexture(render_tex_size.X, render_tex_size.Y);
+
+  local_inputs_.reserve(kBaseInputSize);
+  other_client_inputs_.reserve(kBaseInputSize);
+}
+
+void SimulationClient::RegisterOtherClient(SimulationClient* other_client) noexcept {
+  other_client_ = other_client;
 }
 
 void SimulationClient::Update() noexcept {
-  inputs_ = inputs::GetPlayerInput(client_idx_);
+  current_frame_++;
 
   if (raylib::IsWindowResized()) {
     auto new_tex_size = Engine::window_size();
@@ -21,8 +34,16 @@ void SimulationClient::Update() noexcept {
     render_texture_ = raylib::LoadRenderTexture(new_tex_size.X, new_tex_size.Y);
   }
 
+  const auto input = inputs::GetPlayerInput(local_player_id_);
+  const inputs::FrameInput frame_input{input, current_frame_};
+  const auto delay = Math::Random::Range(min_packet_delay, max_packet_delay);
+  const inputs::SimulationInput simulation_input{frame_input, delay};
+  local_inputs_.push_back(simulation_input);
+
+  ExitGames::Common::Hashtable event_data;
+  event_data.put(static_cast<nByte>(EventKey::kInput), input);
+  RaiseEvent(false, EventCode::kInput, event_data);
   //SendInputs(inputs::FrameInput{inputs_, current_frame_});
-  current_frame_++;
 }
 
 void SimulationClient::Draw() noexcept {
@@ -35,7 +56,7 @@ void SimulationClient::Draw() noexcept {
     const auto client_1_txt_pos_x = tex_center.X - tex_center.X / 2;
     const auto client_2_txt_pos_x = tex_center.X + tex_center.X / 2;
 
-    const char* client_idx_txt = raylib::TextFormat("Client %i", client_idx_);
+    const char* client_idx_txt = raylib::TextFormat("Client %i", local_player_id_);
     raylib::DrawRaylibText(client_idx_txt,
         tex_center.X - raylib::MeasureText(client_idx_txt, kFontSize) / 2, 
         75.f,
@@ -52,12 +73,24 @@ void SimulationClient::Draw() noexcept {
       int text_pos_x = i == 0 ? client_1_txt_pos_x : client_2_txt_pos_x;
 
       if (i == 0)
-        text_pos_x = client_idx_ == 1 ? client_1_txt_pos_x : client_2_txt_pos_x;
+        text_pos_x =
+            local_player_id_ == 1 ? client_1_txt_pos_x : client_2_txt_pos_x;
       else
-        text_pos_x = client_idx_ == 1 ? client_2_txt_pos_x : client_1_txt_pos_x;
+        text_pos_x =
+            local_player_id_ == 1 ? client_2_txt_pos_x : client_1_txt_pos_x;
 
-      const inputs::PlayerInput inputs = i == 0 ? inputs_ : other_client_inputs_;
+      inputs::PlayerInput inputs = 0;
+          //i == 0 ? local_inputs_.back().frame_input.input
+          //       : other_client_inputs_.back().frame_input.input;
 
+      if (i == 0 && !local_inputs_.empty()) {
+        inputs = local_inputs_.back().frame_input.input;
+      }
+
+      if (i == 1 && !other_client_inputs_.empty())
+      {
+        inputs = other_client_inputs_.back().frame_input.input;
+      }
 
       raylib::Color key_color = inputs & static_cast<inputs::PlayerInput>(
                                   inputs::PlayerInputType::kUp)
@@ -104,14 +137,17 @@ void SimulationClient::Deinit() noexcept {
 }
 
 void SimulationClient::RaiseEvent(bool reliable,
-                                  const ExitGames::Common::Hashtable& data,
-                                  EventCode event_code) noexcept {
-  
+                                  EventCode event_code,
+                                  const ExitGames::Common::Hashtable& event_data) noexcept {
+  if (other_client_ != nullptr){
+    other_client_->ReceiveEvent(0, event_code, event_data);
+  }
 }
 
 void SimulationClient::ReceiveEvent(int player_nr, EventCode event_code,
-  const ExitGames::Common::Object& event_content) noexcept {
-  
+                                    const ExitGames::Common::Hashtable& event_content) noexcept {
+
+  std::cout << "received: " << event_content.toString().UTF8Representation().cstr() << '\n';
 }
 
 //void SimulationClient::SendInputs(const inputs::FrameInput& inputs) noexcept {

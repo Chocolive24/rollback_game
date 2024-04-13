@@ -54,7 +54,7 @@ void PhotonSampleApp::DrawImGui() noexcept {
       ExitGames::Common::Hashtable evData;  
       evData.put<nByte, int>(static_cast<nByte>(EventKey::kJump),42);
       constexpr bool sendReliable = false; 
-      networkLogic_.RaiseEvent(sendReliable, evData, EventCode::kJump);
+      networkLogic_.RaiseEvent(sendReliable, EventCode::kJump, evData);
     }
   }
   ImGui::End();

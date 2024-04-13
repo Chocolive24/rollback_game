@@ -19,8 +19,4 @@ public:
 
 private:
   std::array<SimulationClient, game_constants::kMaxPlayerCount> clients_{};
-
-  float min_packet_delay = 0.1f;
-  float max_packet_delay = 0.3f;
-  float packet_loss_percentage = 0.1f;
 };

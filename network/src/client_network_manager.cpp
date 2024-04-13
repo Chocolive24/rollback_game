@@ -46,41 +46,30 @@ void ClientNetworkManager::JoinRandomRoom(ExitGames::Common::Hashtable expectedC
 }
 
 void ClientNetworkManager::RaiseEvent(bool reliable,
-                                      const ExitGames::Common::Hashtable& data,
-                                      EventCode event_code) noexcept {
-  if (!load_balancing_client_.opRaiseEvent(reliable, data,
+                                      EventCode event_code,
+                                      const ExitGames::Common::Hashtable& event_data) noexcept {
+  if (!load_balancing_client_.opRaiseEvent(reliable, event_data,
                                       static_cast<nByte>(event_code))) {
     EGLOG(ExitGames::Common::DebugLevel::ERRORS, L"Could not raise event.");
   }
 }
 
 void ClientNetworkManager::ReceiveEvent(int player_nr, EventCode event_code,
-    const ExitGames::Common::Object& event_content) noexcept {
-  // logging the string representation of the eventContent can be really useful
+                                        const ExitGames::Common::Hashtable& event_content) noexcept {
+
+   // logging the string representation of the eventContent can be really useful
   // for debugging, but use with care: for big events this might get expensive
+  EGLOG(ExitGames::Common::DebugLevel::ALL,
+        L"an event of type %d from player Nr %d with the following content has "
+        L"just arrived: %ls",
+        static_cast<nByte>(event_code), player_nr,
+        event_content.toString(true).cstr());
+
+  std::cout << "event content: "
+            << event_content.toString().UTF8Representation().cstr() << '\n';
+
   switch (event_code) {
     case EventCode::kJump: {
-      // you can access the content as a copy (might be a bit expensive for
-      // really big data constructs)
-      ExitGames::Common::Hashtable content =
-          ExitGames::Common::ValueObject<ExitGames::Common::Hashtable>(
-              event_content).getDataCopy();
-
-      // Print the content of the hashtable as a whole
-      std::cout << "content: "
-                << content.toString(true).UTF8Representation().cstr() << '\n';
-
-      // Access the content by key
-      const ExitGames::Common::Object* value = content.getValue(
-          static_cast<nByte>(EventKey::kJump));
-
-      if (value != nullptr) {
-        std::cout << "content by key: "
-                  << value->toString(true).UTF8Representation().cstr() << '\n';
-      }
-      else {
-        EGLOG(ExitGames::Common::DebugLevel::ERRORS, L"Could not get the event content by key.");
-      }
       break;
     }
     default: {

@@ -41,8 +41,17 @@ void Listener::leaveRoomEventAction(int playerNr, bool isInactive) {
 
 void Listener::customEventAction(int playerNr, nByte eventCode,
     const ExitGames::Common::Object& eventContent) {
+  if (eventContent.getType() != ExitGames::Common::TypeCode::HASHTABLE) {
+    std::cerr << "Unsupported event content type \n";
+    return;
+  }
+
+  const ExitGames::Common::Hashtable& event_data =
+      ExitGames::Common::ValueObject<ExitGames::Common::Hashtable>(eventContent).getDataCopy();
+
   if (network_ != nullptr)
-    network_->ReceiveEvent(playerNr, static_cast<EventCode>(eventCode), eventContent);
+    network_->ReceiveEvent(playerNr, static_cast<EventCode>(eventCode),
+                           event_data);
 }
 
 void Listener::connectReturn(int errorCode,

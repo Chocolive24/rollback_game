@@ -4,8 +4,8 @@
 
 namespace inputs {
 
-PlayerInput GetPlayerInput(int input_profile_id) noexcept {
-  switch (input_profile_id) {
+PlayerInput GetPlayerInput(int local_player_id) noexcept {
+  switch (local_player_id) {
     case 1: {
       PlayerInput player_1_inputs = 0;
 
