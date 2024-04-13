@@ -159,6 +159,9 @@ if (NOT EMSCRIPTEN)
 
     add_executable(photon_sample main/photon_sample.cpp)
     target_link_libraries(photon_sample PRIVATE game)
+
+    add_executable(simulation_app main/simulation_app_entry_point.cpp)
+    target_link_libraries(simulation_app PRIVATE game)
 endif()
 
 # Copy all of the resource files to the destination

@@ -13,7 +13,7 @@ void DebugClient::Init(int client_idx,
 }
 
 void DebugClient::Update() noexcept {
-  inputs_ = inputs::GetPlayerInputs(client_idx_);
+  inputs_ = inputs::GetPlayerInput(client_idx_);
 
   if (IsWindowResized()) {
     auto new_tex_size = Engine::window_size();
@@ -55,39 +55,39 @@ void DebugClient::Draw() noexcept {
       else
         text_pos_x = client_idx_ == 1 ? client_2_txt_pos_x : client_1_txt_pos_x;
 
-      const inputs::PlayerInputs inputs = i == 0 ? inputs_ : other_client_inputs_;
+      const inputs::PlayerInput inputs = i == 0 ? inputs_ : other_client_inputs_;
       
 
-      Color key_color = inputs & static_cast<inputs::PlayerInputs>(
-                                      inputs::PlayerInputTypes::kUp)
+      Color key_color = inputs & static_cast<inputs::PlayerInput>(
+                                      inputs::PlayerInputType::kUp)
                             ? WHITE
                             : DARKGRAY;
       DrawText("UP", text_pos_x - MeasureText("UP", kFontSize) / 2,
                kStartTextPosY + 1 * kTextOffsetY, kFontSize, key_color);
 
-      key_color = inputs & static_cast<inputs::PlayerInputs>(
-                                inputs::PlayerInputTypes::kLeft)
+      key_color = inputs & static_cast<inputs::PlayerInput>(
+                                inputs::PlayerInputType::kLeft)
                       ? WHITE
                       : DARKGRAY;
       DrawText("LEFT", text_pos_x - MeasureText("LEFT", kFontSize) / 2,
                kStartTextPosY + 2 * kTextOffsetY, kFontSize, key_color);
 
-      key_color = inputs & static_cast<inputs::PlayerInputs>(
-                                inputs::PlayerInputTypes::kDown)
+      key_color = inputs & static_cast<inputs::PlayerInput>(
+                                inputs::PlayerInputType::kDown)
                       ? WHITE
                       : DARKGRAY;
       DrawText("DOWN", text_pos_x - MeasureText("DOWN", kFontSize) / 2,
                kStartTextPosY + 3 * kTextOffsetY, kFontSize, key_color);
 
-      key_color = inputs & static_cast<inputs::PlayerInputs>(
-                                inputs::PlayerInputTypes::kRight)
+      key_color = inputs & static_cast<inputs::PlayerInput>(
+                                inputs::PlayerInputType::kRight)
                       ? WHITE
                       : DARKGRAY;
       DrawText("RIGHT", text_pos_x - MeasureText("RIGHT", kFontSize) / 2,
                kStartTextPosY + 4 * kTextOffsetY, kFontSize, key_color);
 
-      key_color = inputs & static_cast<inputs::PlayerInputs>(
-                               inputs::PlayerInputTypes::kShoot)
+      key_color = inputs & static_cast<inputs::PlayerInput>(
+                               inputs::PlayerInputType::kShoot)
                       ? WHITE
                       : DARKGRAY;
 
@@ -104,7 +104,7 @@ void DebugClient::Deinit() noexcept {
 void DebugClient::SendInputs(const inputs::FrameInput& inputs) noexcept {
   const auto delay = Math::Random::Range(server_->min_packet_delay, 
                                               server_->max_packet_delay);
-  const inputs::DebugInputs debug_inputs{inputs, delay, client_idx_};
+  const inputs::DebugInput debug_inputs{inputs, delay, client_idx_};
   if (inputs.input != 0)
   {
     std::cout << "client " << client_idx_ << " sent input from frame nbr " << 

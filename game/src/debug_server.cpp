@@ -61,7 +61,7 @@ void DebugServer::TearDown() noexcept {
 void DebugServer::SendInputs(inputs::FrameInput,
                              DebugClient* client) noexcept {}
 
-void DebugServer::ReceiveInputs(inputs::DebugInputs inputs) noexcept {
+void DebugServer::ReceiveInputs(inputs::DebugInput inputs) noexcept {
   if (Math::Random::Range(0.f, 1.f) <= packet_loss_percentage) {
     return;
   }

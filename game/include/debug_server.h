@@ -19,9 +19,9 @@ public:
   void TearDown() noexcept;
 
   void SendInputs(inputs::FrameInput inputs, DebugClient* client) noexcept;
-  void ReceiveInputs(inputs::DebugInputs inputs) noexcept;
+  void ReceiveInputs(inputs::DebugInput inputs) noexcept;
 
-  std::vector<inputs::DebugInputs> inputs_packet_queue{};
+  std::vector<inputs::DebugInput> inputs_packet_queue{};
   float min_packet_delay = 0.1f;
   float max_packet_delay = 0.3f;
   float packet_loss_percentage = 0.1f;

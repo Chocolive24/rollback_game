@@ -4,7 +4,7 @@
 
 namespace inputs {
 
-enum class PlayerInputTypes : std::uint8_t {
+enum class PlayerInputType : std::uint8_t {
   kUp = 1 << 0,
   kDown = 1 << 1,
   kRight = 1 << 2,
@@ -17,16 +17,16 @@ enum class PlayerInputTypes : std::uint8_t {
  * \brief PlayerInputs is an uint8 which stores all the inputs value of a player
  * in a frame.
  */
-using PlayerInputs = std::uint8_t;
+using PlayerInput = std::uint8_t;
 
-[[nodiscard]] PlayerInputs GetPlayerInputs(int input_profile_id) noexcept;
+[[nodiscard]] PlayerInput GetPlayerInput(int input_profile_id) noexcept;
 
 /**
  * \brief FrameInputs is a struct which contains the inputs off a frame with
  * its number.
  */
 struct FrameInput {
-  PlayerInputs input = 0;
+  PlayerInput input = 0;
   short frame_nbr = 0;
 
 };
@@ -44,7 +44,7 @@ public:
   std::int8_t id_ = 0;
 };
 
-struct DebugInputs {
+struct DebugInput {
   FrameInput frame_inputs{};
   float delay = 0.f;
   int client_idx = 0;

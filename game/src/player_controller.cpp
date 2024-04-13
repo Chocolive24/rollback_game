@@ -39,23 +39,23 @@ void PlayerController::Update() const noexcept {
 }
 
 void PlayerController::PollInputs() noexcept {
-  const auto inputs = inputs::GetPlayerInputs(1);
+  const auto inputs = inputs::GetPlayerInput(1);
   move_direction_ = Math::Vec2F::Zero();
 
-  if (inputs & static_cast<inputs::PlayerInputs>(inputs::PlayerInputTypes::kUp)) {
+  if (inputs & static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kUp)) {
     move_direction_ += Math::Vec2F::Down();
   }
-  if (inputs & static_cast<inputs::PlayerInputs>(inputs::PlayerInputTypes::kLeft)) {
+  if (inputs & static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kLeft)) {
     move_direction_ += Math::Vec2F::Left();
   }
-  if (inputs & static_cast<inputs::PlayerInputs>(inputs::PlayerInputTypes::kDown)) {
+  if (inputs & static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kDown)) {
     move_direction_ += Math::Vec2F::Up();
   }
-  if (inputs & static_cast<inputs::PlayerInputs>(inputs::PlayerInputTypes::kRight)) {
+  if (inputs & static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kRight)) {
     move_direction_ += Math::Vec2F::Right();
   }
 
-  if (inputs & static_cast<inputs::PlayerInputs>(inputs::PlayerInputTypes::kJump)) {
+  if (inputs & static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kJump)) {
     if (is_jumping_) {
       return;
     }
@@ -68,7 +68,7 @@ void PlayerController::PollInputs() noexcept {
     body.ApplyForce(Math::Vec2F::Down() * game_constants::kPlayerJumpMagnitude);
   }
 
-   if (inputs & static_cast<inputs::PlayerInputs>(inputs::PlayerInputTypes::kShoot)) {
+   if (inputs & static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kShoot)) {
     Shoot();
   }
 }

@@ -29,8 +29,8 @@ class DebugClient {
   static constexpr int kStartTextPosY = 200;
   static constexpr int kTextOffsetY = 75;
   static constexpr int kFontSize = 35;
-  inputs::PlayerInputs inputs_{};
-  inputs::PlayerInputs other_client_inputs_{};
+  inputs::PlayerInput inputs_{};
+  inputs::PlayerInput other_client_inputs_{};
   short current_frame_ = 0;
   short last_validated_frame_ = -1; // /!\ avec -1
   // on envoie pas les inputs des frames confirmées.

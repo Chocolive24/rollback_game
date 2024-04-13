@@ -17,8 +17,8 @@ TEST(Inputs, CheckInputReceived) {
   client2.Init(1, Math::Vec2I::Zero());
   client2.RegisterServer(&server);
 
-  inputs::PlayerInputs inputs = 0;
-  inputs |= static_cast<std::uint8_t>(inputs::PlayerInputTypes::kUp);
+  inputs::PlayerInput inputs = 0;
+  inputs |= static_cast<std::uint8_t>(inputs::PlayerInputType::kUp);
 
   client1.SendInputs(inputs::FrameInput{inputs, 0});
 
