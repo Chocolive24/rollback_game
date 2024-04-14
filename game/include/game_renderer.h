@@ -1,6 +1,7 @@
 #pragma once
 
 #include "game_manager.h"
+#include "raylib_wrapper.h"
 
 /**
  * \brief GameRenderer is a class which draws the game into the last render target
@@ -9,13 +10,14 @@
 class GameRenderer {
 public:
   explicit GameRenderer(GameManager* game_manager) noexcept;
-  void Init() const noexcept;
-  void Draw() const noexcept;
-  void Deinit() const noexcept;
+  void Init() noexcept;
+  void Draw() noexcept;
+  void Deinit() noexcept;
 
 private:
   void DrawPlatforms() const noexcept;
   void DrawPlayer() const noexcept;
 
   GameManager* game_manager_ = nullptr;
+  raylib::Camera2D camera_{};
 };

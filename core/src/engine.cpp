@@ -66,7 +66,7 @@ void Engine::ProcessFrame() {
 }
 
 void Engine::Setup() noexcept {
-  unsigned config_flags = FLAG_WINDOW_RESIZABLE;
+  unsigned config_flags = FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT;
 
 #ifndef __EMSCRIPTEN__
   config_flags |= FLAG_VSYNC_HINT;
@@ -93,15 +93,11 @@ void Engine::Setup() noexcept {
   // Setup Dear ImGui style
   ImGui::StyleColorsDark();
 
-  //texture_manager::CreateAllSprites();
-
   application_->Setup();
 }
 
 void Engine::TearDown() noexcept {
   application_->TearDown();
-
-  //texture_manager::DestroyAllSprites();
 
   ImGui_ImplRaylib_Shutdown();
   ImGui::DestroyContext();

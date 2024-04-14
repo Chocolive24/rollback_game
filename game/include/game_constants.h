@@ -9,6 +9,8 @@
 namespace game_constants {
   constexpr float kFixedDeltaTime = 1 / 50.f;
 
+  constexpr Math::Vec2I kGameScreenSize(1280, 720);
+
   constexpr std::uint8_t kMaxPlayerCount = 2;
 
   constexpr float kPlayerMainColLength = 0.65f;
