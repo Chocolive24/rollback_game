@@ -1,7 +1,7 @@
 #include "game_renderer.h"
 
-#include "engine.h"
 #include "Metrics.h"
+#include "engine.h"
 #include "texture_manager.h"
 
 using namespace raylib;
@@ -20,57 +20,65 @@ void GameRenderer::Init() noexcept {
   camera_.rotation = 0.f;
 }
 
-void GameRenderer::Draw() noexcept {
+void GameRenderer::Draw(const RenderTexture2D& render_target) noexcept {
+  UpdateCamera(render_target);
+
+  BeginTextureMode(render_target);
+  {
+    BeginMode2D(camera_);
+    {
+      ClearBackground(BLACK);
+
+      DrawCircle(-200.f, 0.f, 50.f, RED);
+
+      DrawPlatforms();
+      DrawPlayer();
+    }
+    EndMode2D();
+  }
+  EndTextureMode();
+}
+
+void GameRenderer::Deinit() noexcept { texture_manager::DestroyAllSprites(); }
+
+
+void GameRenderer::UpdateCamera(const RenderTexture2D& render_target) {
   // Calculate aspect ratios
   constexpr float game_aspect_ratio =
       static_cast<float>(game_constants::kGameScreenSize.X) /
       game_constants::kGameScreenSize.Y;
 
-  const float windowAspectRatio = static_cast<float>(GetScreenWidth()) /
-                                  static_cast<float> (GetScreenHeight());
+  const float windowAspectRatio =
+      static_cast<float>(render_target.texture.width) /
+      static_cast<float>(render_target.texture.height);
 
   // Calculate scale and offsets
   float scale;
   Vector2 offset;
   if (game_aspect_ratio > windowAspectRatio) {
     // Game screen is wider than the window
-    scale = static_cast<float>(GetScreenWidth()) /
+    scale = static_cast<float>(render_target.texture.width) /
             game_constants::kGameScreenSize.X;
-    offset = {
-        0,
-        (GetScreenHeight() - game_constants::kGameScreenSize.Y * scale) * 0.5f};
-  }
-  else {
+    offset = {0, (render_target.texture.height -
+                  game_constants::kGameScreenSize.Y * scale) *
+                     0.5f};
+  } else {
     // Game screen is taller than the window
-    scale = static_cast<float>(GetScreenHeight()) /
+    scale = static_cast<float>(render_target.texture.height) /
             game_constants::kGameScreenSize.Y;
-    offset = {
-        (GetScreenWidth() - game_constants::kGameScreenSize.X * scale) * 0.5f,
-        0};
+    offset = {(render_target.texture.width -
+               game_constants::kGameScreenSize.X * scale) *
+                  0.5f,
+              0};
   }
 
   // Adjust zoom level based on screen size
-  const float minZoom = fminf(
-      static_cast<float>(GetScreenWidth()) / game_constants::kGameScreenSize.X,
-      static_cast<float>(GetScreenHeight()) /
-          game_constants::kGameScreenSize.Y);
+  const float minZoom = fminf(static_cast<float>(render_target.texture.width) /
+                                  game_constants::kGameScreenSize.X,
+                              static_cast<float>(render_target.texture.height) /
+                                  game_constants::kGameScreenSize.Y);
   camera_.zoom = minZoom;
   camera_.offset = offset;
-
-  BeginMode2D(camera_);
-  {
-    ClearBackground(BLACK);
-
-    DrawCircle(-200.f, 0.f, 50.f, RED);
-
-    DrawPlatforms();
-    DrawPlayer();
-  }
-  EndMode2D();
-}
-
-void GameRenderer::Deinit() noexcept {
-  texture_manager::DestroyAllSprites();
 }
 
 void GameRenderer::DrawPlatforms() const noexcept {
@@ -91,8 +99,7 @@ void GameRenderer::DrawPlatforms() const noexcept {
     // ===============================
 #ifdef DEBUG
     DrawRectangleLines(centered_pix_pos.X, centered_pix_pos.Y, col_pix_size.X,
-                       col_pix_size.Y,
-                       RED);
+                       col_pix_size.Y, RED);
 #endif
     // ===============================
   }
@@ -107,8 +114,8 @@ void GameRenderer::DrawPlayer() const noexcept {
 
   texture_manager::penguin.Draw(Vector2{player_pix_pos.X, player_pix_pos.Y});
 
-   // Draw colliders if in debug mode.
-   // ================================
+  // Draw colliders if in debug mode.
+  // ================================
 #ifdef DEBUG
   DrawRectangleLines(player_pix_pos.X - main_col_pix_length * 0.5f,
                      player_pix_pos.Y - main_col_pix_length * 0.5f,

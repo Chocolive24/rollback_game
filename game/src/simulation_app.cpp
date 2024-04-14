@@ -42,9 +42,8 @@ void SimulationApp::Draw() noexcept {
                    raylib::Rectangle{0, 0, static_cast<float>(client_tex.width),
                              static_cast<float>(-client_tex.height)},
                    pos, raylib::kWhite);
+    //game_renderer_.Draw(client.render_texture());
   }
-
-  game_renderer_.Draw();
 }
 
 void SimulationApp::DrawImGui() noexcept {

@@ -14,4 +14,5 @@ public:
 private:
   GameManager game_manager_{};
   GameRenderer game_renderer_{&game_manager_};
+  raylib::RenderTexture2D render_texture_{};
 };
