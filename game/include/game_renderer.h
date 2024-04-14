@@ -4,12 +4,12 @@
 #include "raylib_wrapper.h"
 
 /**
- * \brief GameRenderer is a class which draws the game into the last render target
- * activated.
+ * \brief GameRenderer is a class which draws the game into a given render target.
  */
 class GameRenderer {
 public:
   explicit GameRenderer(GameManager* game_manager) noexcept;
+
   void Init() noexcept;
   void Draw(const raylib::RenderTexture2D& render_target) noexcept;
   void Deinit() noexcept;
@@ -20,5 +20,5 @@ private:
   void DrawPlayer() const noexcept;
 
   GameManager* game_manager_ = nullptr;
-  raylib::Camera2D camera_;
+  raylib::Camera2D camera_{};
 };

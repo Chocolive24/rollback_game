@@ -3,10 +3,10 @@
 #include "engine.h"
 
 void ClientApplication::Setup() noexcept {
-  game_manager_.Init();
+  game_manager_.Init(0); // change 0.
   game_renderer_.Init();
 
-  render_texture_ = raylib::LoadRenderTexture(raylib::GetScreenWidth() / 2,
+  render_texture_ = raylib::LoadRenderTexture(raylib::GetScreenWidth(),
                                               raylib::GetScreenHeight());
 }
 
@@ -16,8 +16,7 @@ void ClientApplication::Update() noexcept {
 
 void ClientApplication::Draw() noexcept {
   if (raylib::IsWindowResized()) {
-    auto new_tex_size = Engine::window_size();
-    new_tex_size.X /= 2;
+    const auto new_tex_size = Engine::window_size();
     UnloadRenderTexture(render_texture_);
     render_texture_ = raylib::LoadRenderTexture(new_tex_size.X, new_tex_size.Y);
   }

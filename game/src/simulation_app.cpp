@@ -7,14 +7,13 @@ void SimulationApp::Setup() noexcept {
   auto texture_size = Engine::window_size();
   texture_size.X /= 2;
   for (int i = 0; i < game_constants::kMaxPlayerCount; i++) {
-    clients_[i].Init(i + 1, texture_size);
+    clients_[i].Init(i);
+    render_targets_[i] =
+        raylib::LoadRenderTexture(texture_size.X, texture_size.Y);
   }
 
   clients_[0].RegisterOtherClient(&clients_[1]);
   clients_[1].RegisterOtherClient(&clients_[0]);
-
-  game_manager_.Init();
-  game_renderer_.Init();
 }
 
 void SimulationApp::Update() noexcept {
@@ -22,27 +21,33 @@ void SimulationApp::Update() noexcept {
   {
     client.Update();
   }
-
-  game_manager_.Update();
 }
 
 void SimulationApp::Draw() noexcept {
   for (int i = 0; i < game_constants::kMaxPlayerCount; i++) {
     auto& client = clients_[i];
-    client.Draw();
+
+    if (raylib::IsWindowResized()) {
+      auto new_tex_size = Engine::window_size();
+      new_tex_size.X /= 2;
+      raylib::UnloadRenderTexture(render_targets_[i]);
+      render_targets_[i] =
+          raylib::LoadRenderTexture(new_tex_size.X, new_tex_size.Y);
+    }
+
+    client.Draw(render_targets_[i]);
 
     // NOTE: Render texture must be y-flipped due to default OpenGL coordinates
     // (left-bottom)
-    const auto client_tex = client.render_texture().texture;
+    const auto& render_tex = render_targets_[i].texture;
     const raylib::Vector2 pos = i == 0
                                   ? raylib::Vector2{0, 0}
-                                  : raylib::Vector2{static_cast<float>(client_tex.width), 0};
+               : raylib::Vector2{static_cast<float>(render_tex.width), 0};
     
-    DrawTextureRec(client_tex,
-                   raylib::Rectangle{0, 0, static_cast<float>(client_tex.width),
-                             static_cast<float>(-client_tex.height)},
+    DrawTextureRec(render_tex,
+                   raylib::Rectangle{0, 0, static_cast<float>(render_tex.width),
+                                     static_cast<float>(-render_tex.height)},
                    pos, raylib::kWhite);
-    //game_renderer_.Draw(client.render_texture());
   }
 }
 
@@ -64,7 +69,4 @@ void SimulationApp::TearDown() noexcept {
   {
     client.Deinit();
   }
-
-  game_manager_.Deinit();
-  game_renderer_.Deinit();
 }

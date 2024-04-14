@@ -6,7 +6,7 @@ namespace inputs {
 
 PlayerInput GetPlayerInput(int local_player_id) noexcept {
   switch (local_player_id) {
-    case 1: {
+    case 0: {
       PlayerInput player_1_inputs = 0;
 
       if (IsKeyDown(KEY_W)) {
@@ -30,7 +30,7 @@ PlayerInput GetPlayerInput(int local_player_id) noexcept {
       return player_1_inputs;
     }
 
-    case 2: {
+    case 1: {
       PlayerInput player_2_inputs{};
 
       if (IsKeyDown(KEY_UP)) {

@@ -18,7 +18,8 @@ namespace game_constants {
   constexpr Math::Vec2F kPlayerJumpColOffset(0.f, kPlayerMainColLength * 0.5f);
   constexpr float kPlayerSpeedMoveFactor = 5.f;
   constexpr float kPlayerJumpMagnitude = 200.f;
-  constexpr Math::Vec2F kPlayerStartPos = Math::Vec2F(6.40f, 1.60f);
+  constexpr Math::Vec2F kPlayer1StartPos = Math::Vec2F(5.40f, 1.60f);
+  constexpr Math::Vec2F kPlayer2StartPos = Math::Vec2F(7.40f, 1.60f);
 
   constexpr std::uint8_t kPlatformCount = 1;
   constexpr Math::Vec2F kMainPlatformColSize = Math::Vec2F(6.5f, 0.75f);

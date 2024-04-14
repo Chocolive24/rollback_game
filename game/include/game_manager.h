@@ -18,12 +18,14 @@ public:
   GameManager& operator=(const GameManager& other) noexcept = default;
   ~GameManager() noexcept override = default;
 
-  virtual void Init() noexcept;
+  virtual void Init(int local_player_id) noexcept;
   void Update() noexcept;
   virtual void Deinit() noexcept;
 
-  [[nodiscard]] const PlayerController& player_controller() const noexcept {
-    return player_controller_;
+  void SetPlayerInput(inputs::PlayerInput input, std::size_t idx);
+
+  [[nodiscard]] const PlayerManager& player_controller() const noexcept {
+    return player_manager_;
   }
 
   [[nodiscard]] const PlatformManager& platform_manager() const noexcept {
@@ -32,8 +34,7 @@ public:
 
 protected:
   PhysicsEngine::World world_{};
-  PlayerController player_controller_;
-  //std::array<PlayerController, game_constants::kMaxPlayerCount> player_controllers_;
+  PlayerManager player_manager_;
   PlatformManager platform_manager_{};
 
   void OnTriggerEnter(
@@ -52,4 +53,6 @@ protected:
 
 private:
   void PollInputs() noexcept;
+
+  int local_player_id_ = -1;
 };

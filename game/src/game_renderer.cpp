@@ -23,13 +23,9 @@ void GameRenderer::Init() noexcept {
 void GameRenderer::Draw(const RenderTexture2D& render_target) noexcept {
   UpdateCamera(render_target);
 
-  BeginTextureMode(render_target);
-  {
-    BeginMode2D(camera_);
-    {
+  BeginTextureMode(render_target); {
+    BeginMode2D(camera_); {
       ClearBackground(BLACK);
-
-      DrawCircle(-200.f, 0.f, 50.f, RED);
 
       DrawPlatforms();
       DrawPlayer();
@@ -106,31 +102,33 @@ void GameRenderer::DrawPlatforms() const noexcept {
 }
 
 void GameRenderer::DrawPlayer() const noexcept {
-  const auto player_pos =
-      game_manager_->player_controller().GetPlayerPosition();
-  const auto player_pix_pos = Metrics::MetersToPixels(player_pos);
-  constexpr auto main_col_pix_length =
-      Metrics::MetersToPixels(game_constants::kPlayerMainColLength);
-
-  texture_manager::penguin.Draw(Vector2{player_pix_pos.X, player_pix_pos.Y});
-
-  // Draw colliders if in debug mode.
-  // ================================
+  for (std::size_t i = 0; i < game_constants::kMaxPlayerCount; i++) {
+    const auto player_pos =
+      game_manager_->player_controller().GetPlayerPosition(i);
+    const auto player_pix_pos = Metrics::MetersToPixels(player_pos);
+    constexpr auto main_col_pix_length =
+        Metrics::MetersToPixels(game_constants::kPlayerMainColLength);
+    
+    texture_manager::penguin.Draw(Vector2{player_pix_pos.X, player_pix_pos.Y});
+    
+    // Draw colliders if in debug mode.
+    // ================================
 #ifdef DEBUG
-  DrawRectangleLines(player_pix_pos.X - main_col_pix_length * 0.5f,
-                     player_pix_pos.Y - main_col_pix_length * 0.5f,
-                     main_col_pix_length, main_col_pix_length, RED);
-
-  const auto jump_col_pos =
-      game_manager_->player_controller().GetJumpColliderPosition();
-  const auto jump_col_pix_pos = Metrics::MetersToPixels(jump_col_pos);
-
-  const auto radius =
-      game_manager_->player_controller().GetJumpColliderShape().Radius();
-
-  const auto pix_radius = Metrics::MetersToPixels(radius);
-
-  DrawCircleLines(jump_col_pix_pos.X, jump_col_pix_pos.Y, pix_radius, RED);
+    DrawRectangleLines(player_pix_pos.X - main_col_pix_length * 0.5f,
+                       player_pix_pos.Y - main_col_pix_length * 0.5f,
+                       main_col_pix_length, main_col_pix_length, RED);
+    
+    const auto jump_col_pos =
+        game_manager_->player_controller().GetJumpColliderPosition(i);
+    const auto jump_col_pix_pos = Metrics::MetersToPixels(jump_col_pos);
+    
+    const auto radius =
+        game_manager_->player_controller().GetJumpColliderShape(i).Radius();
+    
+    const auto pix_radius = Metrics::MetersToPixels(radius);
+    
+    DrawCircleLines(jump_col_pix_pos.X, jump_col_pix_pos.Y, pix_radius, RED);
 #endif
-  // ================================
+    // ================================
+  }
 }
