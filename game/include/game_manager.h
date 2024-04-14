@@ -22,11 +22,19 @@ public:
   void Update() noexcept;
   virtual void Deinit() noexcept;
 
+  [[nodiscard]] const PlayerController& player_controller() const noexcept {
+    return player_controller_;
+  }
+
+  [[nodiscard]] const PlatformManager& platform_manager() const noexcept {
+    return platform_manager_;
+  }
+
 protected:
   PhysicsEngine::World world_{};
   PlayerController player_controller_;
   //std::array<PlayerController, game_constants::kMaxPlayerCount> player_controllers_;
-  PlatformsManager platforms_manager_{};
+  PlatformManager platform_manager_{};
 
   void OnTriggerEnter(
       PhysicsEngine::ColliderRef colliderRefA,

@@ -107,8 +107,8 @@ void SimulationClient::Draw() noexcept {
         inputs = other_client_inputs_.back().frame_input.input;
         if (local_player_id_ == 2)
         {
-          std::cout << "draw input: " << static_cast<int>(inputs) << '\n';
-          std::cout << "queue size: " << other_client_inputs_.size() << '\n';
+          //std::cout << "draw input: " << static_cast<int>(inputs) << '\n';
+          //std::cout << "queue size: " << other_client_inputs_.size() << '\n';
         }
       }
 
@@ -177,7 +177,7 @@ void SimulationClient::ReceiveEvent(int player_nr, EventCode event_code,
   const auto input_value =
       event_content.getValue(static_cast<nByte>(EventKey::kPlayerInput));
   simulation_input.frame_input.input =
-      ExitGames::Common::ValueObject<inputs::PlayerInput>(input_value).getDataCopy();
+      *ExitGames::Common::ValueObject<inputs::PlayerInput>(input_value).getDataAddress();
 
   if (simulation_input.frame_input.input != 0) {
     std::cout << "client " << local_player_id_ <<  "received input: "
@@ -187,12 +187,12 @@ void SimulationClient::ReceiveEvent(int player_nr, EventCode event_code,
   const auto frame_value = event_content.getValue(
       static_cast<nByte>(EventKey::kFrameNbr));
   simulation_input.frame_input.frame_nbr =
-      ExitGames::Common::ValueObject<short>(frame_value).getDataCopy();
+      *ExitGames::Common::ValueObject<short>(frame_value).getDataAddress();
 
   const auto delay_value =
       event_content.getValue(static_cast<nByte>(EventKey::kDelay));
   simulation_input.delay =
-      ExitGames::Common::ValueObject<float>(delay_value).getDataCopy();
+      *ExitGames::Common::ValueObject<float>(delay_value).getDataAddress();
 
   waiting_input_queue.push_back(simulation_input);
 }

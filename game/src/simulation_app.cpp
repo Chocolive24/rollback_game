@@ -12,6 +12,9 @@ void SimulationApp::Setup() noexcept {
 
   clients_[0].RegisterOtherClient(&clients_[1]);
   clients_[1].RegisterOtherClient(&clients_[0]);
+
+  game_manager_.Init();
+  game_renderer_.Init();
 }
 
 void SimulationApp::Update() noexcept {
@@ -19,6 +22,8 @@ void SimulationApp::Update() noexcept {
   {
     client.Update();
   }
+
+  game_manager_.Update();
 }
 
 void SimulationApp::Draw() noexcept {
@@ -38,6 +43,8 @@ void SimulationApp::Draw() noexcept {
                              static_cast<float>(-client_tex.height)},
                    pos, raylib::kWhite);
   }
+
+  game_renderer_.Draw();
 }
 
 void SimulationApp::DrawImGui() noexcept {
@@ -58,4 +65,7 @@ void SimulationApp::TearDown() noexcept {
   {
     client.Deinit();
   }
+
+  game_manager_.Deinit();
+  game_renderer_.Deinit();
 }

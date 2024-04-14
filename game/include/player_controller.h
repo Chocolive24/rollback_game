@@ -15,13 +15,20 @@ public:
 
   void Shoot() noexcept;
 
-  PhysicsEngine::ColliderRef col_ref_{};
-  PhysicsEngine::ColliderRef can_jump_col_ref_{};
+  void OnTriggerEnter(PhysicsEngine::ColliderRef colliderRefA,
+                      PhysicsEngine::ColliderRef colliderRefB) noexcept;
+
+  [[nodiscard]] Math::Vec2F GetPlayerPosition() const noexcept;
+  [[nodiscard]] Math::Vec2F GetJumpColliderPosition() const noexcept;
+  [[nodiscard]] Math::RectangleF GetMainColliderShape() const noexcept;
+  [[nodiscard]] Math::CircleF GetJumpColliderShape() const noexcept;
+
   bool can_jump_ = true;
   bool is_jumping_ = false;
 
 private:
  PhysicsEngine::World* world_ = nullptr;
-
+ PhysicsEngine::ColliderRef main_col_ref_{};
+ PhysicsEngine::ColliderRef jump_col_ref_{};
  Math::Vec2F move_direction_{};
 };

@@ -12,5 +12,6 @@ public:
   void TearDown() noexcept override;
 
 private:
-  GameRenderer game_renderer_{};
+  GameManager game_manager_{};
+  GameRenderer game_renderer_{&game_manager_};
 };

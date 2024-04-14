@@ -5,12 +5,19 @@
 
 #include <array>
 
-class PlatformsManager {
+class PlatformManager {
 public:
   void Init(PhysicsEngine::World* world) noexcept;
-  std::array<PhysicsEngine::ColliderRef, game_constants::kPlatformCount>
-      platform_col_refs{};
+
+  [[nodiscard]] Math::Vec2F GetPlatformPosition(
+      const std::size_t& idx)const noexcept;
+
+  [[nodiscard]] Math::RectangleF GetPlatformShape(
+      const std::size_t& idx) const noexcept;
 
 private:
+  std::array<PhysicsEngine::ColliderRef,
+    game_constants::kPlatformCount>platform_col_refs{};
+
   PhysicsEngine::World* world_ = nullptr;
 };
