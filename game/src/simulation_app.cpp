@@ -7,7 +7,7 @@ void SimulationApp::Setup() noexcept {
   auto texture_size = Engine::window_size();
   texture_size.X /= 2;
   for (int i = 0; i < game_constants::kMaxPlayerCount; i++) {
-    clients_[i].Init(i);
+    clients_[i].Init(i, i);
     render_targets_[i] =
         raylib::LoadRenderTexture(texture_size.X, texture_size.Y);
   }
@@ -19,7 +19,7 @@ void SimulationApp::Setup() noexcept {
 void SimulationApp::Update() noexcept {
   for (auto& client : clients_)
   {
-    client.Update();
+    client.FixedUpdate();
   }
 }
 

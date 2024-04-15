@@ -5,19 +5,18 @@
 
 #include <iostream>
 
-float SimulationClient::min_packet_delay = 0.3f;
-float SimulationClient::max_packet_delay = 0.3f;
-float SimulationClient::packet_loss_percentage = 0.1f;
+float SimulationClient::min_packet_delay = 1.f;
+float SimulationClient::max_packet_delay = 1.f;
+float SimulationClient::packet_loss_percentage = 0.0f;
 
-void SimulationClient::Init(int local_player_id) noexcept {
+void SimulationClient::Init(int input_profile_id, PlayerId player_id) noexcept {
 
-  local_player_id_ = local_player_id;
+  input_profile_id_ = input_profile_id;
+  player_id_ = player_id;
 
-  local_inputs_.reserve(kBaseInputSize);
-  other_client_inputs_.reserve(kBaseInputSize);
   waiting_input_queue.reserve(kBaseInputSize);
 
-  game_manager_.Init(local_player_id);
+  game_manager_.Init(player_id);
   game_renderer_.Init();
 }
 
@@ -26,13 +25,28 @@ void SimulationClient::RegisterOtherClient(SimulationClient* other_client) noexc
 }
 
 void SimulationClient::Update() noexcept {
+  static float fixed_timer = game_constants::kFixedDeltaTime;
+  fixed_timer += raylib::GetFrameTime();
+
+  while (fixed_timer >= game_constants::kFixedDeltaTime) {
+    FixedUpdate();
+    fixed_timer -= game_constants::kFixedDeltaTime;
+  }
+}
+
+void SimulationClient::FixedUpdate() noexcept {
   current_frame_++;
 
-  const auto input = inputs::GetPlayerInput(local_player_id_);
+  const auto input = inputs::GetPlayerInput(input_profile_id_);
+
+ /* if (input == 0)
+  {
+    input = 2;
+  }*/
+
   const inputs::FrameInput frame_input{input, current_frame_};
   const auto delay = Math::Random::Range(min_packet_delay, max_packet_delay);
-  const inputs::SimulationInput simulation_input{frame_input, delay};
-  local_inputs_.push_back(simulation_input);
+  game_manager_.SetPlayerInput(frame_input, player_id_);
 
   ExitGames::Common::Hashtable event_data;
   event_data.put(static_cast<nByte>(EventKey::kPlayerInput), input);
@@ -41,118 +55,25 @@ void SimulationClient::Update() noexcept {
   RaiseEvent(false, EventCode::kInput, event_data);
 
   auto it = waiting_input_queue.begin();
-
   while (it != waiting_input_queue.end()) {
-    it->delay -= raylib::GetFrameTime();
+    it->delay -= game_constants::kFixedDeltaTime;
 
     if (it->delay <= 0.f) {
-      other_client_inputs_.push_back(*it);
+      game_manager_.SetRemotePlayerInput(it->frame_input,
+                                   other_client_->player_id());
       it = waiting_input_queue.erase(it);
+     
     }
     else {
       ++it;
     }
   }
 
-  if (!other_client_inputs_.empty())
-  {
-    game_manager_.SetPlayerInput(other_client_inputs_.back().frame_input.input,
-                                 other_client_->local_player_id());
-  }
-
-  game_manager_.Update();
+  game_manager_.FixedUpdate();
 }
 
 void SimulationClient::Draw(const raylib::RenderTexture2D& render_target) noexcept {
   game_renderer_.Draw(render_target);
-  //raylib::BeginTextureMode(render_texture_);
-  //{
-  //  raylib::ClearBackground(raylib::kBlack);
-
-  //  const auto tex_center = Math::Vec2I(render_texture_.texture.width / 2,
-  //                                      render_texture_.texture.height / 2);
-  //  const auto client_1_txt_pos_x = tex_center.X - tex_center.X / 2;
-  //  const auto client_2_txt_pos_x = tex_center.X + tex_center.X / 2;
-
-  //  const char* client_idx_txt = raylib::TextFormat("Client %i", local_player_id_);
-  //  raylib::DrawRaylibText(client_idx_txt,
-  //      tex_center.X - raylib::MeasureText(client_idx_txt, kFontSize) / 2, 
-  //      75.f,
-  //      kFontSize, raylib::kWhite);
-
-  //  raylib::DrawRaylibText("Client 1",
-  //           client_1_txt_pos_x - raylib::MeasureText(client_idx_txt, kFontSize) / 2,
-  //           175.f, kFontSize, raylib::kWhite);
-  //  raylib::DrawRaylibText("Client 2",
-  //           client_2_txt_pos_x - raylib::MeasureText(client_idx_txt, kFontSize) / 2,
-  //           175.f, kFontSize, raylib::kWhite);
-
-  //  for (int i = 0; i < game_constants::kMaxPlayerCount; i++) {
-  //    int text_pos_x = i == 0 ? client_1_txt_pos_x : client_2_txt_pos_x;
-
-  //    if (i == 0)
-  //      text_pos_x =
-  //          local_player_id_ == 1 ? client_1_txt_pos_x : client_2_txt_pos_x;
-  //    else
-  //      text_pos_x =
-  //          local_player_id_ == 1 ? client_2_txt_pos_x : client_1_txt_pos_x;
-
-  //    inputs::PlayerInput inputs = 0;
-  //        //i == 0 ? local_inputs_.back().frame_input.input
-  //        //       : other_client_inputs_.back().frame_input.input;
-
-  //    if (i == 0 && !local_inputs_.empty()) {
-  //      inputs = local_inputs_.back().frame_input.input;
-  //    }
-
-  //    if (i == 1 && !other_client_inputs_.empty())
-  //    {
-  //      inputs = other_client_inputs_.back().frame_input.input;
-  //      if (local_player_id_ == 2)
-  //      {
-  //        //std::cout << "draw input: " << static_cast<int>(inputs) << '\n';
-  //        //std::cout << "queue size: " << other_client_inputs_.size() << '\n';
-  //      }
-  //    }
-
-  //    raylib::Color key_color = inputs & static_cast<inputs::PlayerInput>(
-  //                                inputs::PlayerInputType::kUp)
-  //                                ? raylib::kWhite
-  //                                : raylib::kDarkGray;
-  //    raylib::DrawRaylibText("UP", text_pos_x - raylib::MeasureText("UP", kFontSize) / 2,
-  //             kStartTextPosY + 1 * kTextOffsetY, kFontSize, key_color);
-
-  //    key_color = inputs & static_cast<inputs::PlayerInput>(
-  //                              inputs::PlayerInputType::kLeft)
-  //                    ? raylib::kWhite
-  //                    : raylib::kDarkGray;
-  //    raylib::DrawRaylibText("LEFT", text_pos_x - raylib::MeasureText("LEFT", kFontSize) / 2,
-  //             kStartTextPosY + 2 * kTextOffsetY, kFontSize, key_color);
-
-  //    key_color = inputs & static_cast<inputs::PlayerInput>(
-  //                              inputs::PlayerInputType::kDown)
-  //                    ? raylib::kWhite
-  //                    : raylib::kDarkGray;
-  //    raylib::DrawRaylibText("DOWN", text_pos_x - raylib::MeasureText("DOWN", kFontSize) / 2,
-  //             kStartTextPosY + 3 * kTextOffsetY, kFontSize, key_color);
-
-  //    key_color = inputs & static_cast<inputs::PlayerInput>(
-  //                              inputs::PlayerInputType::kRight)
-  //                    ? raylib::kWhite
-  //                    : raylib::kDarkGray;
-  //    raylib::DrawRaylibText("RIGHT", text_pos_x - raylib::MeasureText("RIGHT", kFontSize) / 2,
-  //             kStartTextPosY + 4 * kTextOffsetY, kFontSize, key_color);
-
-  //    key_color = inputs & static_cast<inputs::PlayerInput>(
-  //                             inputs::PlayerInputType::kShoot)
-  //                    ? raylib::kWhite
-  //                    : raylib::kDarkGray;
-
-  //    raylib::DrawRaylibText("SHOOT", text_pos_x - raylib::MeasureText("SHOOT", kFontSize) / 2,
-  //             kStartTextPosY + 5 * kTextOffsetY, kFontSize, key_color);
-  //  }
-  //}
-  //raylib::EndTextureMode();
 }
 
 void SimulationClient::Deinit() noexcept {
@@ -163,12 +84,12 @@ void SimulationClient::Deinit() noexcept {
 void SimulationClient::RaiseEvent(bool reliable,
                                   EventCode event_code,
                                   const ExitGames::Common::Hashtable& event_data) noexcept {
-  if (Math::Random::Range(0.f, 1.f) <= packet_loss_percentage) {
+  if (Math::Random::Range(0.f, 1.f) < packet_loss_percentage) {
     return;
   }
 
   if (other_client_ != nullptr){
-    other_client_->ReceiveEvent(local_player_id_, event_code, event_data);
+    other_client_->ReceiveEvent(player_id_, event_code, event_data);
   }
 }
 
@@ -183,10 +104,10 @@ void SimulationClient::ReceiveEvent(int player_nr, EventCode event_code,
   simulation_input.frame_input.input =
       *ExitGames::Common::ValueObject<inputs::PlayerInput>(input_value).getDataAddress();
 
-  if (simulation_input.frame_input.input != 0) {
-    std::cout << "client " << local_player_id_ <<  "received input: "
-    << (int)simulation_input.frame_input.input << '\n';
-  }
+  //if (simulation_input.frame_input.input != 0) {
+  //  std::cout << "client " << (int)player_id_ <<  "received input: "
+  //  << (int)simulation_input.frame_input.input << '\n';
+  //}
 
   const auto frame_value = event_content.getValue(
       static_cast<nByte>(EventKey::kFrameNbr));

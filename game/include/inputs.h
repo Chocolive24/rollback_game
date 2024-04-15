@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cstdint>
+#include "types.h"
 
 namespace inputs {
 
@@ -19,7 +19,7 @@ enum class PlayerInputType : std::uint8_t {
  */
 using PlayerInput = std::uint8_t;
 
-[[nodiscard]] PlayerInput GetPlayerInput(int local_player_id) noexcept;
+[[nodiscard]] PlayerInput GetPlayerInput(int input_profile_id) noexcept;
 
 /**
  * \brief FrameInputs is a struct which contains the inputs off a frame with
@@ -27,7 +27,7 @@ using PlayerInput = std::uint8_t;
  */
 struct FrameInput {
   PlayerInput input = 0;
-  short frame_nbr = 0;
+  FrameNbr frame_nbr = 0;
 };
 
 /**

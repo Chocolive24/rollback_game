@@ -1,5 +1,7 @@
 #include "player_controller.h"
 
+#include <iostream>
+
 #include "game_constants.h"
 #include "game_renderer.h"
 #include "inputs.h"
@@ -20,6 +22,7 @@ void PlayerManager::Init() noexcept {
     }
 
     players_[i].position = start_pos;
+    players_[i].id = i;
   }
 
   /*const auto& body_ref = world_->CreateBody();
@@ -42,8 +45,9 @@ void PlayerManager::Init() noexcept {
   can_jump_col.SetIsTrigger(true);*/
 }
 
-void PlayerManager::Update() noexcept {
+void PlayerManager::FixedUpdate() noexcept {
   for (auto& player : players_) {
+    //player.input = rollback_manager_->GetPlayerInputAtFrame(current_frame, player.id);
     auto move_direction = Math::Vec2F::Zero();
 
     if (player.input &
@@ -64,6 +68,10 @@ void PlayerManager::Update() noexcept {
     }
 
     player.position += move_direction * 5.f * game_constants::kFixedDeltaTime;
+
+    //std::cout << "player nr: " << (int)player.id
+    //          << " position: " << player.position.X << " " << player.position.Y
+    //          << '\n';
   }
   // if (move_direction_.Length() >= Math::Epsilon) {
   //   const auto& body_ref = world_->GetCollider(main_col_ref_).GetBodyRef();
@@ -77,24 +85,24 @@ void PlayerManager::Update() noexcept {
 }
 
 void PlayerManager::PollInputs() noexcept {
-  const auto inputs = inputs::GetPlayerInput(1);
-  move_direction_ = Math::Vec2F::Zero();
+  //const auto inputs = inputs::GetPlayerInput(1);
+  //move_direction_ = Math::Vec2F::Zero();
 
-  if (inputs & static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kUp)) {
-    move_direction_ += Math::Vec2F::Down();
-  }
-  if (inputs &
-      static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kLeft)) {
-    move_direction_ += Math::Vec2F::Left();
-  }
-  if (inputs &
-      static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kDown)) {
-    move_direction_ += Math::Vec2F::Up();
-  }
-  if (inputs &
-      static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kRight)) {
-    move_direction_ += Math::Vec2F::Right();
-  }
+  //if (inputs & static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kUp)) {
+  //  move_direction_ += Math::Vec2F::Down();
+  //}
+  //if (inputs &
+  //    static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kLeft)) {
+  //  move_direction_ += Math::Vec2F::Left();
+  //}
+  //if (inputs &
+  //    static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kDown)) {
+  //  move_direction_ += Math::Vec2F::Up();
+  //}
+  //if (inputs &
+  //    static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kRight)) {
+  //  move_direction_ += Math::Vec2F::Right();
+  //}
 
   // if (inputs &
   // static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kJump)) {
@@ -132,6 +140,12 @@ void PlayerManager::Shoot() noexcept {
   // collider.SetRestitution(0.f);
 }
 
+void PlayerManager::Copy(const PlayerManager& player_manager) noexcept {
+  for (std::size_t i = 0; i < game_constants::kMaxPlayerCount; i++) {
+    players_[i] = player_manager.players_[i];
+  }
+}
+
 void PlayerManager::OnTriggerEnter(
     PhysicsEngine::ColliderRef colliderRefA,
     PhysicsEngine::ColliderRef colliderRefB) noexcept {
@@ -155,8 +169,8 @@ void PlayerManager::OnTriggerEnter(
   // }
 }
 
-void PlayerManager::SetPlayerInput(inputs::PlayerInput input, std::size_t idx) {
-  players_[idx].input = input;
+void PlayerManager::SetPlayerInput(inputs::PlayerInput input, PlayerId player_id) {
+  players_[player_id].input = input;
 }
 
 Math::Vec2F PlayerManager::GetPlayerPosition(std::size_t idx) const noexcept {

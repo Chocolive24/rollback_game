@@ -5,6 +5,7 @@
 #include "game_renderer.h"
 #include "inputs.h"
 #include "network_interface.h"
+#include "rollback_manager.h"
 
 /**
  * \brief SimulationClient is a class that simulates the game on the client side,
@@ -15,9 +16,10 @@
  */
 class SimulationClient final : public NetworkInterface {
  public:
-  void Init(int local_player_id) noexcept;
+  void Init(int input_profile_id, PlayerId player_id) noexcept;
   void RegisterOtherClient(SimulationClient* other_client) noexcept;
   void Update() noexcept;
+  void FixedUpdate() noexcept;
   void Draw(const raylib::RenderTexture2D& render_target) noexcept;
   void Deinit() noexcept;
 
@@ -26,8 +28,8 @@ class SimulationClient final : public NetworkInterface {
   void ReceiveEvent(int player_nr, EventCode event_code,
                     const ExitGames::Common::Hashtable& event_content) noexcept override;
 
-  [[nodiscard]] int local_player_id() const noexcept {
-    return local_player_id_;
+  [[nodiscard]] PlayerId player_id() const noexcept {
+    return player_id_;
   }
 
   static float min_packet_delay;
@@ -37,11 +39,12 @@ class SimulationClient final : public NetworkInterface {
 private:
   GameManager game_manager_{};
   GameRenderer game_renderer_{&game_manager_};
+  RollbackManager rollback_manager_{};
 
   SimulationClient* other_client_ = nullptr;
 
-  std::vector<inputs::SimulationInput> local_inputs_{};
-  std::vector<inputs::SimulationInput> other_client_inputs_{};
+  //std::vector<inputs::SimulationInput> local_inputs_{};
+  //std::vector<inputs::SimulationInput> other_client_inputs_{};
   std::vector<inputs::SimulationInput> waiting_input_queue{};
 
   static constexpr int kBaseInputSize = 1000;
@@ -49,7 +52,8 @@ private:
   static constexpr int kTextOffsetY = 75;
   static constexpr int kFontSize = 35;
 
-  int local_player_id_ = -1;
+  PlayerId player_id_ = -1;
+  int input_profile_id_ = -1;
   std::int16_t current_frame_ = -1;
 
   // /!\ avec -1

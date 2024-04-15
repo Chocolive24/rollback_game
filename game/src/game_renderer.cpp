@@ -104,7 +104,7 @@ void GameRenderer::DrawPlatforms() const noexcept {
 void GameRenderer::DrawPlayer() const noexcept {
   for (std::size_t i = 0; i < game_constants::kMaxPlayerCount; i++) {
     const auto player_pos =
-      game_manager_->player_controller().GetPlayerPosition(i);
+      game_manager_->player_manager().GetPlayerPosition(i);
     const auto player_pix_pos = Metrics::MetersToPixels(player_pos);
     constexpr auto main_col_pix_length =
         Metrics::MetersToPixels(game_constants::kPlayerMainColLength);
@@ -119,11 +119,11 @@ void GameRenderer::DrawPlayer() const noexcept {
                        main_col_pix_length, main_col_pix_length, RED);
     
     const auto jump_col_pos =
-        game_manager_->player_controller().GetJumpColliderPosition(i);
+        game_manager_->player_manager().GetJumpColliderPosition(i);
     const auto jump_col_pix_pos = Metrics::MetersToPixels(jump_col_pos);
     
     const auto radius =
-        game_manager_->player_controller().GetJumpColliderShape(i).Radius();
+        game_manager_->player_manager().GetJumpColliderShape(i).Radius();
     
     const auto pix_radius = Metrics::MetersToPixels(radius);
     

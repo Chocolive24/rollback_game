@@ -4,8 +4,8 @@
 
 namespace inputs {
 
-PlayerInput GetPlayerInput(int local_player_id) noexcept {
-  switch (local_player_id) {
+PlayerInput GetPlayerInput(int input_profile_id) noexcept {
+  switch (input_profile_id) {
     case 0: {
       PlayerInput player_1_inputs = 0;
 
@@ -22,7 +22,10 @@ PlayerInput GetPlayerInput(int local_player_id) noexcept {
         player_1_inputs |= static_cast<std::uint8_t>(PlayerInputType::kRight);
       }
       if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-        player_1_inputs |= static_cast<std::uint8_t>(PlayerInputType::kShoot);
+        // Check if the mouse is not being used for window move.
+        if (!IsWindowResized() && !IsWindowMinimized()) {
+          player_1_inputs |= static_cast<std::uint8_t>(PlayerInputType::kShoot);
+        }
       }
       if (IsKeyPressed(KEY_SPACE)) {
         player_1_inputs |= static_cast<std::uint8_t>(PlayerInputType::kJump);

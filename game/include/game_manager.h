@@ -1,9 +1,18 @@
 #pragma once
 
-#include "game_constants.h"
 #include "platforms_manager.h"
 #include "player_controller.h"
+#include "rollback_manager.h"
 #include "World.h"
+
+/**
+ * \brief Game is a struct containing all the variables that describe
+ * the state of the game. These variables are the one that are copied
+ * when a rollback is needed.
+ */
+struct Game {
+  //TODO: add varibales mdr.
+};
 
 /**
  * \brief GameManager is a class that update the game logic.
@@ -19,12 +28,20 @@ public:
   ~GameManager() noexcept override = default;
 
   virtual void Init(int local_player_id) noexcept;
-  void Update() noexcept;
+  void FixedUpdate() noexcept;
   virtual void Deinit() noexcept;
 
-  void SetPlayerInput(inputs::PlayerInput input, std::size_t idx);
+  /**
+   * \brief Copy is a method which copies the states of the game. It used
+   * when rollback is applied to go back to a previous game state. \param
+   * game_manager The game manager to be copied.
+   */
+  void Copy(const GameManager& game_manager) noexcept;
 
-  [[nodiscard]] const PlayerManager& player_controller() const noexcept {
+  void SetPlayerInput(inputs::FrameInput input, PlayerId player_id);
+  void SetRemotePlayerInput(inputs::FrameInput input, PlayerId player_id);
+
+  [[nodiscard]] const PlayerManager& player_manager() const noexcept {
     return player_manager_;
   }
 
@@ -34,6 +51,7 @@ public:
 
 protected:
   PhysicsEngine::World world_{};
+  RollbackManager rollback_manager_{};
   PlayerManager player_manager_;
   PlatformManager platform_manager_{};
 
@@ -52,7 +70,5 @@ protected:
       PhysicsEngine::ColliderRef colliderRefB) noexcept override {}
 
 private:
-  void PollInputs() noexcept;
-
   int local_player_id_ = -1;
 };

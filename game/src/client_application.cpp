@@ -11,7 +11,9 @@ void ClientApplication::Setup() noexcept {
 }
 
 void ClientApplication::Update() noexcept {
-  game_manager_.Update();
+  static FrameNbr current_frame = -1;
+  current_frame++;
+  game_manager_.FixedUpdate();
 }
 
 void ClientApplication::Draw() noexcept {

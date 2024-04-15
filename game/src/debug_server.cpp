@@ -13,7 +13,7 @@ void DebugServer::Setup() noexcept {
 }
 
 void DebugServer::Update() noexcept {
-  //game_manager_.Update();
+  //game_manager_.FixedUpdate();
 
   auto it = inputs_packet_queue.begin();
 

@@ -3,6 +3,8 @@
 #include <imgui_impl_raylib.h>
 #include <rlImGui.h>
 
+#include "../../game/include/game_constants.h"
+
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
 #endif
@@ -71,7 +73,7 @@ void Engine::Setup() noexcept {
 #ifndef __EMSCRIPTEN__
   config_flags |= FLAG_VSYNC_HINT;
 #endif
-
+  //SetTargetFPS(50);
   SetConfigFlags(config_flags);
   InitWindow(window_size_.X, window_size_.Y, "Rollback Game");
 
