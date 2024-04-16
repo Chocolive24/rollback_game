@@ -8,6 +8,7 @@
  */
 enum class EventCode : nByte {
   kInput = 0,
+  kFrameConfirmation
 };
 
 /**
@@ -18,4 +19,5 @@ enum class EventKey : nByte {
   kPlayerInput = 0,
   kFrameNbr,
   kDelay,
+  kCheckSum
 };

@@ -1,8 +1,8 @@
 #pragma once
 
+#include "rollback_manager.h"
 #include "platforms_manager.h"
 #include "player_controller.h"
-#include "rollback_manager.h"
 #include "World.h"
 
 /**
@@ -49,9 +49,11 @@ public:
     return platform_manager_;
   }
 
+  RollbackManager rollback_manager_{};
+
 protected:
   PhysicsEngine::World world_{};
-  RollbackManager rollback_manager_{};
+  
   PlayerManager player_manager_;
   PlatformManager platform_manager_{};
 

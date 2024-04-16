@@ -1,11 +1,16 @@
 #pragma once
 
+#include "network_interface.h"
+#include "game_renderer.h"
+#include "rollback_manager.h"
+
 #include <vector>
 
-#include "game_renderer.h"
-#include "inputs.h"
-#include "network_interface.h"
-#include "rollback_manager.h"
+struct FrameToConfirm {
+  int check_sum = 0;
+  FrameNbr frame_nbr = 0;
+  float delay = 0.f;
+};
 
 /**
  * \brief SimulationClient is a class that simulates the game on the client side,
@@ -19,6 +24,9 @@ class SimulationClient final : public NetworkInterface {
   void Init(int input_profile_id, PlayerId player_id) noexcept;
   void RegisterOtherClient(SimulationClient* other_client) noexcept;
   void Update() noexcept;
+  void SendInputEvent();
+  void PollInputPackets();
+  void PollConfirmFramePackets();
   void FixedUpdate() noexcept;
   void Draw(const raylib::RenderTexture2D& render_target) noexcept;
   void Deinit() noexcept;
@@ -41,12 +49,14 @@ private:
   GameRenderer game_renderer_{&game_manager_};
   RollbackManager rollback_manager_{};
 
+  std::vector<inputs::PlayerInput> inputs_{};
+  std::vector<FrameNbr> frames_{};
+
   SimulationClient* other_client_ = nullptr;
-
-  //std::vector<inputs::SimulationInput> local_inputs_{};
-  //std::vector<inputs::SimulationInput> other_client_inputs_{};
   std::vector<inputs::SimulationInput> waiting_input_queue{};
+  std::vector<FrameToConfirm> waiting_frame_queue_{};
 
+  static constexpr PlayerId master_client_id = 0;
   static constexpr int kBaseInputSize = 1000;
   static constexpr int kStartTextPosY = 200;
   static constexpr int kTextOffsetY = 75;
@@ -55,7 +65,4 @@ private:
   PlayerId player_id_ = -1;
   int input_profile_id_ = -1;
   std::int16_t current_frame_ = -1;
-
-  // /!\ avec -1
-  // on envoie pas les inputs des frames confirmées.
 };

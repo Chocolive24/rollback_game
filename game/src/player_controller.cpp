@@ -146,6 +146,28 @@ void PlayerManager::Copy(const PlayerManager& player_manager) noexcept {
   }
 }
 
+// Function to compute checksum for a player
+uint32_t PlayerManager::ComputeChecksum() const noexcept {
+  // Compute checksum using bitwise addition of bytes
+  uint32_t checksum = 0;
+
+  for (const auto& player : players_) {
+    // Interpret the memory layout of the player as bytes
+    const uint8_t* dataPtr = reinterpret_cast<const uint8_t*>(&player);
+
+    // Calculate checksum for each player's data
+    uint32_t playerChecksum = 0;
+    for (size_t i = 0; i < sizeof(Player); ++i) {
+      playerChecksum += static_cast<uint32_t>(dataPtr[i]);
+    }
+
+    // Add player's checksum to the overall checksum
+    checksum += playerChecksum;
+  }
+
+  return checksum;
+}
+
 void PlayerManager::OnTriggerEnter(
     PhysicsEngine::ColliderRef colliderRefA,
     PhysicsEngine::ColliderRef colliderRefB) noexcept {
