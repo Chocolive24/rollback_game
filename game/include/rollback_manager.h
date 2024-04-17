@@ -30,11 +30,11 @@ public:
     confirmed_player_manager = *player_manager;
   }
 
-  void SetPlayerInput(inputs::FrameInput frame_input, PlayerId player_id);
-  //void SetRemotePlayerInput(inputs::FrameInput frame_input, PlayerId player_id);
-  void SetRemotePlayerInput(const std::vector<inputs::FrameInput>& frame_inputs, PlayerId player_id);
+  void SetLocalPlayerInput(inputs::FrameInput frame_input, PlayerId player_id);
+  void SetRemotePlayerInput(const std::vector<inputs::FrameInput>& frame_inputs, 
+                            PlayerId player_id);
 
-  void SimulateUntilCurrentFrame() noexcept;
+  void SimulateUntilCurrentFrame() const noexcept;
 
   void SetCurrentFrame(FrameNbr current_frame) noexcept {
     current_frame_ = current_frame;
@@ -45,6 +45,14 @@ public:
 
   [[nodiscard]] FrameNbr confirmed_frame() const noexcept {
     return confirmed_frame_;
+  }
+
+  [[nodiscard]] FrameNbr last_remote_input_frame() const noexcept {
+    return last_remote_input_frame_;
+  }
+
+  [[nodiscard]] FrameNbr frame_to_confirm() const noexcept {
+    return frame_to_confirm_;
   }
 
 private:
@@ -78,7 +86,7 @@ private:
   /**
    * \brief The frame number which the master client wants to confirm.
    */
-  FrameNbr frame_to_confirm_ = -1;
+  FrameNbr frame_to_confirm_ = 0;
 
   // The frame number of the last confirmed frame (frame verified with checksum).
   FrameNbr confirmed_frame_ = -1;

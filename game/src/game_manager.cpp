@@ -32,7 +32,7 @@ void GameManager::Copy(const GameManager& game_manager) noexcept {
 }
 
 void GameManager::SetPlayerInput(inputs::FrameInput input, PlayerId player_id) {
-  rollback_manager_.SetPlayerInput(input, player_id);
+  rollback_manager_.SetLocalPlayerInput(input, player_id);
 }
 
 void GameManager::SetRemotePlayerInput(inputs::FrameInput input, PlayerId player_id) {
