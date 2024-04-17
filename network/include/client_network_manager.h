@@ -76,7 +76,7 @@ class ClientNetworkManager final : public NetworkInterface,
    * event_content The data associated with the received event.
    */
   void ReceiveEvent(int player_nr, EventCode event_code,
-      const ExitGames::Common::Hashtable& event_content) noexcept override;
+                    const ExitGames::Common::Hashtable& event_content) noexcept override;
 
 
  private:

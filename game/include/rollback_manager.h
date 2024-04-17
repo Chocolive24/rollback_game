@@ -31,7 +31,8 @@ public:
   }
 
   void SetPlayerInput(inputs::FrameInput frame_input, PlayerId player_id);
-  void SetRemotePlayerInput(inputs::FrameInput frame_input, PlayerId player_id);
+  //void SetRemotePlayerInput(inputs::FrameInput frame_input, PlayerId player_id);
+  void SetRemotePlayerInput(const std::vector<inputs::FrameInput>& frame_inputs, PlayerId player_id);
 
   void SimulateUntilCurrentFrame() noexcept;
 
@@ -82,7 +83,7 @@ private:
   // The frame number of the last confirmed frame (frame verified with checksum).
   FrameNbr confirmed_frame_ = -1;
 
-  std::array<std::array<inputs::FrameInput, 20000>,
+  std::array<std::array<inputs::PlayerInput, 20000>,
              game_constants::kMaxPlayerCount> inputs_{};
 };
 

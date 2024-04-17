@@ -33,7 +33,7 @@ public:
    * specified using the 'reliable' parameter.
    *
    * \param reliable Indicates whether the event should be sent reliably.
-   * \param event_data     The data to be sent as part of the event.
+   * \param event_data The data to be sent as part of the event.
    * \param event_code An identifier specifying the type or purpose of the
    * event.
    */

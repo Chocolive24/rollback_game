@@ -36,7 +36,7 @@ void GameManager::SetPlayerInput(inputs::FrameInput input, PlayerId player_id) {
 }
 
 void GameManager::SetRemotePlayerInput(inputs::FrameInput input, PlayerId player_id) {
-  rollback_manager_.SetRemotePlayerInput(input, player_id);
+  //rollback_manager_.SetRemotePlayerInput(input, player_id);
 }
 
 void GameManager::OnTriggerEnter(PhysicsEngine::ColliderRef colliderRefA,

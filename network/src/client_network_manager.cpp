@@ -55,7 +55,7 @@ void ClientNetworkManager::RaiseEvent(bool reliable,
 }
 
 void ClientNetworkManager::ReceiveEvent(int player_nr, EventCode event_code,
-                                        const ExitGames::Common::Hashtable& event_content) noexcept {
+    const ExitGames::Common::Hashtable& event_content) noexcept {
 
    // logging the string representation of the eventContent can be really useful
   // for debugging, but use with care: for big events this might get expensive
@@ -115,8 +115,7 @@ void ClientNetworkManager::leaveRoomEventAction(int playerNr, bool isInactive) {
             << '\n';
 }
 
-void ClientNetworkManager::customEventAction(
-    int playerNr, nByte eventCode,
+void ClientNetworkManager::customEventAction(int playerNr, nByte eventCode,
     const ExitGames::Common::Object& eventContent) {
   if (eventContent.getType() != ExitGames::Common::TypeCode::HASHTABLE) {
     std::cerr << "Unsupported event content type \n";
@@ -124,8 +123,7 @@ void ClientNetworkManager::customEventAction(
   }
 
   const ExitGames::Common::Hashtable& event_data =
-      ExitGames::Common::ValueObject<ExitGames::Common::Hashtable>(eventContent)
-          .getDataCopy();
+      ExitGames::Common::ValueObject<ExitGames::Common::Hashtable>(eventContent).getDataCopy();
 
    ReceiveEvent(playerNr, static_cast<EventCode>(eventCode), event_data);
 }
