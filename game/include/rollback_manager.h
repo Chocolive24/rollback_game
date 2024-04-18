@@ -35,12 +35,7 @@ public:
                             PlayerId player_id);
 
   void SimulateUntilCurrentFrame() const noexcept;
-
-  void SetCurrentFrame(FrameNbr current_frame) noexcept {
-    current_frame_ = current_frame;
-  }
-
-  uint32_t SimulateUntilFrameToConfirm(FrameNbr frame_to_confirm) noexcept;
+  uint32_t ComputeFrameToConfirmChecksum() noexcept;
   void ConfirmFrame(FrameNbr confirm_frame) noexcept;
 
   [[nodiscard]] FrameNbr confirmed_frame() const noexcept {
@@ -68,14 +63,14 @@ private:
   PlayerManager confirmed_player_manager{};
 
   /**
-   * \brief player_manager_to_confirm_ is the last state calculated by the master
-   * client after receiving all inputs for a frame.
-   * This state is stored until the master client receives confirmation that all
-   * clients have the same simulation.
+   * \brief player_manager_to_confirm_ is the state of the player_manager at the
+   * frame to confirm state.
    */
   PlayerManager player_manager_to_confirm_{};
 
-  // The frame nbr of the local client.
+  /**
+   * \brief The frame nbr of the local client.
+   */
   FrameNbr current_frame_ = -1;
 
   /**
@@ -88,10 +83,11 @@ private:
    */
   FrameNbr frame_to_confirm_ = 0;
 
-  // The frame number of the last confirmed frame (frame verified with checksum).
+  /**
+   * \brief The frame number of the last confirmed frame (frame verified with checksum).
+   */
   FrameNbr confirmed_frame_ = -1;
 
-  std::array<std::array<inputs::PlayerInput, 20000>,
+  std::array<std::array<inputs::PlayerInput, 30000>,
              game_constants::kMaxPlayerCount> inputs_{};
 };
-

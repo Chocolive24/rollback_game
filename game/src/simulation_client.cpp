@@ -62,7 +62,7 @@ void SimulationClient::PollInputPackets() {
       game_manager_.rollback_manager_.SetRemotePlayerInput(it->frame_inputs,
                                          other_client_->player_id());
 
-      if (player_id_ == master_client_id)
+      if (player_id_ == kMasterClientId)
       {
         const auto frame_to_confirm_it = std::find_if(
             it->frame_inputs.begin(), it->frame_inputs.end(),
@@ -71,52 +71,30 @@ void SimulationClient::PollInputPackets() {
                      game_manager_.rollback_manager_.frame_to_confirm();
         });
 
-        // "Old packet.
-        if (frame_to_confirm_it == it->frame_inputs.end())
+        if (frame_to_confirm_it != it->frame_inputs.end())
         {
-          it = waiting_input_queue.erase(it);
-          return;
-        }
+          const auto frame_to_confirm = *frame_to_confirm_it;
 
-        const int check_sum = game_manager_.rollback_manager_.SimulateUntilFrameToConfirm(
-                frame_to_confirm_it->frame_nbr);
-
-        ExitGames::Common::Hashtable event_check_sum;
-        const auto check_delay = max_packet_delay;
-
-        event_check_sum.put(static_cast<nByte>(EventKey::kCheckSum), check_sum);
-        event_check_sum.put(static_cast<nByte>(EventKey::kFrameNbr),
-                            frame_to_confirm_it->frame_nbr);
-        event_check_sum.put(static_cast<nByte>(EventKey::kDelay), check_delay);
-        RaiseEvent(true, EventCode::kFrameConfirmation, event_check_sum);
-
-        game_manager_.rollback_manager_.ConfirmFrame(frame_to_confirm_it->frame_nbr);
-
-
-      /*  if (it->frame_inputs.back().frame_nbr == 
-            game_manager_.rollback_manager_.last_remote_input_frame())
-        {
-          const int check_sum =
-              game_manager_.rollback_manager_.SimulateUntilFrameToConfirm(
-                  it->frame_inputs.back().frame_nbr);
+            const int check_sum =
+              game_manager_.rollback_manager_.ComputeFrameToConfirmChecksum();
 
           ExitGames::Common::Hashtable event_check_sum;
-          const auto check_delay =
-              Math::Random::Range(min_packet_delay, max_packet_delay);
+          constexpr auto check_delay = 0.03f;
+
           event_check_sum.put(static_cast<nByte>(EventKey::kCheckSum),
                               check_sum);
           event_check_sum.put(static_cast<nByte>(EventKey::kFrameNbr),
-                              it->frame_inputs.back().frame_nbr);
+                              frame_to_confirm.frame_nbr);
           event_check_sum.put(static_cast<nByte>(EventKey::kDelay),
                               check_delay);
           RaiseEvent(true, EventCode::kFrameConfirmation, event_check_sum);
-            game_manager_.rollback_manager_.ConfirmFrame(it->frame_inputs.back().frame_nbr);
 
-          const auto confirm_frame_it = std::find_if(
-                frames_.begin(), frames_.end(), [it](FrameNbr frame_nbr) {
-                  return frame_nbr == it->frame_inputs.back().frame_nbr;
-          });*/
-        //}
+          game_manager_.rollback_manager_.ConfirmFrame(
+              frame_to_confirm.frame_nbr);
+
+          inputs_.erase(inputs_.begin());
+          frames_.erase(frames_.begin());
+        }
       }
 
       it = waiting_input_queue.erase(it);
@@ -135,33 +113,23 @@ void SimulationClient::PollConfirmFramePackets() {
 
     if (frame_it->delay <= 0.f) {
 
-      if (player_id_ != master_client_id) {
+      if (player_id_ != kMasterClientId) {
         if (frame_it->frame_nbr ==
             game_manager_.rollback_manager_.frame_to_confirm())
         {
           const int check_sum =
-              game_manager_.rollback_manager_.SimulateUntilFrameToConfirm(
-                  frame_it->frame_nbr);
+              game_manager_.rollback_manager_.ComputeFrameToConfirmChecksum(
+              );
 
           if (check_sum != frame_it->check_sum) {
             std::cerr << "Not same checksum\n";
-            std::exit(EXIT_FAILURE);
             return;
           }
 
           std::cout << "Checksum equal for frame: " << frame_it->frame_nbr << '\n';
           game_manager_.rollback_manager_.ConfirmFrame(frame_it->frame_nbr);
-          // ExitGames::Common::Hashtable event_check_sum;
-          // const auto check_delay =
-          //   Math::Random::Range(min_packet_delay, max_packet_delay);
-          // event_check_sum.put(static_cast<nByte>(EventKey::kCheckSum),
-          //                     check_sum);
-          // event_check_sum.put(static_cast<nByte>(EventKey::kFrameNbr),
-          //                     frame_it->frame_nbr);
-          // event_check_sum.put(static_cast<nByte>(EventKey::kDelay),
-          //                     check_delay);
-          // RaiseEvent(true, EventCode::kFrameConfirmation, event_check_sum);
-          // game_manager_.rollback_manager_.ConfirmFrame(frame_it->frame_nbr);
+          inputs_.erase(inputs_.begin());
+          frames_.erase(frames_.begin());
         }
       }
 
@@ -177,11 +145,6 @@ void SimulationClient::PollConfirmFramePackets() {
 
 void SimulationClient::FixedUpdate() noexcept {
   current_frame_++;
-
-  //if (player_id_ != master_client_id)
-  //{
-  //  SendInputEvent();
-  //}
 
   SendInputEvent();
   PollInputPackets();
@@ -213,8 +176,6 @@ void SimulationClient::RaiseEvent(bool reliable,
 
 void SimulationClient::ReceiveEvent(int player_nr, EventCode event_code,
                                     const ExitGames::Common::Hashtable& event_content) noexcept {
- // std::cout << "received: " << event_content.toString().UTF8Representation().cstr() << '\n';
-
   switch (event_code)
   {
     case EventCode::kInput: {
@@ -229,43 +190,11 @@ void SimulationClient::ReceiveEvent(int player_nr, EventCode event_code,
       const int inputs_count =
           *ExitGames::Common::ValueObject<inputs::PlayerInput*>(input_value).getSizes();
 
-      
-      
-
-      //std::vector<inputs::PlayerInput> inputs_to_send{};
-      //inputs_to_send.reserve(inputs_count);
-      //for (int i = 0; i < inputs_count; i++)
-      //{
-      //  inputs_to_send.push_back(inputs[i]);
-      //}
-
-     /* simulation_input.frame_input.input =
-          *ExitGames::Common::ValueObject<inputs::PlayerInput>(input_value)
-               .getDataAddress();*/
-
-       //if (simulation_input.frame_input.input != 0) {
-       //  std::cout << "client " << (int)player_id_ <<  "received input: "
-       //  << (int)simulation_input.frame_input.input << '\n';
-       //}
-
       const auto frame_value =
           event_content.getValue(static_cast<nByte>(EventKey::kFrameNbr));
 
        const FrameNbr* frames =
           ExitGames::Common::ValueObject<FrameNbr*>(frame_value).getDataCopy();
-     
-
-      //const int frame_count =
-      //     *ExitGames::Common::ValueObject<FrameNbr*>(frame_value).getSizes();
-
-      //std::vector<FrameNbr> frames_to_send{};
-      //frames_to_send.reserve(frame_count);
-      //for (int i = 0; i < frame_count; i++) {
-      //  frames_to_send.push_back(frames[i]);
-      //}
-
-      //simulation_input.frame_input.frame_nbr =
-      //    *ExitGames::Common::ValueObject<short>(frame_value).getDataAddress();
 
       for (int i = 0; i < inputs_count; i++) {
         inputs::FrameInput frame_input{inputs[i], frames[i]};

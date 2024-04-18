@@ -2,7 +2,6 @@
 
 #include "network_interface.h"
 #include "game_renderer.h"
-#include "rollback_manager.h"
 
 #include <vector>
 
@@ -24,9 +23,6 @@ class SimulationClient final : public NetworkInterface {
   void Init(int input_profile_id, PlayerId player_id) noexcept;
   void RegisterOtherClient(SimulationClient* other_client) noexcept;
   void Update() noexcept;
-  void SendInputEvent();
-  void PollInputPackets();
-  void PollConfirmFramePackets();
   void FixedUpdate() noexcept;
   void Draw(const raylib::RenderTexture2D& render_target) noexcept;
   void Deinit() noexcept;
@@ -45,9 +41,12 @@ class SimulationClient final : public NetworkInterface {
   static float packet_loss_percentage;
 
 private:
+  void SendInputEvent();
+  void PollInputPackets();
+  void PollConfirmFramePackets();
+
   GameManager game_manager_{};
   GameRenderer game_renderer_{&game_manager_};
-  RollbackManager rollback_manager_{};
 
   std::vector<inputs::PlayerInput> inputs_{};
   std::vector<FrameNbr> frames_{};
@@ -56,7 +55,7 @@ private:
   std::vector<inputs::SimulationInput> waiting_input_queue{};
   std::vector<FrameToConfirm> waiting_frame_queue_{};
 
-  static constexpr PlayerId master_client_id = 0;
+  static constexpr PlayerId kMasterClientId = 0;
   static constexpr int kBaseInputSize = 1000;
   static constexpr int kStartTextPosY = 200;
   static constexpr int kTextOffsetY = 75;
