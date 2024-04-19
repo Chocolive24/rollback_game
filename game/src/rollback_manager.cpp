@@ -5,9 +5,9 @@
 #include "game_manager.h"
 
 void RollbackManager::SetLocalPlayerInput(inputs::FrameInput frame_input,
-                                     PlayerId player_id) {
+                                          PlayerId player_id) {
   inputs_[player_id][frame_input.frame_nbr] = frame_input.input;
-  current_player_manager_->SetPlayerInput(frame_input.input, player_id);
+  current_game_manager_->SetPlayerInput(frame_input.input, player_id);
   current_frame_ = frame_input.frame_nbr;
 }
 
@@ -33,10 +33,9 @@ void RollbackManager::SetRemotePlayerInput(
                                  });
 
     auto idx = std::distance(frame_inputs.begin(), it);
-    for (int i = last_remote_input_frame_ + 1; i < latest_frame_input.frame_nbr;
-         i++) {
+    for (int i = last_remote_input_frame_ + 1; i < latest_frame_input.frame_nbr; i++) {
       inputs_[player_id][i] = frame_inputs[idx].input;
-      ++idx;
+      idx++;
     }
   }
 
@@ -47,54 +46,31 @@ void RollbackManager::SetRemotePlayerInput(
     inputs_[player_id][frame] = latest_frame_input.input;
   }
 
-  //const auto it = std::find_if(frame_inputs.begin(), frame_inputs.end(),
-  //                             [this](inputs::FrameInput frame_input) {
-  //                               return frame_input.frame_nbr ==
-  //                                      last_remote_input_frame_ + 1;
-  //                             });
-
-  // auto idx = std::distance(frame_inputs.begin(), it);
-
-  // bool must_rollback = false;
-  // if (last_remote_input_frame_ != -1)
-  // {
-  //   for (int i = last_remote_input_frame_; i <= latest_frame_input.frame_nbr;
-  //   i++)
-  //   {
-  //     if (inputs_[player_id][i] != frame_inputs[idx].input)
-  //     {
-  //       must_rollback = true;
-  //       std::cout << "must rollback\n";
-  //       break;
-  //     }
-  //   }
-  // }
-
   SimulateUntilCurrentFrame();
 
   last_remote_input_frame_ = latest_frame_input.frame_nbr;
 }
 
-void RollbackManager::SimulateUntilCurrentFrame() const noexcept {
-  current_player_manager_->Copy(confirmed_player_manager);
+void RollbackManager::SimulateUntilCurrentFrame() noexcept {
+  current_game_manager_->Copy(confirmed_game_manager_);
 
   for (int i = confirmed_frame_ + 1; i < current_frame_; i++) {
     for (PlayerId player_id = 0; player_id < game_constants::kMaxPlayerCount;
          player_id++) {
       const auto input = inputs_[player_id][i];
-      current_player_manager_->SetPlayerInput(input, player_id);
+      current_game_manager_->SetPlayerInput(input, player_id);
     }
 
-    current_player_manager_->FixedUpdate();
+    current_game_manager_->FixedUpdate();
   }
 
   // The Fixed update of the current frame is made in the main loop after polling
   // received events from network.
 }
 
-uint32_t RollbackManager::ComputeFrameToConfirmChecksum() noexcept {
+int RollbackManager::ComputeFrameToConfirmChecksum() noexcept {
 
-  player_manager_to_confirm_.Copy(confirmed_player_manager);
+  player_manager_to_confirm_.Copy(confirmed_game_manager_);
 
   for (int frame = confirmed_frame_ + 1; frame <= frame_to_confirm_; frame++) {
     for (PlayerId player_id = 0; player_id < game_constants::kMaxPlayerCount;
@@ -110,14 +86,21 @@ uint32_t RollbackManager::ComputeFrameToConfirmChecksum() noexcept {
 }
 
 void RollbackManager::ConfirmFrame(FrameNbr confirm_frame) noexcept {
-  for (int frame = confirmed_frame_ + 1; frame <= confirm_frame; frame++) {
+
+  if (last_remote_input_frame_ < confirm_frame)
+  {
+    std::cout << "Input not received for confirmed frame: " << confirm_frame
+              << '\n';
+  }
+
+  for (int frame = confirmed_frame_ + 1; frame <= frame_to_confirm_; frame++) {
     for (PlayerId player_id = 0; player_id < game_constants::kMaxPlayerCount;
          player_id++) {
       const auto input = inputs_[player_id][frame];
-      confirmed_player_manager.SetPlayerInput(input, player_id);
+      confirmed_game_manager_.SetPlayerInput(input, player_id);
     }
 
-    confirmed_player_manager.FixedUpdate();
+    confirmed_game_manager_.FixedUpdate();
   }
 
   confirmed_frame_++;

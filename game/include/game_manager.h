@@ -1,6 +1,5 @@
 #pragma once
 
-#include "rollback_manager.h"
 #include "platforms_manager.h"
 #include "player_controller.h"
 #include "World.h"
@@ -10,13 +9,12 @@
  * the state of the game. These variables are the one that are copied
  * when a rollback is needed.
  */
-struct Game {
-  //TODO: add varibales mdr.
+struct GameState {
+  std::array<Player, game_constants::kMaxPlayerCount> players{};
 };
 
 /**
  * \brief GameManager is a class that update the game logic.
- * A Renderer can inherit from it to be able to draw the game state on screen.
  */
 class GameManager : public PhysicsEngine::ContactListener {
 public:
@@ -38,7 +36,9 @@ public:
    */
   void Copy(const GameManager& game_manager) noexcept;
 
-  void SetPlayerInput(inputs::FrameInput input, PlayerId player_id);
+  [[nodiscard]] int ComputeChecksum() const noexcept;
+
+  void SetPlayerInput(inputs::PlayerInput input, PlayerId player_id);
   void SetRemotePlayerInput(inputs::FrameInput input, PlayerId player_id);
 
   [[nodiscard]] const PlayerManager& player_manager() const noexcept {
@@ -48,8 +48,6 @@ public:
   [[nodiscard]] const PlatformManager& platform_manager() const noexcept {
     return platform_manager_;
   }
-
-  RollbackManager rollback_manager_{};
 
 protected:
   PhysicsEngine::World world_{};

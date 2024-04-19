@@ -1,9 +1,12 @@
 #pragma once
 
 #include "network_interface.h"
+#include "rollback_manager.h"
 #include "game_renderer.h"
 
 #include <vector>
+
+#include "Timer.h"
 
 struct FrameToConfirm {
   int check_sum = 0;
@@ -47,6 +50,7 @@ private:
 
   GameManager game_manager_{};
   GameRenderer game_renderer_{&game_manager_};
+  RollbackManager rollback_manager_{};
 
   std::vector<inputs::PlayerInput> inputs_{};
   std::vector<FrameNbr> frames_{};
@@ -54,6 +58,9 @@ private:
   SimulationClient* other_client_ = nullptr;
   std::vector<inputs::SimulationInput> waiting_input_queue{};
   std::vector<FrameToConfirm> waiting_frame_queue_{};
+
+  Timer timer_{};
+  float fixed_timer_ = game_constants::kFixedDeltaTime;
 
   static constexpr PlayerId kMasterClientId = 0;
   static constexpr int kBaseInputSize = 1000;

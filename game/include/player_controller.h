@@ -11,11 +11,8 @@
  */
 struct Player {
   Math::Vec2F position{0.f, 0.f};
-  Math::Vec2F velocity{0.f, 0.f};
   inputs::PlayerInput input = 0;
   PlayerId id = -1;
-  // bool can_jump_ = true;
-  // bool is_jumping_ = false;
 };
 
 /**
@@ -38,7 +35,7 @@ public:
    */
   void Copy(const PlayerManager& player_manager) noexcept;
 
-  [[nodiscard]]uint32_t ComputeChecksum() const noexcept;
+  [[nodiscard]] int ComputeChecksum() const noexcept;
 
   void OnTriggerEnter(PhysicsEngine::ColliderRef colliderRefA,
                       PhysicsEngine::ColliderRef colliderRefB) noexcept;

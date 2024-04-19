@@ -3,9 +3,8 @@
 #include "types.h"
 #include "game_constants.h"
 #include "inputs.h"
-#include "player_controller.h"
+#include "game_manager.h"
 
-class GameManager;
 class NetworkInterface;
 
 /**
@@ -25,17 +24,17 @@ class NetworkInterface;
  */
 class RollbackManager {
 public:
-  void RegisterPlayerManager(PlayerManager* player_manager) noexcept {
-    current_player_manager_ = player_manager;
-    confirmed_player_manager = *player_manager;
+  void RegisterGameManager(GameManager* player_manager) noexcept {
+    current_game_manager_ = player_manager;
+    confirmed_game_manager_ = *player_manager;
   }
 
   void SetLocalPlayerInput(inputs::FrameInput frame_input, PlayerId player_id);
   void SetRemotePlayerInput(const std::vector<inputs::FrameInput>& frame_inputs, 
                             PlayerId player_id);
 
-  void SimulateUntilCurrentFrame() const noexcept;
-  uint32_t ComputeFrameToConfirmChecksum() noexcept;
+  void SimulateUntilCurrentFrame() noexcept;
+  [[nodiscard]] int ComputeFrameToConfirmChecksum() noexcept;
   void ConfirmFrame(FrameNbr confirm_frame) noexcept;
 
   [[nodiscard]] FrameNbr confirmed_frame() const noexcept {
@@ -54,19 +53,21 @@ private:
   /**
    * \brief current_play_manager_ is a pointer to client's player_manager
    */
-  PlayerManager* current_player_manager_ = nullptr;
+  GameManager* current_game_manager_ = nullptr;
 
   /**
-   * \brief confirmed_player_manager is a copy of the client's player_manager
+   * \brief confirmed_player_manager_ is a copy of the client's player_manager
    * at the last confirmed frame state.
    */
-  PlayerManager confirmed_player_manager{};
+  GameManager confirmed_game_manager_{};
 
   /**
    * \brief player_manager_to_confirm_ is the state of the player_manager at the
    * frame to confirm state.
    */
-  PlayerManager player_manager_to_confirm_{};
+  GameManager player_manager_to_confirm_{};
+
+  std::vector<GameManager> game_managers_{};
 
   /**
    * \brief The frame nbr of the local client.
