@@ -10,7 +10,7 @@
 
 struct FrameToConfirm {
   int check_sum = 0;
-  FrameNbr frame_nbr = 0;
+  std::vector<inputs::FrameInput> frame_inputs{};
   float delay = 0.f;
 };
 

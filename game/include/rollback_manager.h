@@ -27,6 +27,7 @@ public:
   void RegisterGameManager(GameManager* player_manager) noexcept {
     current_game_manager_ = player_manager;
     confirmed_game_manager_ = *player_manager;
+    //last_reliable_game_manager_ = *player_manager;
   }
 
   void SetLocalPlayerInput(inputs::FrameInput frame_input, PlayerId player_id);
@@ -67,8 +68,6 @@ private:
    */
   GameManager player_manager_to_confirm_{};
 
-  std::vector<GameManager> game_managers_{};
-
   /**
    * \brief The frame nbr of the local client.
    */
@@ -78,6 +77,9 @@ private:
    * \brief The frame number of the last time a remote input was received.
    */
   FrameNbr last_remote_input_frame_ = -1;
+
+
+  //FrameNbr new_remote_input_frame_ = -1;
 
   /**
    * \brief The frame number which the master client wants to confirm.

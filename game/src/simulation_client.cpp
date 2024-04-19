@@ -4,9 +4,9 @@
 
 #include <iostream>
 
-float SimulationClient::min_packet_delay = 0.0f;
-float SimulationClient::max_packet_delay = 0.1f;
-float SimulationClient::packet_loss_percentage = 0.02f;
+float SimulationClient::min_packet_delay = 0.01f;
+float SimulationClient::max_packet_delay = 0.3f;
+float SimulationClient::packet_loss_percentage = 0.1f;
 
 void SimulationClient::Init(int input_profile_id, PlayerId player_id) noexcept {
 
@@ -67,14 +67,14 @@ void SimulationClient::PollInputPackets() {
 
       if (player_id_ == kMasterClientId)
       {
-        const auto frame_to_confirm_it = std::find_if(
+        auto frame_to_confirm_it = std::find_if(
             it->frame_inputs.begin(), it->frame_inputs.end(),
             [this](inputs::FrameInput frame_input) {
               return frame_input.frame_nbr ==
                      rollback_manager_.frame_to_confirm();
         });
 
-        if (frame_to_confirm_it != it->frame_inputs.end())
+        while (frame_to_confirm_it != it->frame_inputs.end())
         {
           const auto frame_to_confirm = *frame_to_confirm_it;
 
@@ -82,28 +82,29 @@ void SimulationClient::PollInputPackets() {
               rollback_manager_.ComputeFrameToConfirmChecksum();
 
           ExitGames::Common::Hashtable event_check_sum;
-          constexpr auto check_delay = 0.03f;
 
           event_check_sum.put(static_cast<nByte>(EventKey::kCheckSum),
                               check_sum);
-          event_check_sum.put(static_cast<nByte>(EventKey::kFrameNbr),
-                              frame_to_confirm.frame_nbr);
+          const auto& frame_nbr_it = std::find(frames_.begin(), frames_.end(),
+                                              frame_to_confirm.frame_nbr);
+          const auto& dist = std::distance(frames_.begin(), frame_nbr_it);
+
+          event_check_sum.put<nByte, inputs::PlayerInput*>(
+              static_cast<nByte>(EventKey::kPlayerInput), inputs_.data(), dist + 1);
+          event_check_sum.put<nByte, FrameNbr*>(
+              static_cast<nByte>(EventKey::kFrameNbr), frames_.data(), dist + 1);
           event_check_sum.put(static_cast<nByte>(EventKey::kDelay),
-                              check_delay);
-          //event_check_sum.put<nByte, inputs::PlayerInput*>(
-          //    static_cast<nByte>(EventKey::kPlayerInput), inputs_.data(),
-          //    inputs_.size());
-          //event_check_sum.put<nByte, FrameNbr*>(
-          //    static_cast<nByte>(EventKey::kFrameNbr), frames_.data(),
-          //    frames_.size());
+                              max_packet_delay);
+
 
           RaiseEvent(true, EventCode::kFrameConfirmation, event_check_sum);
 
-          rollback_manager_.ConfirmFrame(
-              frame_to_confirm.frame_nbr);
+          rollback_manager_.ConfirmFrame(frame_to_confirm.frame_nbr);
 
-          inputs_.erase(inputs_.begin());
-          frames_.erase(frames_.begin());
+ /*         inputs_.erase(inputs_.begin());
+          frames_.erase(frames_.begin());*/
+
+          ++frame_to_confirm_it;
         }
       }
 
@@ -124,26 +125,37 @@ void SimulationClient::PollConfirmFramePackets() {
     if (frame_it->delay <= 0.f) {
 
       if (player_id_ != kMasterClientId) {
-        if (frame_it->frame_nbr ==
-            rollback_manager_.frame_to_confirm())
-        {
+
+          // If we did not receive the inputs before the frame to confirm, add them.
+          if (rollback_manager_.last_remote_input_frame() < frame_it->frame_inputs.back().frame_nbr)
+          {
+            auto it = std::find_if(
+              frame_it->frame_inputs.begin(), frame_it->frame_inputs.end(),
+              [this](inputs::FrameInput frame_input) {
+                return frame_input.frame_nbr ==
+                       rollback_manager_.last_remote_input_frame();
+              });
+
+            std::vector<inputs::FrameInput> inputs(it, frame_it->frame_inputs.end());
+
+            rollback_manager_.SetRemotePlayerInput(inputs, other_client_->player_id());
+          }
+
           const int check_sum =
               rollback_manager_.ComputeFrameToConfirmChecksum();
 
           if (check_sum != frame_it->check_sum) {
-            std::cerr << "Not same checksum for frame: " << frame_it->frame_nbr << '\n';
+            std::cerr << "Not same checksum for frame: " << rollback_manager_.frame_to_confirm()
+                      << '\n';
             return;
           }
 
-          std::cout << "Checksum equal for frame: " << frame_it->frame_nbr << '\n';
-          rollback_manager_.ConfirmFrame(frame_it->frame_nbr);
+          std::cout << "Checksum equal for frame: "
+                    << rollback_manager_.frame_to_confirm()
+                    << '\n';
+          rollback_manager_.ConfirmFrame(rollback_manager_.frame_to_confirm());
           inputs_.erase(inputs_.begin());
           frames_.erase(frames_.begin());
-        }
-        else
-        {
-          std::cout << "bug\n";
-        }
       }
 
       
@@ -234,10 +246,33 @@ void SimulationClient::ReceiveEvent(int player_nr, EventCode event_code,
       frame_to_confirm.check_sum =
           ExitGames::Common::ValueObject<int>(check_sum_value).getDataCopy();
 
+      //const auto frame_value =
+      //    event_content.getValue(static_cast<nByte>(EventKey::kFrameNbr));
+      //frame_to_confirm.frame_nbr =
+      //    ExitGames::Common::ValueObject<short>(frame_value).getDataCopy();
+
+      const auto input_value =
+          event_content.getValue(static_cast<nByte>(EventKey::kPlayerInput));
+
+      const inputs::PlayerInput* inputs =
+          ExitGames::Common::ValueObject<inputs::PlayerInput*>(input_value)
+              .getDataCopy();
+
+      const int inputs_count =
+          *ExitGames::Common::ValueObject<inputs::PlayerInput*>(input_value)
+               .getSizes();
+
       const auto frame_value =
           event_content.getValue(static_cast<nByte>(EventKey::kFrameNbr));
-      frame_to_confirm.frame_nbr =
-          ExitGames::Common::ValueObject<short>(frame_value).getDataCopy();
+
+      const FrameNbr* frames =
+          ExitGames::Common::ValueObject<FrameNbr*>(frame_value).getDataCopy();
+
+      for (int i = 0; i < inputs_count; i++) {
+        inputs::FrameInput frame_input{inputs[i], frames[i]};
+        frame_to_confirm.frame_inputs.push_back(frame_input);
+      }
+
 
       const auto delay_value =
           event_content.getValue(static_cast<nByte>(EventKey::kDelay));

@@ -86,14 +86,7 @@ int RollbackManager::ComputeFrameToConfirmChecksum() noexcept {
 }
 
 void RollbackManager::ConfirmFrame(FrameNbr confirm_frame) noexcept {
-
-  if (last_remote_input_frame_ < confirm_frame)
-  {
-    std::cout << "Input not received for confirmed frame: " << confirm_frame
-              << '\n';
-  }
-
-  for (int frame = confirmed_frame_ + 1; frame <= frame_to_confirm_; frame++) {
+ for (int frame = confirmed_frame_ + 1; frame <= frame_to_confirm_; frame++) {
     for (PlayerId player_id = 0; player_id < game_constants::kMaxPlayerCount;
          player_id++) {
       const auto input = inputs_[player_id][frame];

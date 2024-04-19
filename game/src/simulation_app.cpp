@@ -19,7 +19,7 @@ void SimulationApp::Setup() noexcept {
 void SimulationApp::Update() noexcept {
   for (auto& client : clients_)
   {
-    client.FixedUpdate();
+    client.Update();
   }
 }
 
