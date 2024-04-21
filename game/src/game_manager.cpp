@@ -1,7 +1,7 @@
 #include "game_manager.h"
 
 void GameManager::Init(int local_player_id) noexcept {
-  world_.Init(Math::Vec2F(0.f, 5.81f), 5);
+  world_.Init(Math::Vec2F(0.f, 0.f), 10);
   world_.SetContactListener(this);
 
   player_manager_.RegisterWorld(&world_);
@@ -23,7 +23,7 @@ void GameManager::Deinit() noexcept {
 }
 
 void GameManager::Copy(const GameManager& game_manager) noexcept {
-  //TODO: copy game state data.
+  world_ = game_manager.world_;
   player_manager_.Copy(game_manager.player_manager_);
 }
 

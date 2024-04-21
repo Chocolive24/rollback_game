@@ -49,6 +49,10 @@ public:
     return platform_manager_;
   }
 
+  [[nodiscard]] PlayerId local_player_id() const noexcept {
+    return local_player_id_;
+  }
+
 protected:
   PhysicsEngine::World world_{};
   

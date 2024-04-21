@@ -16,7 +16,7 @@ namespace game_constants {
   constexpr float kPlayerMainColLength = 0.65f;
   constexpr float kPlayerJumpColRadius = 0.1f;
   constexpr Math::Vec2F kPlayerJumpColOffset(0.f, kPlayerMainColLength * 0.5f);
-  constexpr float kPlayerSpeedMoveFactor = 5.f;
+  constexpr float kPlayerSpeedMoveFactor = 10.f;
   constexpr float kPlayerJumpMagnitude = 200.f;
   constexpr Math::Vec2F kPlayer1StartPos = Math::Vec2F(5.40f, 1.60f);
   constexpr Math::Vec2F kPlayer2StartPos = Math::Vec2F(7.40f, 1.60f);

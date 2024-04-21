@@ -10,9 +10,10 @@
  * when a rollback is needed.
  */
 struct Player {
-  Math::Vec2F position{0.f, 0.f};
   inputs::PlayerInput input = 0;
   PlayerId id = -1;
+  PhysicsEngine::ColliderRef main_col_ref{};
+  PhysicsEngine::ColliderRef jump_col_ref{};
 };
 
 /**
@@ -54,7 +55,4 @@ public:
 private:
  std::array<Player, game_constants::kMaxPlayerCount> players_{};
  PhysicsEngine::World* world_ = nullptr;
- PhysicsEngine::ColliderRef main_col_ref_{};
- PhysicsEngine::ColliderRef jump_col_ref_{};
- Math::Vec2F move_direction_{};
 };

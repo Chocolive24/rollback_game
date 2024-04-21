@@ -26,8 +26,13 @@ class RollbackManager {
 public:
   void RegisterGameManager(GameManager* player_manager) noexcept {
     current_game_manager_ = player_manager;
-    confirmed_game_manager_ = *player_manager;
-    //last_reliable_game_manager_ = *player_manager;
+    confirmed_game_manager_.Init(player_manager->local_player_id());
+    game_manager_to_confirm_.Init(player_manager->local_player_id());
+
+    for (std::size_t i = 0; i < 2; i++)
+    {
+      inputs_[i].fill(255);
+    }
   }
 
   void SetLocalPlayerInput(inputs::FrameInput frame_input, PlayerId player_id);
@@ -36,7 +41,7 @@ public:
 
   void SimulateUntilCurrentFrame() noexcept;
   [[nodiscard]] int ComputeFrameToConfirmChecksum() noexcept;
-  void ConfirmFrame(FrameNbr confirm_frame) noexcept;
+  void ConfirmFrame() noexcept;
 
   [[nodiscard]] FrameNbr confirmed_frame() const noexcept {
     return confirmed_frame_;
@@ -62,11 +67,7 @@ private:
    */
   GameManager confirmed_game_manager_{};
 
-  /**
-   * \brief player_manager_to_confirm_ is the state of the player_manager at the
-   * frame to confirm state.
-   */
-  GameManager player_manager_to_confirm_{};
+  GameManager game_manager_to_confirm_{};
 
   /**
    * \brief The frame nbr of the local client.
@@ -77,9 +78,6 @@ private:
    * \brief The frame number of the last time a remote input was received.
    */
   FrameNbr last_remote_input_frame_ = -1;
-
-
-  //FrameNbr new_remote_input_frame_ = -1;
 
   /**
    * \brief The frame number which the master client wants to confirm.

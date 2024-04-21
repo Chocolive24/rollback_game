@@ -45,6 +45,7 @@ class SimulationClient final : public NetworkInterface {
 
 private:
   void SendInputEvent();
+  void SendFrameConfirmationEvent(const std::vector<inputs::FrameInput>& frame_inputs);
   void PollInputPackets();
   void PollConfirmFramePackets();
 

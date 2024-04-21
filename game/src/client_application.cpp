@@ -3,7 +3,7 @@
 #include "engine.h"
 
 void ClientApplication::Setup() noexcept {
-  game_manager_.Init(0); // change 0.
+  game_manager_.Init(0);
   game_renderer_.Init();
 
   render_texture_ = raylib::LoadRenderTexture(raylib::GetScreenWidth(),

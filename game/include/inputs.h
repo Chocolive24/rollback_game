@@ -21,6 +21,8 @@ enum class PlayerInputType : std::uint8_t {
  */
 using PlayerInput = std::uint8_t;
 
+  constexpr PlayerInput kInvalidInput = 255;
+
 [[nodiscard]] PlayerInput GetPlayerInput(int input_profile_id) noexcept;
 
 /**

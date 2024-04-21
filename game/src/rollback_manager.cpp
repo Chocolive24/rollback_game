@@ -12,10 +12,21 @@ void RollbackManager::SetLocalPlayerInput(inputs::FrameInput frame_input,
 }
 
 void RollbackManager::SetRemotePlayerInput(
-    const std::vector<inputs::FrameInput>& frame_inputs, PlayerId player_id) {
+  const std::vector<inputs::FrameInput>& frame_inputs, PlayerId player_id) {
 
-  const auto& latest_frame_input = frame_inputs.back();
+  auto latest_frame_input = frame_inputs.back();
   const auto frame_diff = latest_frame_input.frame_nbr - last_remote_input_frame_;
+
+  //if (latest_frame_input.frame_nbr > current_frame_)
+  //{
+  //    std::cout << "Received inputs greater than the local current frame.\n";
+  //  const auto& it = std::find_if(frame_inputs.begin(), frame_inputs.end(), 
+  //      [this](FrameNbr frame_nbr) {
+  //        return frame_nbr == current_frame_
+  //      })
+  //  latest_frame_input =
+  //}
+
 
   // The inputs are already received.
   if (frame_diff < 1)
@@ -34,7 +45,8 @@ void RollbackManager::SetRemotePlayerInput(
 
     auto idx = std::distance(frame_inputs.begin(), it);
     for (int i = last_remote_input_frame_ + 1; i < latest_frame_input.frame_nbr; i++) {
-      inputs_[player_id][i] = frame_inputs[idx].input;
+      const auto input = frame_inputs[idx].input;
+      inputs_[player_id][i] = input;
       idx++;
     }
   }
@@ -69,23 +81,22 @@ void RollbackManager::SimulateUntilCurrentFrame() noexcept {
 }
 
 int RollbackManager::ComputeFrameToConfirmChecksum() noexcept {
-
-  player_manager_to_confirm_.Copy(confirmed_game_manager_);
+  game_manager_to_confirm_.Copy(confirmed_game_manager_);
 
   for (int frame = confirmed_frame_ + 1; frame <= frame_to_confirm_; frame++) {
     for (PlayerId player_id = 0; player_id < game_constants::kMaxPlayerCount;
          player_id++) {
       const auto input = inputs_[player_id][frame];
-      player_manager_to_confirm_.SetPlayerInput(input, player_id);
+      game_manager_to_confirm_.SetPlayerInput(input, player_id);
     }
 
-    player_manager_to_confirm_.FixedUpdate();
+    game_manager_to_confirm_.FixedUpdate();
   }
 
-  return player_manager_to_confirm_.ComputeChecksum();
+  return game_manager_to_confirm_.ComputeChecksum();
 }
 
-void RollbackManager::ConfirmFrame(FrameNbr confirm_frame) noexcept {
+void RollbackManager::ConfirmFrame() noexcept {
  for (int frame = confirmed_frame_ + 1; frame <= frame_to_confirm_; frame++) {
     for (PlayerId player_id = 0; player_id < game_constants::kMaxPlayerCount;
          player_id++) {
