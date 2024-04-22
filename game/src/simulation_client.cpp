@@ -59,10 +59,7 @@ void SimulationClient::Deinit() noexcept {
 }
 
 void SimulationClient::SendInputEvent() {
-   auto input = inputs::GetPlayerInput(input_profile_id_);
-
-   //input = 2;
-
+  const auto input = inputs::GetPlayerInput(input_profile_id_);
   const inputs::FrameInput frame_input{input, current_frame_};
   rollback_manager_.SetLocalPlayerInput(frame_input, player_id_);
 
@@ -141,7 +138,7 @@ void SimulationClient::PollInputPackets() {
     it->delay -= game_constants::kFixedDeltaTime;
 
     if (it->delay <= 0.f) {
-      rollback_manager_.OnRemoteInputReceived(it->frame_inputs,
+      rollback_manager_.SetRemotePlayerInput(it->frame_inputs,
                                          other_client_->player_id());
 
       if (player_id_ == kMasterClientId)
@@ -170,7 +167,7 @@ void SimulationClient::PollConfirmFramePackets() {
           // If we did not receive the inputs before the frame to confirm, add them.
           if (rollback_manager_.last_remote_input_frame() < frame_it->frame_inputs.back().frame_nbr)
           {
-            rollback_manager_.OnRemoteInputReceived(frame_it->frame_inputs, other_client_->player_id());
+            rollback_manager_.SetRemotePlayerInput(frame_it->frame_inputs, other_client_->player_id());
           }
 
           const int check_sum = rollback_manager_.ComputeFrameToConfirmChecksum();

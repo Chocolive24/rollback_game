@@ -11,7 +11,7 @@ void RollbackManager::SetLocalPlayerInput(inputs::FrameInput frame_input,
   current_frame_ = frame_input.frame_nbr;
 }
 
-void RollbackManager::OnRemoteInputReceived(
+void RollbackManager::SetRemotePlayerInput(
   const std::vector<inputs::FrameInput>& frame_inputs, PlayerId player_id) {
 
   auto last_remote_frame_input = frame_inputs.back();
@@ -86,7 +86,8 @@ void RollbackManager::OnRemoteInputReceived(
 void RollbackManager::SimulateUntilCurrentFrame() noexcept {
   current_game_manager_->Copy(confirmed_game_manager_);
 
-  for (FrameNbr frame = confirmed_frame_ + 1; frame < current_frame_; frame++) {
+  for (FrameNbr frame = static_cast<FrameNbr>(confirmed_frame_ + 1); 
+      frame < current_frame_; frame++) {
     /*for (PlayerId player_id = 0; player_id < game_constants::kMaxPlayerCount;
          player_id++) {
       const auto input = inputs_[player_id][i];

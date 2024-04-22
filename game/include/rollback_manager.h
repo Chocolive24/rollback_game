@@ -8,19 +8,19 @@
 class NetworkInterface;
 
 /**
- * \brief RollbackManager is a class responsible for the integrity of the game simulation.
+ * \brief RollbackManager is a class responsible of the integrity of the game simulation.
  *
  * It has 3 game states with different temporalities.
  *
  * The current game state, which is the local client's real-time game.
  *
- * The confirmed state, which is the last game state confirmed by the master client
- * when all clients have the same simulation.
+ * The confirmed state, which is the last game state confirmed by the client.
+ * (A checksum is done to confirm the integrity of the simulation.)
  *
- * Finally, the state to be confirmed, which is the game state calculated by the
+ * Finally, the state to be confirmed is the game state calculated by the
  * master client once all the inputs for a frame have been received.
- * This state becomes the confirmed state once a validation of the simulation's
- * integrity has been received by the other clients.
+ * All other clients receive the checksum of this game state and verify if it
+ * corresponds to their checksum for this given state.
  */
 class RollbackManager {
 public:
@@ -33,7 +33,7 @@ public:
   }
 
   void SetLocalPlayerInput(inputs::FrameInput frame_input, PlayerId player_id);
-  void OnRemoteInputReceived(const std::vector<inputs::FrameInput>& frame_inputs, 
+  void SetRemotePlayerInput(const std::vector<inputs::FrameInput>& frame_inputs, 
                             PlayerId player_id);
 
   void SimulateUntilCurrentFrame() noexcept;
@@ -57,7 +57,7 @@ public:
 
 private:
   /**
-   * \brief current_play_manager_ is a pointer to client's player_manager
+   * \brief current_game_manager_ is a pointer to local client's GameManager.
    */
   GameManager* current_game_manager_ = nullptr;
 
@@ -67,6 +67,10 @@ private:
    */
   GameManager confirmed_game_manager_{};
 
+  /**
+   * \brief game_manager_to_confirm_ is a GameManager at the state that needs
+   * to be confirmed.
+   */
   GameManager game_manager_to_confirm_{};
 
   /**
@@ -89,6 +93,12 @@ private:
    */
   FrameNbr confirmed_frame_ = -1;
 
-  std::array<std::array<inputs::PlayerInput, 30000>,
+  /**
+   * \brief kMaxFrameCount is the maximum of frame that the game can last.
+   * Here 30'000 corresponds to 10 minutes.
+   */
+  static constexpr FrameNbr kMaxFrameCount = 30'000;
+
+  std::array<std::array<inputs::PlayerInput, kMaxFrameCount>,
              game_constants::kMaxPlayerCount> inputs_{};
 };
