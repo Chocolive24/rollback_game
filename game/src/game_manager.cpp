@@ -1,13 +1,13 @@
 #include "game_manager.h"
 
 void GameManager::Init(int local_player_id) noexcept {
-  world_.Init(Math::Vec2F(0.f, 0.f), 10);
-  world_.SetContactListener(this);
+  game_.world.Init(Math::Vec2F(0.f, 0.f), 10);
+  game_.world.SetContactListener(this);
 
-  player_manager_.RegisterWorld(&world_);
+  player_manager_.RegisterWorld(&game_.world);
   player_manager_.Init();
 
-  platform_manager_.Init(&world_);
+  platform_manager_.Init(&game_.world);
 
   local_player_id_ = local_player_id;
 }
@@ -15,15 +15,15 @@ void GameManager::Init(int local_player_id) noexcept {
 void GameManager::FixedUpdate() noexcept {
   player_manager_.FixedUpdate();
 
-  world_.Update(game_constants::kFixedDeltaTime);
+  game_.world.Update(game_constants::kFixedDeltaTime);
 }
 
 void GameManager::Deinit() noexcept {
-  world_.Deinit();
+  game_.world.Deinit();
 }
 
 void GameManager::Copy(const GameManager& game_manager) noexcept {
-  world_ = game_manager.world_;
+  game_.world = game_manager.game_.world;
   player_manager_.Copy(game_manager.player_manager_);
 }
 

@@ -14,18 +14,23 @@ void RollbackManager::SetLocalPlayerInput(inputs::FrameInput frame_input,
 void RollbackManager::SetRemotePlayerInput(
   const std::vector<inputs::FrameInput>& frame_inputs, PlayerId player_id) {
 
-  auto latest_frame_input = frame_inputs.back();
-  const auto frame_diff = latest_frame_input.frame_nbr - last_remote_input_frame_;
+  auto last_remote_frame_input = frame_inputs.back();
+  const auto frame_diff =
+      last_remote_frame_input.frame_nbr - last_remote_input_frame_;
 
-  //if (latest_frame_input.frame_nbr > current_frame_)
-  //{
-  //    std::cout << "Received inputs greater than the local current frame.\n";
-  //  const auto& it = std::find_if(frame_inputs.begin(), frame_inputs.end(), 
-  //      [this](FrameNbr frame_nbr) {
-  //        return frame_nbr == current_frame_
-  //      })
-  //  latest_frame_input =
-  //}
+  // If the last remote input is greater than the local current frame, set the
+  // last_remote_frame_input value with the remote input value for my current_frame to
+  // avoid the confirmation of a future frame without the local inputs.
+  if (last_remote_frame_input.frame_nbr > current_frame_)
+  {
+    const auto& current_frame_it =
+        std::find_if(frame_inputs.begin(), frame_inputs.end(),
+                     [this](inputs::FrameInput frame_input) {
+                       return frame_input.frame_nbr == current_frame_;
+                     });
+
+    last_remote_frame_input = *current_frame_it;
+  }
 
 
   // The inputs are already received.
@@ -36,31 +41,29 @@ void RollbackManager::SetRemotePlayerInput(
 
   // If we didn't receive some inputs between the last time and the new inputs,
   // iterates over the missing inputs to add them in the inputs array.
-  if (frame_diff > 1) {
-    const auto it = std::find_if(frame_inputs.begin(), frame_inputs.end(),
-                                 [this](inputs::FrameInput frame_input) {
-                                   return frame_input.frame_nbr ==
-                                          last_remote_input_frame_ + 1;
-                                 });
+  const auto it = std::find_if(frame_inputs.begin(), frame_inputs.end(),
+                               [this](inputs::FrameInput frame_input) {
+                                 return frame_input.frame_nbr ==
+                                        last_remote_input_frame_ + 1;
+                               });
 
-    auto idx = std::distance(frame_inputs.begin(), it);
-    for (int i = last_remote_input_frame_ + 1; i < latest_frame_input.frame_nbr; i++) {
-      const auto input = frame_inputs[idx].input;
-      inputs_[player_id][i] = input;
-      idx++;
-    }
+  auto idx = std::distance(frame_inputs.begin(), it);
+  for (int i = last_remote_input_frame_ + 1; i <= last_remote_frame_input.frame_nbr; i++) {
+    const auto input = frame_inputs[idx].input;
+    inputs_[player_id][i] = input;
+    idx++;
   }
 
   // Predicts the remote client would not change its inputs until the current
   // frame to have a realtime simulation.
-  for (FrameNbr frame = latest_frame_input.frame_nbr; frame <= current_frame_;
-       frame++) {
-    inputs_[player_id][frame] = latest_frame_input.input;
-  }
+  //for (FrameNbr frame = latest_frame_input.frame_nbr; frame <= current_frame_;
+  //     frame++) {
+  //  inputs_[player_id][frame] = latest_frame_input.input;
+  //}
 
   SimulateUntilCurrentFrame();
 
-  last_remote_input_frame_ = latest_frame_input.frame_nbr;
+  last_remote_input_frame_ = last_remote_frame_input.frame_nbr;
 }
 
 void RollbackManager::SimulateUntilCurrentFrame() noexcept {

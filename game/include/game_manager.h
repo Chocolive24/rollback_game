@@ -9,8 +9,9 @@
  * the state of the game. These variables are the one that are copied
  * when a rollback is needed.
  */
-struct GameState {
-  std::array<Player, game_constants::kMaxPlayerCount> players{};
+struct Game {
+  PhysicsEngine::World world;
+  std::array<inputs::PlayerInput, game_constants::kMaxPlayerCount> player_inputs{};
 };
 
 /**
@@ -54,7 +55,8 @@ public:
   }
 
 protected:
-  PhysicsEngine::World world_{};
+  Game game_{};
+  //PhysicsEngine::World world_{};
   
   PlayerManager player_manager_;
   PlatformManager platform_manager_{};

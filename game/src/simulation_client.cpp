@@ -29,7 +29,7 @@ void SimulationClient::RegisterOtherClient(SimulationClient* other_client) noexc
 
 void SimulationClient::Update() noexcept {
   timer_.Tick();
-  fixed_timer_ += timer_.DeltaTime();
+  fixed_timer_ += raylib::GetFrameTime();
   while (fixed_timer_ >= game_constants::kFixedDeltaTime) {
     FixedUpdate();
     fixed_timer_ -= game_constants::kFixedDeltaTime;
@@ -75,15 +75,33 @@ void SimulationClient::SendInputEvent() {
   RaiseEvent(false, EventCode::kInput, event_data);
 }
 
-void SimulationClient::SendFrameConfirmationEvent(const std::vector<inputs::FrameInput>& frame_inputs) {
+void SimulationClient::SendFrameConfirmationEvent(
+    const std::vector<inputs::FrameInput>& remote_frame_inputs) {
   auto frame_to_confirm_it = std::find_if(
-    frame_inputs.begin(), frame_inputs.end(),
+    remote_frame_inputs.begin(), remote_frame_inputs.end(),
     [this](inputs::FrameInput frame_input) {
       return frame_input.frame_nbr ==
         rollback_manager_.frame_to_confirm();
     });
 
-  while (frame_to_confirm_it != frame_inputs.end())
+  auto end_it = remote_frame_inputs.end();
+
+  // If the last remote inputs is greater than the current frame. The end iterator
+  // must be equal to the frame input of the local current frame.
+  if (remote_frame_inputs.back().frame_nbr > current_frame_)
+  {
+    // Get the iterator of the inputs at the current frame to avoid to confirm
+    // a frame greater than the local current frame.
+    const auto current_frame_it = std::find_if(
+        remote_frame_inputs.begin(), remote_frame_inputs.end(),
+        [this](inputs::FrameInput frame_input) {
+          return frame_input.frame_nbr == current_frame_;
+        });
+
+    end_it = current_frame_it;
+  }
+
+  while (frame_to_confirm_it != end_it)
   {
     const auto frame_to_confirm = *frame_to_confirm_it;
 
@@ -104,7 +122,6 @@ void SimulationClient::SendFrameConfirmationEvent(const std::vector<inputs::Fram
       static_cast<nByte>(EventKey::kFrameNbr), frames_.data(), dist + 1);
     event_check_sum.put(static_cast<nByte>(EventKey::kDelay),
                         0.08f);
-
 
     RaiseEvent(true, EventCode::kFrameConfirmation, event_check_sum);
 
@@ -148,16 +165,16 @@ void SimulationClient::PollConfirmFramePackets() {
           // If we did not receive the inputs before the frame to confirm, add them.
           if (rollback_manager_.last_remote_input_frame() < frame_it->frame_inputs.back().frame_nbr)
           {
-            const auto it = std::find_if(
+            /*const auto it = std::find_if(
               frame_it->frame_inputs.begin(), frame_it->frame_inputs.end(),
               [this](inputs::FrameInput frame_input) {
                 return frame_input.frame_nbr ==
                        rollback_manager_.last_remote_input_frame();
               });
 
-            std::vector<inputs::FrameInput> inputs(it, frame_it->frame_inputs.end());
+            std::vector<inputs::FrameInput> inputs(it, frame_it->frame_inputs.end());*/
 
-            rollback_manager_.SetRemotePlayerInput(inputs, other_client_->player_id());
+            rollback_manager_.SetRemotePlayerInput(frame_it->frame_inputs, other_client_->player_id());
           }
 
           const int check_sum = rollback_manager_.ComputeFrameToConfirmChecksum();
@@ -225,12 +242,6 @@ void SimulationClient::ReceiveEvent(int player_nr, EventCode event_code,
           ExitGames::Common::ValueObject<FrameNbr*>(frame_value).getDataCopy();
 
       for (int i = 0; i < inputs_count; i++) {
-
-        if (inputs[i] == 255)
-        {
-            std::cout << "WTF\n";
-        }
-
         inputs::FrameInput frame_input{inputs[i], frames[i]};
         simulation_input.frame_inputs.push_back(frame_input);
       }
@@ -251,7 +262,7 @@ void SimulationClient::ReceiveEvent(int player_nr, EventCode event_code,
 
       if (player_id_ == kMasterClientId)
       {
-        const FrameToConfirm f{0, {}, max_packet_delay};
+        const FrameToConfirm f{0, {}, 0.08f};
         waiting_frame_queue_.push_back(f);
         break;
       }
