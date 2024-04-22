@@ -17,6 +17,7 @@ public:
 private:
   void UpdateCamera(const raylib::RenderTexture2D& render_target);
   void DrawPlatforms() const noexcept;
+  void DrawProjectiles() const noexcept;
   void DrawPlayer() const noexcept;
 
   GameManager* game_manager_ = nullptr;

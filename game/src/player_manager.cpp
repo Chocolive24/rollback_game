@@ -1,7 +1,7 @@
-#include "player_controller.h"
-#include "game_constants.h"
-#include "game_renderer.h"
-#include "inputs.h"
+#include "player_manager.h"
+#include "raylib_wrapper.h"
+
+#include <cassert>
 
 void PlayerManager::Init() noexcept {
   for (std::size_t i = 0; i < game_constants::kMaxPlayerCount; i++) {
@@ -29,7 +29,7 @@ void PlayerManager::Init() noexcept {
         Math::Vec2F(game_constants::kPlayerMainColLength * 0.5f,
                     game_constants::kPlayerMainColLength * 0.5f);
     collider.SetShape(Math::RectangleF(-half_size, half_size));
-    collider.SetRestitution(0.f);
+    collider.SetRestitution(0.3f);
 
     const auto jump_col_ref = world_->CreateCollider(body_ref);
     auto& can_jump_col = world_->GetCollider(jump_col_ref);
@@ -46,93 +46,61 @@ void PlayerManager::Init() noexcept {
 
 void PlayerManager::FixedUpdate() noexcept {
   for (const auto& player : players_) {
-    auto move_direction = Math::Vec2F::Zero();
-
-    if (player.input &
-        static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kUp)) {
-      move_direction += Math::Vec2F::Down();
-    }
-    if (player.input &
-        static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kLeft)) {
-      move_direction += Math::Vec2F::Left();
-    }
-    if (player.input &
-        static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kDown)) {
-      move_direction += Math::Vec2F::Up();
-    }
-    if (player.input &
-        static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kRight)) {
-      move_direction += Math::Vec2F::Right();
-    }
-
-    if (move_direction.Length() >= Math::Epsilon) {
-      const auto& body_ref = world_->GetCollider(player.main_col_ref).GetBodyRef();
-      auto& body = world_->GetBody(body_ref);
-      const auto dir = move_direction.Length() >= Math::Epsilon
-                           ? move_direction.Normalized()
-                           : move_direction;
-      const auto val = dir * game_constants::kPlayerSpeedMoveFactor;
-      body.ApplyForce(val);
-    }
-
-    //player.position += move_direction * 5.f * game_constants::kFixedDeltaTime;
+    Move(player);
+    Shoot(player);
   }
 }
 
-void PlayerManager::PollInputs() noexcept {
-  //const auto inputs = inputs::GetPlayerInput(1);
-  //move_direction = Math::Vec2F::Zero();
+void PlayerManager::Move(const Player& player) const noexcept {
+  auto move_direction = Math::Vec2F::Zero();
 
-  //if (inputs & static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kUp)) {
-  //  move_direction += Math::Vec2F::Down();
-  //}
-  //if (inputs &
-  //    static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kLeft)) {
-  //  move_direction += Math::Vec2F::Left();
-  //}
-  //if (inputs &
-  //    static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kDown)) {
-  //  move_direction += Math::Vec2F::Up();
-  //}
-  //if (inputs &
-  //    static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kRight)) {
-  //  move_direction += Math::Vec2F::Right();
-  //}
+  if (player.input &
+      static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kUp)) {
+    move_direction += Math::Vec2F::Down();
+  }
+  if (player.input &
+      static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kLeft)) {
+    move_direction += Math::Vec2F::Left();
+  }
+  if (player.input &
+      static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kDown)) {
+    move_direction += Math::Vec2F::Up();
+  }
+  if (player.input &
+      static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kRight)) {
+    move_direction += Math::Vec2F::Right();
+  }
 
-  // if (inputs &
-  // static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kJump)) {
-  //   if (is_jumping_) {
-  //     return;
-  //   }
-
-  //  is_jumping_ = true;
-  //  can_jump_ = false;
-  //  const auto& body_ref = world_->GetCollider(main_col_ref_).GetBodyRef();
-  //  auto& body = world_->GetBody(body_ref);
-
-  //  body.ApplyForce(Math::Vec2F::Down() *
-  //  game_constants::kPlayerJumpMagnitude);
-  //}
-
-  // if (inputs &
-  // static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kShoot)) {
-  //  Shoot();
-  //}
+  if (move_direction.Length() >= Math::Epsilon) {
+    const auto& body_ref =
+        world_->GetCollider(player.main_col_ref).GetBodyRef();
+    auto& body = world_->GetBody(body_ref);
+    const auto dir = move_direction.Length() >= Math::Epsilon
+                         ? move_direction.Normalized()
+                         : move_direction;
+    const auto val = dir * game_constants::kPlayerSpeedMoveFactor;
+    body.ApplyForce(val);
+  }
 }
 
-void PlayerManager::Shoot() noexcept {
-  // const auto& body_ref = world_->GetCollider(main_col_ref_).GetBodyRef();
-  // const auto& body = world_->GetBody(body_ref);
 
-  // const auto& proj_body_ref = world_->CreateBody();
-  // auto& proj_body = world_->GetBody(proj_body_ref);
-  // proj_body.SetPosition(body.Position() + Math::Vec2F(0.5f, 0.f));
+void PlayerManager::Shoot(const Player& player) const noexcept {
+  assert(projectile_manager_ != nullptr,
+         "No projectiles manager pointer given to player manager.\n");
 
-  // const auto& col_ref = world_->CreateCollider(proj_body_ref);
-  // auto& collider = world_->GetCollider(col_ref);
+  const auto& body =
+      world_->GetBody(world_->GetCollider(player.main_col_ref).GetBodyRef());
 
-  // collider.SetShape(Math::CircleF(Math::Vec2F::Zero(), 0.1f));
-  // collider.SetRestitution(0.f);
+  //TODO: pas de creation de proj si le click s'est fait dans le joueur.
+
+   if (player.input &
+      static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kShoot)) {
+     const auto [x, y] = raylib::GetMousePosition();
+     const auto proj_v = Math::Vec2F(x, y) - body.Position();
+     const auto proj_dir = proj_v.Normalized();
+
+     projectile_manager_->CreateProjectile(body.Position() + proj_dir * 0.5f, proj_dir);
+   }
 }
 
 void PlayerManager::Copy(const PlayerManager& player_manager) noexcept {
@@ -210,7 +178,6 @@ Math::Vec2F PlayerManager::GetPlayerPosition(std::size_t idx) const noexcept {
       world_->GetCollider(players_[idx].main_col_ref).GetBodyRef();
    const auto& body = world_->GetBody(body_ref);
    return body.Position();
-  //return players_[idx].position;
 }
 
 Math::Vec2F PlayerManager::GetJumpColliderPosition(
@@ -219,12 +186,10 @@ Math::Vec2F PlayerManager::GetJumpColliderPosition(
        world_->GetCollider(players_[idx].main_col_ref).GetBodyRef();
    const auto& body = world_->GetBody(body_ref);
    return body.Position() + game_constants::kPlayerJumpColOffset;
-  //return Math::Vec2F(-1000, -1000);
 }
 
 Math::CircleF PlayerManager::GetJumpColliderShape(
     std::size_t idx) const noexcept {
    const auto& col = world_->GetCollider(players_[idx].jump_col_ref);
    return std::get<Math::CircleF>(col.Shape());
-  //return Math::CircleF(Math::Vec2F(0.f, 0.f), 0.f);
 }

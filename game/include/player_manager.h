@@ -2,6 +2,7 @@
 
 #include "game_constants.h"
 #include "inputs.h"
+#include "projectile_manager.h"
 #include "World.h"
 
 /**
@@ -22,12 +23,12 @@ struct Player {
 class PlayerManager {
 public:
   void RegisterWorld(PhysicsEngine::World* world) noexcept { world_ = world; }
+  void RegisterProjectileManager(ProjectileManager* proj_manager) noexcept {
+    projectile_manager_ = proj_manager;
+  }
 
   void Init() noexcept;
   void FixedUpdate() noexcept;
-  void PollInputs() noexcept;
-
-  void Shoot() noexcept;
 
   /**
    * \brief Copy is a method which copies the states of the players. It used when
@@ -53,6 +54,9 @@ public:
   //bool is_jumping_ = false;
 
 private:
+ void Move(const Player& player) const noexcept;
+ void Shoot(const Player& player) const noexcept;
  std::array<Player, game_constants::kMaxPlayerCount> players_{};
  PhysicsEngine::World* world_ = nullptr;
+ ProjectileManager* projectile_manager_ = nullptr;
 };

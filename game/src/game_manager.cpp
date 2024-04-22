@@ -3,12 +3,14 @@
 #include "rollback_manager.h"
 
 void GameManager::Init(int local_player_id) noexcept {
-  game_.world.Init(Math::Vec2F(0.f, 0.f), 10);
+  game_.world.Init(Math::Vec2F(0.f, 0.f), 110);
   game_.world.SetContactListener(this);
 
   player_manager_.RegisterWorld(&game_.world);
+  player_manager_.RegisterProjectileManager(&projectile_manager_);
   player_manager_.Init();
 
+  projectile_manager_.Init(&game_.world);
   platform_manager_.Init(&game_.world);
 
   local_player_id_ = local_player_id;
@@ -32,6 +34,7 @@ void GameManager::Deinit() noexcept {
 void GameManager::Copy(const GameManager& game_manager) noexcept {
   game_.world = game_manager.game_.world;
   player_manager_.Copy(game_manager.player_manager_);
+  projectile_manager_.Copy(game_manager.projectile_manager_);
 }
 
 int GameManager::ComputeChecksum() const noexcept {

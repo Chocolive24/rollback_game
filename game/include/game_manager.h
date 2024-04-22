@@ -1,7 +1,7 @@
 #pragma once
 
 #include "platforms_manager.h"
-#include "player_controller.h"
+#include "player_manager.h"
 #include "World.h"
 
 class RollbackManager;
@@ -56,6 +56,11 @@ public:
     return platform_manager_;
   }
 
+  
+  [[nodiscard]] const ProjectileManager& projectile_manager() const noexcept {
+    return projectile_manager_;
+  }
+
   [[nodiscard]] PlayerId local_player_id() const noexcept {
     return local_player_id_;
   }
@@ -66,7 +71,8 @@ protected:
 
   RollbackManager* rollback_manager_ = nullptr;
 
-  PlayerManager player_manager_;
+  PlayerManager player_manager_{};
+  ProjectileManager projectile_manager_{};
   PlatformManager platform_manager_{};
 
   int local_player_id_ = -1;

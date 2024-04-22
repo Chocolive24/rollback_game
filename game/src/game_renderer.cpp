@@ -28,6 +28,7 @@ void GameRenderer::Draw(const RenderTexture2D& render_target) noexcept {
       ClearBackground(BLACK);
 
       DrawPlatforms();
+      DrawProjectiles();
       DrawPlayer();
     }
     EndMode2D();
@@ -101,19 +102,36 @@ void GameRenderer::DrawPlatforms() const noexcept {
   }
 }
 
+void GameRenderer::DrawProjectiles() const noexcept {
+  for (std::size_t i = 0; 
+      i < game_manager_->projectile_manager().projectile_count(); i++) {
+    const auto proj_pos =
+        game_manager_->projectile_manager().GetProjectilePosition(i);
+    const auto proj_pix_pos = Metrics::MetersToPixels(proj_pos);
+    const auto proj_pix_pos_int = static_cast<Math::Vec2I>(proj_pix_pos);
+
+    const auto radius =
+        game_manager_->projectile_manager().GetProjectileCircle(i).Radius();
+    const auto pix_radius = Metrics::PixelsToMeters(radius);
+
+
+    DrawCircle(proj_pix_pos_int.X, proj_pix_pos_int.Y, pix_radius, WHITE);
+  }
+}
+
 void GameRenderer::DrawPlayer() const noexcept {
   for (std::size_t i = 0; i < game_constants::kMaxPlayerCount; i++) {
     const auto player_pos =
       game_manager_->player_manager().GetPlayerPosition(i);
     const auto player_pix_pos = Metrics::MetersToPixels(player_pos);
-    constexpr auto main_col_pix_length =
-        Metrics::MetersToPixels(game_constants::kPlayerMainColLength);
     
     texture_manager::penguin.Draw(Vector2{player_pix_pos.X, player_pix_pos.Y});
     
     // Draw colliders if in debug mode.
     // ================================
 #ifdef DEBUG
+    constexpr auto main_col_pix_length =
+        Metrics::MetersToPixels(game_constants::kPlayerMainColLength);
     DrawRectangleLines(player_pix_pos.X - main_col_pix_length * 0.5f,
                        player_pix_pos.Y - main_col_pix_length * 0.5f,
                        main_col_pix_length, main_col_pix_length, RED);

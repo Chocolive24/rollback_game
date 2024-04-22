@@ -21,15 +21,15 @@ PlayerInput GetPlayerInput(int input_profile_id) noexcept {
       if (IsKeyDown(KEY_D)) {
         player_1_inputs |= static_cast<std::uint8_t>(PlayerInputType::kRight);
       }
-      //if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-      //  // Check if the mouse is not being used for window move.
-      //  if (!IsWindowResized() && !IsWindowMinimized()) {
-      //    player_1_inputs |= static_cast<std::uint8_t>(PlayerInputType::kShoot);
-      //  }
-      //}
-      //if (IsKeyPressed(KEY_SPACE)) {
-      //  player_1_inputs |= static_cast<std::uint8_t>(PlayerInputType::kJump);
-      //}
+      if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        // Check if the mouse is not being used for window move.
+        if (!IsWindowResized() && !IsWindowMinimized()) {
+          player_1_inputs |= static_cast<std::uint8_t>(PlayerInputType::kShoot);
+        }
+      }
+      if (IsKeyPressed(KEY_SPACE)) {
+        player_1_inputs |= static_cast<std::uint8_t>(PlayerInputType::kJump);
+      }
       return player_1_inputs;
     }
 
@@ -48,12 +48,12 @@ PlayerInput GetPlayerInput(int input_profile_id) noexcept {
       if (IsKeyDown(KEY_RIGHT)) {
         player_2_inputs |= static_cast<std::uint8_t>(PlayerInputType::kRight);
       }
-      //if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
-      //  player_2_inputs |= static_cast<std::uint8_t>(PlayerInputType::kShoot);
-      //}
-      //if (IsKeyPressed(KEY_SPACE)) {
-      //  player_2_inputs |= static_cast<std::uint8_t>(PlayerInputType::kJump);
-      //}
+      if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+        player_2_inputs |= static_cast<std::uint8_t>(PlayerInputType::kShoot);
+      }
+      if (IsKeyPressed(KEY_SPACE)) {
+        player_2_inputs |= static_cast<std::uint8_t>(PlayerInputType::kJump);
+      }
       return player_2_inputs;
     }
     default:
