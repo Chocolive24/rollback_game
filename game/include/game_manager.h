@@ -4,6 +4,8 @@
 #include "player_controller.h"
 #include "World.h"
 
+class RollbackManager;
+
 /**
  * \brief Game is a struct containing all the variables that describe
  * the state of the game. These variables are the one that are copied
@@ -27,8 +29,12 @@ public:
   ~GameManager() noexcept override = default;
 
   virtual void Init(int local_player_id) noexcept;
-  void FixedUpdate() noexcept;
+  void FixedUpdate(FrameNbr frame_nbr) noexcept;
   virtual void Deinit() noexcept;
+
+  void RegisterRollbackManager(RollbackManager* rollback_manager) noexcept {
+    rollback_manager_ = rollback_manager;
+  }
 
   /**
    * \brief Copy is a method which copies the states of the game. It used
@@ -57,9 +63,14 @@ public:
 protected:
   Game game_{};
   //PhysicsEngine::World world_{};
-  
+
+  RollbackManager* rollback_manager_ = nullptr;
+
   PlayerManager player_manager_;
   PlatformManager platform_manager_{};
+
+  int local_player_id_ = -1;
+  FrameNbr current_frame_ = -1;
 
   void OnTriggerEnter(
       PhysicsEngine::ColliderRef colliderRefA,
@@ -74,7 +85,4 @@ protected:
   void OnCollisionExit(
       PhysicsEngine::ColliderRef colliderRefA,
       PhysicsEngine::ColliderRef colliderRefB) noexcept override {}
-
-private:
-  int local_player_id_ = -1;
 };

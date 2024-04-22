@@ -7,11 +7,11 @@
 void RollbackManager::SetLocalPlayerInput(inputs::FrameInput frame_input,
                                           PlayerId player_id) {
   inputs_[player_id][frame_input.frame_nbr] = frame_input.input;
-  current_game_manager_->SetPlayerInput(frame_input.input, player_id);
+  //current_game_manager_->SetPlayerInput(frame_input.input, player_id);
   current_frame_ = frame_input.frame_nbr;
 }
 
-void RollbackManager::SetRemotePlayerInput(
+void RollbackManager::OnRemoteInputReceived(
   const std::vector<inputs::FrameInput>& frame_inputs, PlayerId player_id) {
 
   auto last_remote_frame_input = frame_inputs.back();
@@ -32,7 +32,6 @@ void RollbackManager::SetRemotePlayerInput(
     last_remote_frame_input = *current_frame_it;
   }
 
-
   // The inputs are already received.
   if (frame_diff < 1)
   {
@@ -47,21 +46,39 @@ void RollbackManager::SetRemotePlayerInput(
                                         last_remote_input_frame_ + 1;
                                });
 
+  //bool must_rollback = last_remote_input_frame_ == -1;
+
   auto idx = std::distance(frame_inputs.begin(), it);
   for (int i = last_remote_input_frame_ + 1; i <= last_remote_frame_input.frame_nbr; i++) {
     const auto input = frame_inputs[idx].input;
+
+    //if (last_remote_input_frame_ > -1) {
+    //  // If the new remote input is different from the last remote input received
+    //  // we need to rollback to correct the simulation.
+    //  if (input != inputs_[player_id][last_remote_input_frame_] && !must_rollback) {
+    //    must_rollback = true;
+    //    std::cout << "must roll" << i << "\n";
+    //  }
+    //}
+
     inputs_[player_id][i] = input;
+
     idx++;
   }
 
   // Predicts the remote client would not change its inputs until the current
   // frame to have a realtime simulation.
-  //for (FrameNbr frame = latest_frame_input.frame_nbr; frame <= current_frame_;
-  //     frame++) {
-  //  inputs_[player_id][frame] = latest_frame_input.input;
-  //}
+  for (FrameNbr frame = last_remote_frame_input.frame_nbr; frame <= current_frame_;
+       frame++) {
+    inputs_[player_id][frame] = last_remote_frame_input.input;
+  }
 
   SimulateUntilCurrentFrame();
+
+  //if (must_rollback)
+  //{
+  //  SimulateUntilCurrentFrame();
+  //}
 
   last_remote_input_frame_ = last_remote_frame_input.frame_nbr;
 }
@@ -69,14 +86,14 @@ void RollbackManager::SetRemotePlayerInput(
 void RollbackManager::SimulateUntilCurrentFrame() noexcept {
   current_game_manager_->Copy(confirmed_game_manager_);
 
-  for (int i = confirmed_frame_ + 1; i < current_frame_; i++) {
-    for (PlayerId player_id = 0; player_id < game_constants::kMaxPlayerCount;
+  for (FrameNbr frame = confirmed_frame_ + 1; frame < current_frame_; frame++) {
+    /*for (PlayerId player_id = 0; player_id < game_constants::kMaxPlayerCount;
          player_id++) {
       const auto input = inputs_[player_id][i];
       current_game_manager_->SetPlayerInput(input, player_id);
-    }
+    }*/
 
-    current_game_manager_->FixedUpdate();
+    current_game_manager_->FixedUpdate(frame);
   }
 
   // The Fixed update of the current frame is made in the main loop after polling
@@ -87,13 +104,13 @@ int RollbackManager::ComputeFrameToConfirmChecksum() noexcept {
   game_manager_to_confirm_.Copy(confirmed_game_manager_);
 
   for (int frame = confirmed_frame_ + 1; frame <= frame_to_confirm_; frame++) {
-    for (PlayerId player_id = 0; player_id < game_constants::kMaxPlayerCount;
+   /* for (PlayerId player_id = 0; player_id < game_constants::kMaxPlayerCount;
          player_id++) {
       const auto input = inputs_[player_id][frame];
       game_manager_to_confirm_.SetPlayerInput(input, player_id);
-    }
+    }*/
 
-    game_manager_to_confirm_.FixedUpdate();
+    game_manager_to_confirm_.FixedUpdate(frame);
   }
 
   return game_manager_to_confirm_.ComputeChecksum();
@@ -101,15 +118,19 @@ int RollbackManager::ComputeFrameToConfirmChecksum() noexcept {
 
 void RollbackManager::ConfirmFrame() noexcept {
  for (int frame = confirmed_frame_ + 1; frame <= frame_to_confirm_; frame++) {
-    for (PlayerId player_id = 0; player_id < game_constants::kMaxPlayerCount;
+    /*for (PlayerId player_id = 0; player_id < game_constants::kMaxPlayerCount;
          player_id++) {
       const auto input = inputs_[player_id][frame];
       confirmed_game_manager_.SetPlayerInput(input, player_id);
-    }
+    }*/
 
-    confirmed_game_manager_.FixedUpdate();
+    confirmed_game_manager_.FixedUpdate(frame);
   }
 
   confirmed_frame_++;
   frame_to_confirm_++;
+}
+
+inputs::PlayerInput RollbackManager::GetPlayerInputAtFrame(PlayerId player_id, FrameNbr frame_nbr) const noexcept {
+  return inputs_[player_id][frame_nbr];
 }

@@ -27,21 +27,21 @@ public:
   void RegisterGameManager(GameManager* player_manager) noexcept {
     current_game_manager_ = player_manager;
     confirmed_game_manager_.Init(player_manager->local_player_id());
+    confirmed_game_manager_.RegisterRollbackManager(this);
     game_manager_to_confirm_.Init(player_manager->local_player_id());
-
-    for (std::size_t i = 0; i < 2; i++)
-    {
-      inputs_[i].fill(255);
-    }
+    game_manager_to_confirm_.RegisterRollbackManager(this);
   }
 
   void SetLocalPlayerInput(inputs::FrameInput frame_input, PlayerId player_id);
-  void SetRemotePlayerInput(const std::vector<inputs::FrameInput>& frame_inputs, 
+  void OnRemoteInputReceived(const std::vector<inputs::FrameInput>& frame_inputs, 
                             PlayerId player_id);
 
   void SimulateUntilCurrentFrame() noexcept;
   [[nodiscard]] int ComputeFrameToConfirmChecksum() noexcept;
   void ConfirmFrame() noexcept;
+
+  [[nodiscard]] inputs::PlayerInput GetPlayerInputAtFrame(
+      PlayerId player_id, FrameNbr frame_nbr) const noexcept;
 
   [[nodiscard]] FrameNbr confirmed_frame() const noexcept {
     return confirmed_frame_;

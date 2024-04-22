@@ -16,6 +16,8 @@ void SimulationClient::Init(int input_profile_id, PlayerId player_id) noexcept {
   waiting_input_queue.reserve(kBaseInputSize);
 
   game_manager_.Init(player_id);
+  game_manager_.RegisterRollbackManager(&rollback_manager_);
+
   game_renderer_.Init();
 
   rollback_manager_.RegisterGameManager(&game_manager_);
@@ -43,7 +45,7 @@ void SimulationClient::FixedUpdate() noexcept {
   PollInputPackets();
   PollConfirmFramePackets();
 
-  game_manager_.FixedUpdate();
+  game_manager_.FixedUpdate(current_frame_);
 }
 
 void SimulationClient::Draw(
@@ -57,7 +59,10 @@ void SimulationClient::Deinit() noexcept {
 }
 
 void SimulationClient::SendInputEvent() {
-  const auto input = inputs::GetPlayerInput(input_profile_id_);
+   auto input = inputs::GetPlayerInput(input_profile_id_);
+
+   //input = 2;
+
   const inputs::FrameInput frame_input{input, current_frame_};
   rollback_manager_.SetLocalPlayerInput(frame_input, player_id_);
 
@@ -136,7 +141,7 @@ void SimulationClient::PollInputPackets() {
     it->delay -= game_constants::kFixedDeltaTime;
 
     if (it->delay <= 0.f) {
-      rollback_manager_.SetRemotePlayerInput(it->frame_inputs,
+      rollback_manager_.OnRemoteInputReceived(it->frame_inputs,
                                          other_client_->player_id());
 
       if (player_id_ == kMasterClientId)
@@ -165,16 +170,7 @@ void SimulationClient::PollConfirmFramePackets() {
           // If we did not receive the inputs before the frame to confirm, add them.
           if (rollback_manager_.last_remote_input_frame() < frame_it->frame_inputs.back().frame_nbr)
           {
-            /*const auto it = std::find_if(
-              frame_it->frame_inputs.begin(), frame_it->frame_inputs.end(),
-              [this](inputs::FrameInput frame_input) {
-                return frame_input.frame_nbr ==
-                       rollback_manager_.last_remote_input_frame();
-              });
-
-            std::vector<inputs::FrameInput> inputs(it, frame_it->frame_inputs.end());*/
-
-            rollback_manager_.SetRemotePlayerInput(frame_it->frame_inputs, other_client_->player_id());
+            rollback_manager_.OnRemoteInputReceived(frame_it->frame_inputs, other_client_->player_id());
           }
 
           const int check_sum = rollback_manager_.ComputeFrameToConfirmChecksum();

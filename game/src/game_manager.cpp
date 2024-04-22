@@ -1,5 +1,7 @@
 #include "game_manager.h"
 
+#include "rollback_manager.h"
+
 void GameManager::Init(int local_player_id) noexcept {
   game_.world.Init(Math::Vec2F(0.f, 0.f), 10);
   game_.world.SetContactListener(this);
@@ -12,7 +14,12 @@ void GameManager::Init(int local_player_id) noexcept {
   local_player_id_ = local_player_id;
 }
 
-void GameManager::FixedUpdate() noexcept {
+void GameManager::FixedUpdate(FrameNbr frame_nbr) noexcept {
+  for (PlayerId id = 0; id < game_constants::kMaxPlayerCount; id++) {
+    const auto input = rollback_manager_->GetPlayerInputAtFrame(id, frame_nbr);
+    player_manager_.SetPlayerInput(input, id);
+  }
+
   player_manager_.FixedUpdate();
 
   game_.world.Update(game_constants::kFixedDeltaTime);

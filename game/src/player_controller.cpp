@@ -146,36 +146,33 @@ int PlayerManager::ComputeChecksum() const noexcept {
   int checksum = 0;
 
   for (const auto& player : players_) {
-    //const auto& body_ref = world_->GetCollider(player.main_col_ref).GetBodyRef();
-    //const auto& body = world_->GetBody(body_ref);
+    const auto& body_ref = world_->GetCollider(player.main_col_ref).GetBodyRef();
+    const auto& body = world_->GetBody(body_ref);
 
-    //const auto& pos = body.Position();
-    //const auto* posPtr = reinterpret_cast<const int*>(&pos);
+    const auto& pos = body.Position();
+    const auto* posPtr = reinterpret_cast<const int*>(&pos);
 
-    //// Adding position
-    //for (size_t i = 0; i < sizeof(Math::Vec2F) / sizeof(int); i++) {
-    //  checksum += posPtr[i];
-    //}
+    // Add position
+    for (size_t i = 0; i < sizeof(Math::Vec2F) / sizeof(int); i++) {
+      checksum += posPtr[i];
+    }
 
-    //// Adding velocity
-    //const auto& velocity = body.Velocity();
-    //const auto* velocityPtr = reinterpret_cast<const int*>(&velocity);
-    //for (size_t i = 0; i < sizeof(Math::Vec2F) / sizeof(int); i++) {
-    //  checksum += velocityPtr[i];
-    //}
+    // Add velocity
+    const auto& velocity = body.Velocity();
+    const auto* velocityPtr = reinterpret_cast<const int*>(&velocity);
+    for (size_t i = 0; i < sizeof(Math::Vec2F) / sizeof(int); i++) {
+      checksum += velocityPtr[i];
+    }
 
-    //// Adding forces
-    //const auto& forces = body.Forces();
-    //const auto* forces_ptr = reinterpret_cast<const int*>(&forces);
-    //for (size_t i = 0; i < sizeof(Math::Vec2F) / sizeof(int); i++) {
-    //  checksum += forces_ptr[i];
-    //}
+    // Add forces
+    const auto& forces = body.Forces();
+    const auto* forces_ptr = reinterpret_cast<const int*>(&forces);
+    for (size_t i = 0; i < sizeof(Math::Vec2F) / sizeof(int); i++) {
+      checksum += forces_ptr[i];
+    }
 
-    // Add input to checksum.
+    // Add input.
     checksum += static_cast<int>(player.input);
-
-    //// Add player ID to checksum.
-    //checksum += static_cast<int>(player.id);
   }
 
   return checksum;

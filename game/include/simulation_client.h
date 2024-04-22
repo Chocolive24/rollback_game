@@ -49,9 +49,9 @@ private:
   void PollInputPackets();
   void PollConfirmFramePackets();
 
+  RollbackManager rollback_manager_{};
   GameManager game_manager_{};
   GameRenderer game_renderer_{&game_manager_};
-  RollbackManager rollback_manager_{};
 
   std::vector<inputs::PlayerInput> inputs_{};
   std::vector<FrameNbr> frames_{};
