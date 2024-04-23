@@ -5,8 +5,6 @@
 #include "inputs.h"
 #include "game_manager.h"
 
-class NetworkInterface;
-
 /**
  * \brief RollbackManager is a class responsible of the integrity of the game simulation.
  *
@@ -26,9 +24,9 @@ class RollbackManager {
 public:
   void RegisterGameManager(GameManager* player_manager) noexcept {
     current_game_manager_ = player_manager;
-    confirmed_game_manager_.Init(player_manager->local_player_id());
+    confirmed_game_manager_.Init(player_manager->player_id(), player_manager->input_profile_id());
     confirmed_game_manager_.RegisterRollbackManager(this);
-    game_manager_to_confirm_.Init(player_manager->local_player_id());
+    game_manager_to_confirm_.Init(player_manager->player_id(), player_manager->input_profile_id());
     game_manager_to_confirm_.RegisterRollbackManager(this);
   }
 
@@ -42,6 +40,12 @@ public:
 
   [[nodiscard]] inputs::PlayerInput GetPlayerInputAtFrame(
       PlayerId player_id, FrameNbr frame_nbr) const noexcept;
+
+  [[nodiscard]] FrameNbr current_frame() const noexcept {
+    return current_frame_;
+  }
+
+  void IncreaseCurrentFrame() noexcept { current_frame_++; }
 
   [[nodiscard]] FrameNbr confirmed_frame() const noexcept {
     return confirmed_frame_;

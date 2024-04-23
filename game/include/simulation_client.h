@@ -3,12 +3,11 @@
 #include "network_interface.h"
 #include "rollback_manager.h"
 #include "game_renderer.h"
+#include "network_game_manager.h"
 
 #include <vector>
 
-#include "Timer.h"
-
-struct FrameToConfirm {
+struct SimulationFrameToConfirm {
   int check_sum = 0;
   std::vector<inputs::FrameInput> frame_inputs{};
   float delay = 0.f;
@@ -35,41 +34,24 @@ class SimulationClient final : public NetworkInterface {
   void ReceiveEvent(int player_nr, EventCode event_code,
                     const ExitGames::Common::Hashtable& event_content) noexcept override;
 
-  [[nodiscard]] PlayerId player_id() const noexcept {
-    return player_id_;
-  }
-
   static float min_packet_delay;
   static float max_packet_delay;
   static float packet_loss_percentage;
 
 private:
-  void SendInputEvent();
-  void SendFrameConfirmationEvent(const std::vector<inputs::FrameInput>& remote_frame_inputs);
   void PollInputPackets();
   void PollConfirmFramePackets();
 
   RollbackManager rollback_manager_{};
-  GameManager game_manager_{};
-  GameRenderer game_renderer_{&game_manager_};
-
-  std::vector<inputs::PlayerInput> inputs_{};
-  std::vector<FrameNbr> frames_{};
+  NetworkGameManager network_game_manager_{};
+  GameRenderer game_renderer_{&network_game_manager_};
 
   SimulationClient* other_client_ = nullptr;
   std::vector<inputs::SimulationInput> waiting_input_queue{};
-  std::vector<FrameToConfirm> waiting_frame_queue_{};
+  std::vector<SimulationFrameToConfirm> waiting_frame_queue_{};
 
-  Timer timer_{};
   float fixed_timer_ = game_constants::kFixedDeltaTime;
 
   static constexpr PlayerId kMasterClientId = 0;
-  static constexpr int kBaseInputSize = 1000;
-  static constexpr int kStartTextPosY = 200;
-  static constexpr int kTextOffsetY = 75;
-  static constexpr int kFontSize = 35;
-
-  PlayerId player_id_ = -1;
-  int input_profile_id_ = -1;
-  std::int16_t current_frame_ = -1;
+  static constexpr int kBaseInputSize = 100;
 };

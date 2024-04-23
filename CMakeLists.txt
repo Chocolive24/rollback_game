@@ -127,12 +127,12 @@ set_target_properties(core PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories(core PUBLIC core/include/)
 target_link_libraries(core PUBLIC raylib imgui::imgui rl_imgui math common)
 
-# Create the Common library with Math as a dependency
-file(GLOB_RECURSE NETWORK_SRC_FILES network/include/*.h network/src/*.cpp)
-add_library(network ${NETWORK_SRC_FILES})
-set_target_properties(network PROPERTIES LINKER_LANGUAGE CXX)
-target_include_directories(network PUBLIC network/include/)
-target_link_libraries(network PUBLIC photon)
+## Create the Common library with Math as a dependency
+#file(GLOB_RECURSE NETWORK_SRC_FILES network/include/*.h network/src/*.cpp)
+#add_library(network ${NETWORK_SRC_FILES})
+#set_target_properties(network PROPERTIES LINKER_LANGUAGE CXX)
+#target_include_directories(network PUBLIC network/include/)
+#target_link_libraries(network PUBLIC photon)
 
 # Create the game library.
 file(GLOB_RECURSE GAME_SRC_FILES game/include/*.h game/src/*.cpp)
@@ -141,7 +141,7 @@ set_target_properties(game PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories(game PUBLIC game/include/)
 target_link_libraries(game PUBLIC math common physics core)
 if (NOT EMSCRIPTEN)
-    target_link_libraries(game PUBLIC network)
+    target_link_libraries(game PUBLIC photon)
 endif()
 add_dependencies(game data_target)
 
@@ -154,9 +154,6 @@ if (EMSCRIPTEN)
 endif ()
 
 if (NOT EMSCRIPTEN)
-    add_executable(debug_app main/debug_app_entry_point.cpp)
-    target_link_libraries(debug_app PRIVATE game)
-
     add_executable(photon_sample main/photon_sample.cpp)
     target_link_libraries(photon_sample PRIVATE game)
 
@@ -168,14 +165,14 @@ endif()
 #file(COPY ${data_files} DESTINATION "data/")
 
 # Tests.
-if (NOT EMSCRIPTEN)
-    file(GLOB_RECURSE GAME_TEST_FILES game/tests/*.cpp)
-    foreach(test_file ${GAME_TEST_FILES} )
-        get_filename_component(test_name ${test_file} NAME_WE)
-
-        add_executable(${test_name} ${test_file})
-
-        target_link_libraries(${test_name} PRIVATE common core game)
-        target_link_libraries(${test_name} PRIVATE GTest::gtest GTest::gtest_main)
-    endforeach()
-endif()
+#if (NOT EMSCRIPTEN)
+#    file(GLOB_RECURSE GAME_TEST_FILES game/tests/*.cpp)
+#    foreach(test_file ${GAME_TEST_FILES} )
+#        get_filename_component(test_name ${test_file} NAME_WE)
+#
+#        add_executable(${test_name} ${test_file})
+#
+#        target_link_libraries(${test_name} PRIVATE common core game)
+#        target_link_libraries(${test_name} PRIVATE GTest::gtest GTest::gtest_main)
+#    endforeach()
+#endif()

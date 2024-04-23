@@ -617,12 +617,12 @@ namespace PhysicsEngine
     {
         std::size_t colliderIdx = -1;
 
-        auto it = std::find_if(
+       const auto it = std::find_if(
                 _colliders.begin(),
                 _colliders.end(),
                 [](const Collider& collider)
         {
-            return !collider.Enabled();
+            return !collider.IsInitialized();
         });
 
         if (it != _colliders.end())
@@ -633,8 +633,9 @@ namespace PhysicsEngine
         else
         {
             // No collider with none shape found.
-            std::size_t previousSize = _colliders.size();
-            auto newSize = static_cast<std::size_t>(static_cast<float>(previousSize) * _bodyAllocResizeFactor);
+            const std::size_t previousSize = _colliders.size();
+            const auto newSize = static_cast<std::size_t>(
+                static_cast<float>(previousSize) * _bodyAllocResizeFactor);
 
             _colliders.resize(newSize, Collider());
             _collidersGenIndices.resize(newSize, 0);
@@ -644,6 +645,7 @@ namespace PhysicsEngine
 
         auto& collider = _colliders[colliderIdx];
 
+        collider.SetIsInitialized(true);
         collider.SetEnabled(true);
         collider.SetBodyRef(bodyRef);
 

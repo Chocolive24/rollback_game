@@ -2,27 +2,20 @@
 #include "game_constants.h"
 #include "Random.h"
 
-#include <iostream>
-
 float SimulationClient::min_packet_delay = 0.01f;
 float SimulationClient::max_packet_delay = 0.03f;
 float SimulationClient::packet_loss_percentage = 0.1f;
 
 void SimulationClient::Init(int input_profile_id, PlayerId player_id) noexcept {
-
-  input_profile_id_ = input_profile_id;
-  player_id_ = player_id;
-
   waiting_input_queue.reserve(kBaseInputSize);
 
-  game_manager_.Init(player_id);
-  game_manager_.RegisterRollbackManager(&rollback_manager_);
+  network_game_manager_.Init(player_id, input_profile_id);
+  network_game_manager_.RegisterNetworkInterface(this);
+  network_game_manager_.RegisterRollbackManager(&rollback_manager_);
 
   game_renderer_.Init();
 
-  rollback_manager_.RegisterGameManager(&game_manager_);
-
-  timer_.Init();
+  rollback_manager_.RegisterGameManager(&network_game_manager_);
 }
 
 void SimulationClient::RegisterOtherClient(SimulationClient* other_client) noexcept {
@@ -30,7 +23,6 @@ void SimulationClient::RegisterOtherClient(SimulationClient* other_client) noexc
 }
 
 void SimulationClient::Update() noexcept {
-  timer_.Tick();
   fixed_timer_ += raylib::GetFrameTime();
   while (fixed_timer_ >= game_constants::kFixedDeltaTime) {
     FixedUpdate();
@@ -39,13 +31,13 @@ void SimulationClient::Update() noexcept {
 }
 
 void SimulationClient::FixedUpdate() noexcept {
-  current_frame_++;
+  rollback_manager_.IncreaseCurrentFrame();
 
-  SendInputEvent();
+  network_game_manager_.SendInputEvent();
   PollInputPackets();
   PollConfirmFramePackets();
 
-  game_manager_.FixedUpdate(current_frame_);
+  network_game_manager_.FixedUpdate(rollback_manager_.current_frame());
 }
 
 void SimulationClient::Draw(
@@ -54,82 +46,8 @@ void SimulationClient::Draw(
 }
 
 void SimulationClient::Deinit() noexcept {
-  game_manager_.Deinit();
+  network_game_manager_.Deinit();
   game_renderer_.Deinit();
-}
-
-void SimulationClient::SendInputEvent() {
-  const auto input = inputs::GetPlayerInput(input_profile_id_);
-  const inputs::FrameInput frame_input{input, current_frame_};
-  rollback_manager_.SetLocalPlayerInput(frame_input, player_id_);
-
-  inputs_.push_back(input);
-  frames_.push_back(current_frame_);
-
-  ExitGames::Common::Hashtable event_data;
-  const auto delay = Math::Random::Range(min_packet_delay, max_packet_delay);
-  event_data.put(static_cast<nByte>(EventKey::kPlayerInput), inputs_.data(), 
-      static_cast<int>(inputs_.size()));
-  event_data.put(static_cast<nByte>(EventKey::kFrameNbr), 
-      frames_.data(), static_cast<int>(frames_.size()));
-  event_data.put(static_cast<nByte>(EventKey::kDelay), delay);
-
-  RaiseEvent(false, EventCode::kInput, event_data);
-}
-
-void SimulationClient::SendFrameConfirmationEvent(
-    const std::vector<inputs::FrameInput>& remote_frame_inputs) {
-  auto frame_to_confirm_it = std::find_if(
-    remote_frame_inputs.begin(), remote_frame_inputs.end(),
-    [this](inputs::FrameInput frame_input) {
-      return frame_input.frame_nbr ==
-        rollback_manager_.frame_to_confirm();
-    });
-
-  auto end_it = remote_frame_inputs.end();
-
-  // If the last remote inputs is greater than the current frame. The end iterator
-  // must be equal to the frame input of the local current frame.
-  if (remote_frame_inputs.back().frame_nbr > current_frame_)
-  {
-    // Get the iterator of the inputs at the current frame to avoid to confirm
-    // a frame greater than the local current frame.
-    const auto current_frame_it = std::find_if(
-        remote_frame_inputs.begin(), remote_frame_inputs.end(),
-        [this](inputs::FrameInput frame_input) {
-          return frame_input.frame_nbr == current_frame_;
-        });
-
-    end_it = current_frame_it;
-  }
-
-  while (frame_to_confirm_it != end_it)
-  {
-    const auto frame_to_confirm = *frame_to_confirm_it;
-
-    const int check_sum =
-      rollback_manager_.ComputeFrameToConfirmChecksum();
-
-    ExitGames::Common::Hashtable event_check_sum;
-
-    event_check_sum.put(static_cast<nByte>(EventKey::kCheckSum),
-                        check_sum);
-    const auto& frame_nbr_it = std::find(frames_.begin(), frames_.end(),
-                                         frame_to_confirm.frame_nbr);
-    const auto& dist = std::distance(frames_.begin(), frame_nbr_it);
-
-    event_check_sum.put<nByte, inputs::PlayerInput*>(
-      static_cast<nByte>(EventKey::kPlayerInput), inputs_.data(), dist + 1);
-    event_check_sum.put<nByte, FrameNbr*>(
-      static_cast<nByte>(EventKey::kFrameNbr), frames_.data(), dist + 1);
-    event_check_sum.put(static_cast<nByte>(EventKey::kDelay),
-                        0.08f);
-
-    RaiseEvent(true, EventCode::kFrameConfirmation, event_check_sum);
-
-    rollback_manager_.ConfirmFrame();
-    ++frame_to_confirm_it;
-  }
 }
 
 void SimulationClient::PollInputPackets() {
@@ -138,14 +56,25 @@ void SimulationClient::PollInputPackets() {
     it->delay -= game_constants::kFixedDeltaTime;
 
     if (it->delay <= 0.f) {
-      rollback_manager_.SetRemotePlayerInput(it->frame_inputs,
-                                         other_client_->player_id());
+      std::vector<inputs::PlayerInput> remote_inputs{};
+      remote_inputs.reserve(it->frame_inputs.size());
 
-      if (player_id_ == kMasterClientId)
+      std::vector<FrameNbr> remote_frames{};
+      remote_frames.reserve(it->frame_inputs.size());
+
+      for (const auto& frame_input : it->frame_inputs)
       {
-        const auto& frame_inputs = it->frame_inputs;
-        SendFrameConfirmationEvent(frame_inputs);
+        remote_inputs.push_back(frame_input.input);
+        remote_frames.push_back(frame_input.frame_nbr);
       }
+
+       ExitGames::Common::Hashtable event_data;
+       event_data.put(static_cast<nByte>(EventKey::kPlayerInput),
+       remote_inputs.data(), static_cast<int>(remote_inputs.size()));
+       event_data.put(static_cast<nByte>(EventKey::kFrameNbr),
+           remote_frames.data(), static_cast<int>(remote_frames.size()));
+
+      network_game_manager_.OnEventReceived(EventCode::kInput, event_data);
 
       it = waiting_input_queue.erase(it);
     }
@@ -158,37 +87,33 @@ void SimulationClient::PollInputPackets() {
 void SimulationClient::PollConfirmFramePackets() {
   auto frame_it = waiting_frame_queue_.begin();
   while (frame_it != waiting_frame_queue_.end()) {
-    frame_it->delay -= game_constants::kFixedDeltaTime;
+    frame_it->delay -= raylib::GetFrameTime();
 
     if (frame_it->delay <= 0.f) {
+      std::vector<inputs::PlayerInput> remote_inputs{};
+      remote_inputs.reserve(frame_it->frame_inputs.size());
 
-      if (player_id_ != kMasterClientId) {
+      std::vector<FrameNbr> remote_frames{};
+      remote_frames.reserve(frame_it->frame_inputs.size());
 
-          // If we did not receive the inputs before the frame to confirm, add them.
-          if (rollback_manager_.last_remote_input_frame() < frame_it->frame_inputs.back().frame_nbr)
-          {
-            rollback_manager_.SetRemotePlayerInput(frame_it->frame_inputs, other_client_->player_id());
-          }
-
-          const int check_sum = rollback_manager_.ComputeFrameToConfirmChecksum();
-
-          if (check_sum != frame_it->check_sum) {
-            std::cerr << "Not same checksum for frame: " << rollback_manager_.frame_to_confirm()
-                      << '\n';
-            return;
-          }
-
-          rollback_manager_.ConfirmFrame();
-
-          // Send a frame confirmation event with empty data to the master client
-          // just to tell him that we confirmed the frame and that he can erase
-          // the input at the confirmed frame in its vector of inputs.
-          RaiseEvent(true, EventCode::kFrameConfirmation,
-                     ExitGames::Common::Hashtable());
+      for (const auto& frame_input : frame_it->frame_inputs) {
+        remote_inputs.push_back(frame_input.input);
+        remote_frames.push_back(frame_input.frame_nbr);
       }
 
-      inputs_.erase(inputs_.begin());
-      frames_.erase(frames_.begin());
+      ExitGames::Common::Hashtable event_data;
+      event_data.put(static_cast<nByte>(EventKey::kCheckSum),
+                     frame_it->check_sum);
+      event_data.put(static_cast<nByte>(EventKey::kPlayerInput),
+                     remote_inputs.data(),
+                     static_cast<int>(remote_inputs.size()));
+      event_data.put(static_cast<nByte>(EventKey::kFrameNbr),
+                     remote_frames.data(),
+                     static_cast<int>(remote_frames.size()));
+
+      network_game_manager_.OnEventReceived(EventCode::kFrameConfirmation,
+                                            event_data);
+
       frame_it = waiting_frame_queue_.erase(frame_it);
     }
    
@@ -207,8 +132,14 @@ void SimulationClient::RaiseEvent(bool reliable,
     return;
   }
 
+  ExitGames::Common::Hashtable simulated_event = event_data;
+  const auto delay =
+      reliable ? 0.08f
+               : Math::Random::Range(min_packet_delay, max_packet_delay);
+  simulated_event.put(static_cast<nByte>(EventKey::kDelay), delay);
+
   if (other_client_ != nullptr){
-    other_client_->ReceiveEvent(player_id_, event_code, event_data);
+    other_client_->ReceiveEvent(network_game_manager_.player_id(), event_code, simulated_event);
   }
 }
 
@@ -253,14 +184,14 @@ void SimulationClient::ReceiveEvent(int player_nr, EventCode event_code,
     }
     case EventCode::kFrameConfirmation: {
 
-      if (player_id_ == kMasterClientId)
+      if (network_game_manager_.player_id() == kMasterClientId)
       {
-        const FrameToConfirm f{0, {}, 0.08f};
+        const SimulationFrameToConfirm f{0, {}, 0.08f};
         waiting_frame_queue_.push_back(f);
         break;
       }
 
-      FrameToConfirm frame_to_confirm{};
+      SimulationFrameToConfirm frame_to_confirm{};
 
       const auto check_sum_value =
           event_content.getValue(static_cast<nByte>(EventKey::kCheckSum));

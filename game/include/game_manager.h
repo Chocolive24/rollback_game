@@ -28,8 +28,9 @@ public:
   GameManager& operator=(const GameManager& other) noexcept = default;
   ~GameManager() noexcept override = default;
 
-  virtual void Init(int local_player_id) noexcept;
-  void FixedUpdate(FrameNbr frame_nbr) noexcept;
+  virtual void Init(PlayerId player_id, int input_profile_id) noexcept;
+  virtual void Update() noexcept;
+  virtual void FixedUpdate(FrameNbr frame_nbr) noexcept;
   virtual void Deinit() noexcept;
 
   void RegisterRollbackManager(RollbackManager* rollback_manager) noexcept {
@@ -38,15 +39,19 @@ public:
 
   /**
    * \brief Copy is a method which copies the states of the game. It used
-   * when rollback is applied to go back to a previous game state. \param
-   * game_manager The game manager to be copied.
+   * when rollback is applied to go back to a previous game state.
+   * \param game_manager The game manager to be copied.
    */
   void Copy(const GameManager& game_manager) noexcept;
 
-  [[nodiscard]] int ComputeChecksum() const noexcept;
+  /**
+   * \brief Copy is a method which copies the states of the game. It used
+   * when rollback is applied to go back to a previous game state.
+   * \param game The game to be copied.
+   */
+  void Copy(const Game& game) noexcept { game_ = game; }
 
-  void SetPlayerInput(inputs::PlayerInput input, PlayerId player_id);
-  void SetRemotePlayerInput(inputs::FrameInput input, PlayerId player_id);
+  [[nodiscard]] int ComputeChecksum() const noexcept;
 
   [[nodiscard]] const PlayerManager& player_manager() const noexcept {
     return player_manager_;
@@ -56,13 +61,16 @@ public:
     return platform_manager_;
   }
 
-  
   [[nodiscard]] const ProjectileManager& projectile_manager() const noexcept {
     return projectile_manager_;
   }
 
-  [[nodiscard]] PlayerId local_player_id() const noexcept {
-    return local_player_id_;
+  [[nodiscard]] PlayerId player_id() const noexcept {
+    return player_id_;
+  }
+
+  [[nodiscard]] int input_profile_id() const noexcept {
+    return input_profile_id_;
   }
 
 protected:
@@ -75,8 +83,10 @@ protected:
   ProjectileManager projectile_manager_{};
   PlatformManager platform_manager_{};
 
-  int local_player_id_ = -1;
-  FrameNbr current_frame_ = -1;
+  int input_profile_id_ = -1;
+  PlayerId player_id_ = -1;
+
+  float fixed_timer_ = game_constants::kFixedDeltaTime;
 
   void OnTriggerEnter(
       PhysicsEngine::ColliderRef colliderRefA,

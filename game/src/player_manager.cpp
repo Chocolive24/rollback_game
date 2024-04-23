@@ -1,5 +1,6 @@
 #include "player_manager.h"
 #include "raylib_wrapper.h"
+#include "Metrics.h"
 
 #include <cassert>
 
@@ -95,11 +96,13 @@ void PlayerManager::Shoot(const Player& player) const noexcept {
 
    if (player.input &
       static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kShoot)) {
-     const auto [x, y] = raylib::GetMousePosition();
-     const auto proj_v = Math::Vec2F(x, y) - body.Position();
+     const auto mouse_pix_pos = raylib::GetMousePosition();
+    const auto mouse_pos =
+        Metrics::PixelsToMeters(Math::Vec2F(mouse_pix_pos.x, mouse_pix_pos.y));
+     const auto proj_v = mouse_pos - body.Position();
      const auto proj_dir = proj_v.Normalized();
 
-     projectile_manager_->CreateProjectile(body.Position() + proj_dir * 0.5f, proj_dir);
+     projectile_manager_->CreateProjectile(body.Position() + proj_dir, proj_dir);
    }
 }
 
@@ -118,26 +121,26 @@ int PlayerManager::ComputeChecksum() const noexcept {
     const auto& body = world_->GetBody(body_ref);
 
     const auto& pos = body.Position();
-    const auto* posPtr = reinterpret_cast<const int*>(&pos);
+    const auto* pos_ptr = reinterpret_cast<const int*>(&pos);
 
     // Add position
     for (size_t i = 0; i < sizeof(Math::Vec2F) / sizeof(int); i++) {
-      checksum += posPtr[i];
+      checksum += pos_ptr[i];
     }
 
     // Add velocity
     const auto& velocity = body.Velocity();
-    const auto* velocityPtr = reinterpret_cast<const int*>(&velocity);
+    const auto* velocity_ptr = reinterpret_cast<const int*>(&velocity);
     for (size_t i = 0; i < sizeof(Math::Vec2F) / sizeof(int); i++) {
-      checksum += velocityPtr[i];
+      checksum += velocity_ptr[i];
     }
 
     // Add forces
-    const auto& forces = body.Forces();
-    const auto* forces_ptr = reinterpret_cast<const int*>(&forces);
-    for (size_t i = 0; i < sizeof(Math::Vec2F) / sizeof(int); i++) {
-      checksum += forces_ptr[i];
-    }
+    //const auto& forces = body.Forces();
+    //const auto* forces_ptr = reinterpret_cast<const int*>(&forces);
+    //for (size_t i = 0; i < sizeof(Math::Vec2F) / sizeof(int); i++) {
+    //  checksum += forces_ptr[i];
+    //}
 
     // Add input.
     checksum += static_cast<int>(player.input);

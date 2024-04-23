@@ -15,7 +15,7 @@ void ProjectileManager::Init(PhysicsEngine::World* world) noexcept {
 
     projectiles_[i].collider_ref = world_->CreateCollider(body_ref);
     auto& collider = world_->GetCollider(projectiles_[i].collider_ref);
-    collider.SetShape(Math::CircleF(Math::Vec2F::Zero(), 4.f));
+    collider.SetShape(Math::CircleF(Math::Vec2F::Zero(), 0.2f));
     collider.SetRestitution(1.f);
     collider.SetEnabled(false);
   }

@@ -1,5 +1,6 @@
 #include "inputs.h"
 
+#include <iostream>
 #include <raylib.h>
 
 namespace inputs {
@@ -25,6 +26,7 @@ PlayerInput GetPlayerInput(int input_profile_id) noexcept {
         // Check if the mouse is not being used for window move.
         if (!IsWindowResized() && !IsWindowMinimized()) {
           player_1_inputs |= static_cast<std::uint8_t>(PlayerInputType::kShoot);
+          //std::cout << "input shoot\n";
         }
       }
       if (IsKeyPressed(KEY_SPACE)) {
@@ -48,7 +50,7 @@ PlayerInput GetPlayerInput(int input_profile_id) noexcept {
       if (IsKeyDown(KEY_RIGHT)) {
         player_2_inputs |= static_cast<std::uint8_t>(PlayerInputType::kRight);
       }
-      if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+      if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
         player_2_inputs |= static_cast<std::uint8_t>(PlayerInputType::kShoot);
       }
       if (IsKeyPressed(KEY_SPACE)) {

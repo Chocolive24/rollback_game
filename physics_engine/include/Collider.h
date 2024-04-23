@@ -30,6 +30,7 @@ namespace PhysicsEngine
         float _friction{-1.f};
         bool _isTrigger{false};
         bool _enabled{false};
+        bool _isInitialized{false};
         
 
     public:
@@ -143,6 +144,19 @@ namespace PhysicsEngine
         constexpr void SetOffset(const Math::Vec2F offset) noexcept {
             _offset = offset;
         }
+
+        /**
+         * @brief IsInitialized is a method that checks if the collider is initialized
+         * @return True if the collider is initialized.
+         */
+        [[nodiscard]] constexpr bool IsInitialized() const noexcept {
+            return _isInitialized;
+        }
+
+        constexpr void SetIsInitialized(const bool initialized) noexcept {
+            _isInitialized = initialized;
+        }
+
     };
 
     /**

@@ -1,8 +1,8 @@
 #include "game_manager.h"
-
 #include "rollback_manager.h"
+#include "raylib_wrapper.h"
 
-void GameManager::Init(int local_player_id) noexcept {
+void GameManager::Init(PlayerId player_id, int input_profile_id) noexcept {
   game_.world.Init(Math::Vec2F(0.f, 0.f), 110);
   game_.world.SetContactListener(this);
 
@@ -13,7 +13,17 @@ void GameManager::Init(int local_player_id) noexcept {
   projectile_manager_.Init(&game_.world);
   platform_manager_.Init(&game_.world);
 
-  local_player_id_ = local_player_id;
+  player_id_ = player_id;
+  input_profile_id_ = input_profile_id;
+}
+
+void GameManager::Update() noexcept {
+  //fixed_timer_ += raylib::GetFrameTime();
+  //while (fixed_timer_ >= game_constants::kFixedDeltaTime) {
+  //  current_frame_++;
+  //  FixedUpdate(current_frame_);
+  //  fixed_timer_ -= game_constants::kFixedDeltaTime;
+  //}
 }
 
 void GameManager::FixedUpdate(FrameNbr frame_nbr) noexcept {
@@ -32,9 +42,10 @@ void GameManager::Deinit() noexcept {
 }
 
 void GameManager::Copy(const GameManager& game_manager) noexcept {
-  game_.world = game_manager.game_.world;
-  player_manager_.Copy(game_manager.player_manager_);
-  projectile_manager_.Copy(game_manager.projectile_manager_);
+  game_ = game_manager.game_;
+  //game_.world = game_manager.game_.world;
+  //player_manager_.Copy(game_manager.player_manager_);
+  //projectile_manager_.Copy(game_manager.projectile_manager_);
 }
 
 int GameManager::ComputeChecksum() const noexcept {
@@ -43,14 +54,6 @@ int GameManager::ComputeChecksum() const noexcept {
   checksum += player_manager_.ComputeChecksum();
 
   return checksum;
-}
-
-void GameManager::SetPlayerInput(inputs::PlayerInput input, PlayerId player_id) {
-  player_manager_.SetPlayerInput(input, player_id);
-}
-
-void GameManager::SetRemotePlayerInput(inputs::FrameInput input, PlayerId player_id) {
-  //rollback_manager_.SetRemotePlayerInput(input, player_id);
 }
 
 void GameManager::OnTriggerEnter(PhysicsEngine::ColliderRef colliderRefA,

@@ -34,6 +34,11 @@ struct FrameInput {
   FrameNbr frame_nbr = 0;
 };
 
+struct FrameToConfirm {
+  int checksum;
+  std::vector<FrameInput> frame_inputs{};
+};
+
 /**
  * \brief ClientId 
  */

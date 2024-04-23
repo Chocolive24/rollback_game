@@ -112,7 +112,7 @@ void GameRenderer::DrawProjectiles() const noexcept {
 
     const auto radius =
         game_manager_->projectile_manager().GetProjectileCircle(i).Radius();
-    const auto pix_radius = Metrics::PixelsToMeters(radius);
+    const auto pix_radius = Metrics::MetersToPixels(radius);
 
 
     DrawCircle(proj_pix_pos_int.X, proj_pix_pos_int.Y, pix_radius, WHITE);

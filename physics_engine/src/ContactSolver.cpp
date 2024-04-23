@@ -187,12 +187,14 @@ namespace PhysicsEngine
         const auto impusle = deltaVelocity / totalInverseMass;
         const auto impulsePerIMass = Normal * impusle;
 
-        if (BodyA->GetBodyType() == BodyType::Dynamic)
+        if (BodyA->GetBodyType() == BodyType::Dynamic ||
+            BodyA->GetBodyType() == BodyType::Kinematic)
         {
             BodyA->SetVelocity(BodyA->Velocity() + impulsePerIMass * inversMassBodyA);
         }
 
-        if (BodyB->GetBodyType() == BodyType::Dynamic)
+        if (BodyB->GetBodyType() == BodyType::Dynamic ||
+            BodyB->GetBodyType() == BodyType::Kinematic)
         {
             BodyB->SetVelocity(BodyB->Velocity() - impulsePerIMass * inversMassBodyB);
         }
@@ -210,12 +212,14 @@ namespace PhysicsEngine
 
         const auto movePerIMass = Normal * (Penetration / totalInverseMass);
 
-        if (BodyA->GetBodyType() == BodyType::Dynamic)
+        if (BodyA->GetBodyType() == BodyType::Dynamic ||
+            BodyA->GetBodyType() == BodyType::Kinematic)
         {
             BodyA->SetPosition(BodyA->Position() + movePerIMass * inversMassBodyA);
         }
 
-        if (BodyB->GetBodyType() == BodyType::Dynamic)
+        if (BodyB->GetBodyType() == BodyType::Dynamic ||
+            BodyB->GetBodyType() == BodyType::Kinematic)
         {
             BodyB->SetPosition(BodyB->Position() - movePerIMass * inversMassBodyB);
         }

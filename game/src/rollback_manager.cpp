@@ -1,13 +1,9 @@
 #include "rollback_manager.h"
-
-#include <iostream>
-
 #include "game_manager.h"
 
 void RollbackManager::SetLocalPlayerInput(inputs::FrameInput frame_input,
                                           PlayerId player_id) {
   inputs_[player_id][frame_input.frame_nbr] = frame_input.input;
-  //current_game_manager_->SetPlayerInput(frame_input.input, player_id);
   current_frame_ = frame_input.frame_nbr;
 }
 
@@ -49,7 +45,7 @@ void RollbackManager::SetRemotePlayerInput(
   //bool must_rollback = last_remote_input_frame_ == -1;
 
   auto idx = std::distance(frame_inputs.begin(), it);
-  for (int i = last_remote_input_frame_ + 1; i <= last_remote_frame_input.frame_nbr; i++) {
+  for (int i = last_remote_input_frame_ + 1; i < last_remote_frame_input.frame_nbr; i++) {
     const auto input = frame_inputs[idx].input;
 
     //if (last_remote_input_frame_ > -1) {
@@ -104,7 +100,8 @@ void RollbackManager::SimulateUntilCurrentFrame() noexcept {
 int RollbackManager::ComputeFrameToConfirmChecksum() noexcept {
   game_manager_to_confirm_.Copy(confirmed_game_manager_);
 
-  for (int frame = confirmed_frame_ + 1; frame <= frame_to_confirm_; frame++) {
+  for (FrameNbr frame = static_cast<FrameNbr>(confirmed_frame_ + 1);
+       frame <= frame_to_confirm_; frame++) {
    /* for (PlayerId player_id = 0; player_id < game_constants::kMaxPlayerCount;
          player_id++) {
       const auto input = inputs_[player_id][frame];
@@ -118,7 +115,8 @@ int RollbackManager::ComputeFrameToConfirmChecksum() noexcept {
 }
 
 void RollbackManager::ConfirmFrame() noexcept {
- for (int frame = confirmed_frame_ + 1; frame <= frame_to_confirm_; frame++) {
+  for (FrameNbr frame = static_cast<FrameNbr>(confirmed_frame_ + 1);
+       frame <= frame_to_confirm_; frame++) {
     /*for (PlayerId player_id = 0; player_id < game_constants::kMaxPlayerCount;
          player_id++) {
       const auto input = inputs_[player_id][frame];
@@ -132,6 +130,7 @@ void RollbackManager::ConfirmFrame() noexcept {
   frame_to_confirm_++;
 }
 
-inputs::PlayerInput RollbackManager::GetPlayerInputAtFrame(PlayerId player_id, FrameNbr frame_nbr) const noexcept {
+inputs::PlayerInput RollbackManager::GetPlayerInputAtFrame(PlayerId player_id, 
+    FrameNbr frame_nbr) const noexcept {
   return inputs_[player_id][frame_nbr];
 }

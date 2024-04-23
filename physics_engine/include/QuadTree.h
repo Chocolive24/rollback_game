@@ -57,8 +57,8 @@ namespace PhysicsEngine
     private:
         HeapAllocator _heapAllocator;
 
-        AllocVector<QuadNode> _nodes{ StandardAllocator<QuadNode> {_heapAllocator} };
-        AllocVector<ColliderPair> _possiblePairs{ StandardAllocator<ColliderPair> {_heapAllocator} };
+        AllocVector<QuadNode> _nodes{ StandardAllocator<QuadNode>{_heapAllocator} };
+        AllocVector<ColliderPair> _possiblePairs{ StandardAllocator<ColliderPair>{_heapAllocator} };
 
         int _nodeIndex = 1;
 
