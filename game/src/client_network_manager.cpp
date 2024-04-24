@@ -1,6 +1,6 @@
 #include "client_network_manager.h"
 #include "event.h"
-
+#include "client_application.h"
 ClientNetworkManager::ClientNetworkManager(
     const ExitGames::Common::JString& appID,
     const ExitGames::Common::JString& appVersion)
@@ -59,24 +59,29 @@ void ClientNetworkManager::ReceiveEvent(int player_nr, EventCode event_code,
 
    // logging the string representation of the eventContent can be really useful
   // for debugging, but use with care: for big events this might get expensive
-  EGLOG(ExitGames::Common::DebugLevel::ALL,
-        L"an event of type %d from player Nr %d with the following content has "
-        L"just arrived: %ls",
-        static_cast<nByte>(event_code), player_nr,
-        event_content.toString(true).cstr());
+  //EGLOG(ExitGames::Common::DebugLevel::ALL,
+  //      L"an event of type %d from player Nr %d with the following content has "
+  //      L"just arrived: %ls",
+  //      static_cast<nByte>(event_code), player_nr,
+  //      event_content.toString(true).cstr());
 
-  std::cout << "event content: "
-            << event_content.toString().UTF8Representation().cstr() << '\n';
+  //std::cout << "event content: "
+  //          << event_content.toString().UTF8Representation().cstr() << '\n';
 
-  switch (event_code) {
-    case EventCode::kInput: {
-      break;
-    }
-    default: {
-      // have a look at demo_typeSupport inside the C++ client SDKs for
-      // example code on how to send and receive more fancy data types
-    } break;
-  }
+  if (network_game_manager_ == nullptr) 
+      return;
+
+  network_game_manager_->OnEventReceived(event_code, event_content);
+
+  //switch (event_code) {
+  //  case EventCode::kInput: {
+  //    break;
+  //  }
+  //  default: {
+  //    // have a look at demo_typeSupport inside the C++ client SDKs for
+  //    // example code on how to send and receive more fancy data types
+  //  } break;
+  //}
 }
 
 
@@ -108,6 +113,19 @@ void ClientNetworkManager::joinRoomEventAction(
   std::cout << "Room state: player nr: " << playerNr
             << " player nrs size: " << playernrs.getSize() << " player userID: "
             << player.getUserID().UTF8Representation().cstr() << '\n';
+
+  if (client_application_ == nullptr) return;
+
+  if (client_application_->client_id() == game_constants::kInvalidClientId)
+  {
+    client_application_->SetClientId(playerNr);
+    client_application_->SetState(AppState::kInRoom);
+  }
+
+
+  if (playerNr == game_constants::kMaxPlayerCount) {
+    client_application_->StartGame();
+  }
 }
 
 void ClientNetworkManager::leaveRoomEventAction(int playerNr, bool isInactive) {
@@ -137,6 +155,10 @@ void ClientNetworkManager::connectReturn(int errorCode,
             << " "
             << "region: " << region.UTF8Representation().cstr() << " "
             << "cluster: " << cluster.UTF8Representation().cstr() << '\n';
+
+  if (client_application_ == nullptr) return;
+
+  client_application_->SetState(AppState::kInMainMenu);
 }
 
 void ClientNetworkManager::disconnectReturn() { std::cout << "client disconnected\n"; }

@@ -22,7 +22,7 @@ PlayerInput GetPlayerInput(int input_profile_id) noexcept {
       if (IsKeyDown(KEY_D)) {
         player_1_inputs |= static_cast<std::uint8_t>(PlayerInputType::kRight);
       }
-      if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+      if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
         // Check if the mouse is not being used for window move.
         if (!IsWindowResized() && !IsWindowMinimized()) {
           player_1_inputs |= static_cast<std::uint8_t>(PlayerInputType::kShoot);
@@ -36,7 +36,7 @@ PlayerInput GetPlayerInput(int input_profile_id) noexcept {
     }
 
     case 1: {
-      PlayerInput player_2_inputs{};
+      PlayerInput player_2_inputs = 0;
 
       if (IsKeyDown(KEY_UP)) {
         player_2_inputs |= static_cast<std::uint8_t>(PlayerInputType::kUp);
@@ -63,5 +63,4 @@ PlayerInput GetPlayerInput(int input_profile_id) noexcept {
   }
 }
 
-ClientId::ClientId(std::int8_t id) noexcept { id_ = id; }
 }  // namespace input

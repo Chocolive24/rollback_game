@@ -39,16 +39,28 @@ void PlayerManager::Init() noexcept {
     can_jump_col.SetOffset(game_constants::kPlayerJumpColOffset);
     can_jump_col.SetIsTrigger(true);
 
-    players_[i].id = i;
     players_[i].main_col_ref = main_col_ref;
     players_[i].jump_col_ref = jump_col_ref;
   }
 }
 
 void PlayerManager::FixedUpdate() noexcept {
-  for (const auto& player : players_) {
+  for (auto& player : players_) {
     Move(player);
+
+    if (player.shoot_timer_ > Math::Epsilon) {
+      player.shoot_timer_ -= game_constants::kFixedDeltaTime;
+
+      if (player.shoot_timer_ <= Math::Epsilon)
+      {
+        player.shoot_timer_ = 0.f;
+      }
+
+      return;
+    }
+
     Shoot(player);
+    player.shoot_timer_ = kShootCooldown;
   }
 }
 
@@ -89,27 +101,25 @@ void PlayerManager::Shoot(const Player& player) const noexcept {
   assert(projectile_manager_ != nullptr,
          "No projectiles manager pointer given to player manager.\n");
 
-  const auto& body =
-      world_->GetBody(world_->GetCollider(player.main_col_ref).GetBodyRef());
-
-  //TODO: pas de creation de proj si le click s'est fait dans le joueur.
-
+    // TODO: pas de creation de proj si le click s'est fait dans le joueur.
    if (player.input &
       static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kShoot)) {
-     const auto mouse_pix_pos = raylib::GetMousePosition();
-    const auto mouse_pos =
-        Metrics::PixelsToMeters(Math::Vec2F(mouse_pix_pos.x, mouse_pix_pos.y));
-     const auto proj_v = mouse_pos - body.Position();
-     const auto proj_dir = proj_v.Normalized();
+    
+     const auto& body =
+         world_->GetBody(world_->GetCollider(player.main_col_ref).GetBodyRef());
+     //const auto proj_v = mouse_pos - body.Position();
+     //const auto proj_dir = proj_v.Normalized();
 
-     projectile_manager_->CreateProjectile(body.Position() + proj_dir, proj_dir);
+     projectile_manager_->CreateProjectile(body.Position() + Math::Vec2F(0.5f, 0.f),
+                                           Math::Vec2F::Right());
    }
 }
 
 void PlayerManager::Copy(const PlayerManager& player_manager) noexcept {
-  for (std::size_t i = 0; i < game_constants::kMaxPlayerCount; i++) {
-    players_[i] = player_manager.players_[i];
-  }
+  players_ = player_manager.players_;
+  //for (std::size_t i = 0; i < game_constants::kMaxPlayerCount; i++) {
+  //  players_[i] = player_manager.players_[i];
+  //}
 }
 
 // Function to compute checksum for the players state.

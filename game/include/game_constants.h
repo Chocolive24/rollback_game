@@ -1,5 +1,6 @@
 #pragma once
 
+#include "types.h"
 #include "Vec2.h"
 
 /**
@@ -8,6 +9,11 @@
  */
 namespace game_constants {
   constexpr float kFixedDeltaTime = 1 / 50.f;
+
+  constexpr int kLocalPlayer1InputId = 0;
+  constexpr int kLocalPlayer2InputId = 0;
+
+  constexpr ClientId kInvalidClientId = -1;
 
   constexpr Math::Vec2I kGameScreenSize(1280, 720);
 

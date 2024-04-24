@@ -4,7 +4,7 @@
 void RollbackManager::SetLocalPlayerInput(inputs::FrameInput frame_input,
                                           PlayerId player_id) {
   inputs_[player_id][frame_input.frame_nbr] = frame_input.input;
-  current_frame_ = frame_input.frame_nbr;
+  //current_frame_ = frame_input.frame_nbr;
 }
 
 void RollbackManager::SetRemotePlayerInput(

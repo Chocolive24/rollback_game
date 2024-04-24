@@ -6,29 +6,6 @@ void NetworkGameManager::RegisterNetworkInterface(
   network_interface_ = network_interface;
 }
 
-//void NetworkGameManager::Init(PlayerId player_id, int input_profile_id) noexcept {
-//  GameManager::Init(player_id, input_profile_id);
-//}
-//
-//void NetworkGameManager::Update() noexcept {
-//  fixed_timer_ += raylib::GetFrameTime();
-//  while (fixed_timer_ >= game_constants::kFixedDeltaTime) {
-//    current_frame_++;
-//    SendInputEvent();
-//    FixedUpdate(current_frame_);
-//    fixed_timer_ -= game_constants::kFixedDeltaTime;
-//  }
-//}
-//
-//void NetworkGameManager::FixedUpdate(FrameNbr frame_nbr) noexcept {
-//  for (PlayerId id = 0; id < game_constants::kMaxPlayerCount; id++) {
-//    const auto input = rollback_manager_->GetPlayerInputAtFrame(id, frame_nbr);
-//    player_manager_.SetPlayerInput(input, id);
-//  }
-//
-//  GameManager::FixedUpdate(frame_nbr);
-//}
-
 void NetworkGameManager::OnEventReceived(EventCode event_code,
   const ExitGames::Common::Hashtable& event_content) noexcept {
   switch (event_code)
@@ -145,6 +122,7 @@ void NetworkGameManager::OnEventReceived(EventCode event_code,
 void NetworkGameManager::SendInputEvent() noexcept {
   const auto input = inputs::GetPlayerInput(input_profile_id_);
   const auto current_frame = rollback_manager_->current_frame();
+
   const inputs::FrameInput frame_input{input, current_frame};
   rollback_manager_->SetLocalPlayerInput(frame_input, player_id_);
 

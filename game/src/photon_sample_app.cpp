@@ -11,6 +11,12 @@ void PhotonSampleApp::Setup() noexcept {
 
 void PhotonSampleApp::Update() noexcept {
   networkLogic_.Service();
+
+  ExitGames::Common::Hashtable evData;
+  evData.put<nByte, int>(static_cast<nByte>(EventKey::kPlayerInput), 42);
+
+  constexpr bool sendReliable = false;
+  networkLogic_.RaiseEvent(sendReliable, EventCode::kInput, evData);
 }
 
 void PhotonSampleApp::Draw() noexcept {

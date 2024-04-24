@@ -5,6 +5,10 @@
 #include <Common-cpp/inc/Logger.h>
 #include <LoadBalancing-cpp/inc/Client.h>
 
+#include "network_game_manager.h"
+
+class ClientApplication;
+
 /**
  * \brief ClientNetworkManager is a class responsible for managing network
  * communication on the client side using Photon's LoadBalancing API.
@@ -24,6 +28,15 @@ class ClientNetworkManager final : public NetworkInterface,
    */
   ClientNetworkManager(const ExitGames::Common::JString& appID,
                        const ExitGames::Common::JString& appVersion);
+
+  void RegisterClientApplication(
+      ClientApplication* client_application) noexcept {
+    client_application_ = client_application;
+  }
+
+  void RegisterNetworkGameManager(NetworkGameManager* network_game_manager) noexcept {
+    network_game_manager_ = network_game_manager;
+  }
 
   /**
    * \brief Initiates a connection to the Photon server.
@@ -118,7 +131,8 @@ class ClientNetworkManager final : public NetworkInterface,
 
   // Member variables.
   // =================
-
+  ClientApplication* client_application_ = nullptr;
+  NetworkGameManager* network_game_manager_ = nullptr;
   ExitGames::LoadBalancing::Client load_balancing_client_;
   ExitGames::Common::Logger mLogger;  // name must be mLogger because it is accessed by EGLOG()
 };

@@ -3,15 +3,15 @@
 #include "raylib_wrapper.h"
 
 void GameManager::Init(PlayerId player_id, int input_profile_id) noexcept {
-  game_.world.Init(Math::Vec2F(0.f, 0.f), 110);
-  game_.world.SetContactListener(this);
+  world_.Init(Math::Vec2F(0.f, 0.f), 110);
+  world_.SetContactListener(this);
 
-  player_manager_.RegisterWorld(&game_.world);
+  player_manager_.RegisterWorld(&world_);
   player_manager_.RegisterProjectileManager(&projectile_manager_);
   player_manager_.Init();
 
-  projectile_manager_.Init(&game_.world);
-  platform_manager_.Init(&game_.world);
+  projectile_manager_.Init(&world_);
+  platform_manager_.Init(&world_);
 
   player_id_ = player_id;
   input_profile_id_ = input_profile_id;
@@ -34,18 +34,17 @@ void GameManager::FixedUpdate(FrameNbr frame_nbr) noexcept {
 
   player_manager_.FixedUpdate();
 
-  game_.world.Update(game_constants::kFixedDeltaTime);
+  world_.Update(game_constants::kFixedDeltaTime);
 }
 
 void GameManager::Deinit() noexcept {
-  game_.world.Deinit();
+  world_.Deinit();
 }
 
 void GameManager::Copy(const GameManager& game_manager) noexcept {
-  game_ = game_manager.game_;
-  //game_.world = game_manager.game_.world;
-  //player_manager_.Copy(game_manager.player_manager_);
-  //projectile_manager_.Copy(game_manager.projectile_manager_);
+  world_ = game_manager.world_;
+  player_manager_.Copy(game_manager.player_manager_);
+  projectile_manager_.Copy(game_manager.projectile_manager_);
 }
 
 int GameManager::ComputeChecksum() const noexcept {

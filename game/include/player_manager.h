@@ -12,7 +12,7 @@
  */
 struct Player {
   inputs::PlayerInput input = 0;
-  PlayerId id = -1;
+  float shoot_timer_ = 0.f;
   PhysicsEngine::ColliderRef main_col_ref{};
   PhysicsEngine::ColliderRef jump_col_ref{};
 };
@@ -50,13 +50,12 @@ public:
   [[nodiscard]] Math::CircleF GetJumpColliderShape(
       std::size_t idx) const noexcept;
 
-  //bool can_jump_ = true;
-  //bool is_jumping_ = false;
-
 private:
  void Move(const Player& player) const noexcept;
  void Shoot(const Player& player) const noexcept;
  std::array<Player, game_constants::kMaxPlayerCount> players_{};
  PhysicsEngine::World* world_ = nullptr;
  ProjectileManager* projectile_manager_ = nullptr;
+
+  static constexpr float kShootCooldown = 0.5f;
 };

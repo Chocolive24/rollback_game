@@ -28,10 +28,10 @@ public:
   GameManager& operator=(const GameManager& other) noexcept = default;
   ~GameManager() noexcept override = default;
 
-  virtual void Init(PlayerId player_id, int input_profile_id) noexcept;
-  virtual void Update() noexcept;
-  virtual void FixedUpdate(FrameNbr frame_nbr) noexcept;
-  virtual void Deinit() noexcept;
+  void Init(PlayerId player_id, int input_profile_id) noexcept;
+  void Update() noexcept;
+  void FixedUpdate(FrameNbr frame_nbr) noexcept;
+  void Deinit() noexcept;
 
   void RegisterRollbackManager(RollbackManager* rollback_manager) noexcept {
     rollback_manager_ = rollback_manager;
@@ -49,7 +49,7 @@ public:
    * when rollback is applied to go back to a previous game state.
    * \param game The game to be copied.
    */
-  void Copy(const Game& game) noexcept { game_ = game; }
+  //void Copy(const Game& game) noexcept { game_ = game; }
 
   [[nodiscard]] int ComputeChecksum() const noexcept;
 
@@ -74,8 +74,8 @@ public:
   }
 
 protected:
-  Game game_{};
-  //PhysicsEngine::World world_{};
+  //Game game_{};
+  PhysicsEngine::World world_{};
 
   RollbackManager* rollback_manager_ = nullptr;
 

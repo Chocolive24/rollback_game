@@ -40,19 +40,6 @@ struct FrameToConfirm {
 };
 
 /**
- * \brief ClientId 
- */
-class ClientId {
-public:
-  explicit ClientId(std::int8_t id) noexcept;
-
-  //TODO operator de conversion vers int.
-
- private:
-  std::int8_t id_ = 0;
-};
-
-/**
  * \brief SimulationInput is a struct containing a frame input and have a delay value
  * to simulate the network delay.
  */
