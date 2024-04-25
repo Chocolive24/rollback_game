@@ -59,8 +59,22 @@ void PlayerManager::FixedUpdate() noexcept {
       return;
     }
 
-    Shoot(player);
-    player.shoot_timer_ = kShootCooldown;
+    assert(projectile_manager_ != nullptr,
+           "No projectiles manager pointer given to player manager.\n");
+
+    // TODO: pas de creation de proj si le click s'est fait dans le joueur.
+    if (player.input &
+        static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kShoot)) {
+      const auto& body = world_->GetBody(
+          world_->GetCollider(player.main_col_ref).GetBodyRef());
+      // const auto proj_v = mouse_pos - body.Position();
+      // const auto proj_dir = proj_v.Normalized();
+
+      projectile_manager_->CreateProjectile(
+          body.Position() + Math::Vec2F(0.5f, 0.f), Math::Vec2F::Right());
+      player.shoot_timer_ = kShootCooldown;
+    }
+    
   }
 }
 
@@ -123,37 +137,30 @@ void PlayerManager::Copy(const PlayerManager& player_manager) noexcept {
 }
 
 // Function to compute checksum for the players state.
-int PlayerManager::ComputeChecksum() const noexcept {
-  int checksum = 0;
+Checksum PlayerManager::ComputeChecksum() const noexcept {
+  Checksum checksum = 0;
 
   for (const auto& player : players_) {
     const auto& body_ref = world_->GetCollider(player.main_col_ref).GetBodyRef();
     const auto& body = world_->GetBody(body_ref);
 
     const auto& pos = body.Position();
-    const auto* pos_ptr = reinterpret_cast<const int*>(&pos);
+    const auto* pos_ptr = reinterpret_cast<const Checksum*>(&pos);
 
     // Add position
-    for (size_t i = 0; i < sizeof(Math::Vec2F) / sizeof(int); i++) {
+    for (size_t i = 0; i < sizeof(Math::Vec2F) / sizeof(Checksum); i++) {
       checksum += pos_ptr[i];
     }
 
     // Add velocity
     const auto& velocity = body.Velocity();
-    const auto* velocity_ptr = reinterpret_cast<const int*>(&velocity);
-    for (size_t i = 0; i < sizeof(Math::Vec2F) / sizeof(int); i++) {
+    const auto* velocity_ptr = reinterpret_cast<const Checksum*>(&velocity);
+    for (size_t i = 0; i < sizeof(Math::Vec2F) / sizeof(Checksum); i++) {
       checksum += velocity_ptr[i];
     }
 
-    // Add forces
-    //const auto& forces = body.Forces();
-    //const auto* forces_ptr = reinterpret_cast<const int*>(&forces);
-    //for (size_t i = 0; i < sizeof(Math::Vec2F) / sizeof(int); i++) {
-    //  checksum += forces_ptr[i];
-    //}
-
     // Add input.
-    checksum += static_cast<int>(player.input);
+    checksum += player.input;
   }
 
   return checksum;

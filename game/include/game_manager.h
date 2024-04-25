@@ -51,7 +51,7 @@ public:
    */
   //void Copy(const Game& game) noexcept { game_ = game; }
 
-  [[nodiscard]] int ComputeChecksum() const noexcept;
+  [[nodiscard]] Checksum ComputeChecksum() const noexcept;
 
   [[nodiscard]] const PlayerManager& player_manager() const noexcept {
     return player_manager_;

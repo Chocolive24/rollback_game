@@ -35,7 +35,7 @@ public:
                             PlayerId player_id);
 
   void SimulateUntilCurrentFrame() noexcept;
-  [[nodiscard]] int ComputeFrameToConfirmChecksum() noexcept;
+  [[nodiscard]] Checksum ComputeFrameToConfirmChecksum() noexcept;
   void ConfirmFrame() noexcept;
 
   [[nodiscard]] inputs::PlayerInput GetPlayerInputAtFrame(

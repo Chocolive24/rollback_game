@@ -36,12 +36,21 @@ void NetworkGameManager::OnEventReceived(EventCode event_code,
         remote_frame_inputs.push_back(frame_input);
       }
 
+      //TODO: Si l'input a deja ete recu, un confirm packet a deja ete envoye donc il faut pas
+      //TODO: le renvoyer.
+      if (remote_frame_inputs.back().frame_nbr < rollback_manager_->last_remote_input_frame())
+      {
+        std::cout << "received old input, no need to send confirm packet\n";
+        return;
+      }
+
 
       const PlayerId other_client_id = player_id_ == 0 ? 1 : 0;
       rollback_manager_->SetRemotePlayerInput(remote_frame_inputs,
                                              other_client_id);
 
       if (player_id_ == kMasterClientId) {
+        //TODO: ne pas envoyer la frame confirmation si j'ai déjà au l'input.
         SendFrameConfirmationEvent(remote_frame_inputs);
       }
 
@@ -166,6 +175,17 @@ void NetworkGameManager::SendFrameConfirmationEvent(
 
   while (frame_to_confirm_it != end_it) {
     const auto frame_to_confirm = *frame_to_confirm_it;
+
+    if (frame_to_confirm.frame_nbr > current_frame)
+    {
+      std::cout << "Tried to confirm a frame greater than the local current frame.\n";
+      break;
+    }
+
+    //TODO: ici frame_to_confirm_it à crash car la frame a confirmer était la frame 200
+    //TODO: mais la current frame était la frame 198.
+    //TODO: Pour debugger j'ai lancé le client 1 en debug (le master) et l'autre client en exe depuis
+    //TODO: explorateur de fichier.
 
     const int check_sum = rollback_manager_->ComputeFrameToConfirmChecksum();
 

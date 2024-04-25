@@ -97,7 +97,7 @@ void RollbackManager::SimulateUntilCurrentFrame() noexcept {
   // received events from network.
 }
 
-int RollbackManager::ComputeFrameToConfirmChecksum() noexcept {
+Checksum RollbackManager::ComputeFrameToConfirmChecksum() noexcept {
   game_manager_to_confirm_.Copy(confirmed_game_manager_);
 
   for (FrameNbr frame = static_cast<FrameNbr>(confirmed_frame_ + 1);

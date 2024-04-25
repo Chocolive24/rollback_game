@@ -37,7 +37,7 @@ public:
    */
   void Copy(const PlayerManager& player_manager) noexcept;
 
-  [[nodiscard]] int ComputeChecksum() const noexcept;
+  [[nodiscard]] Checksum ComputeChecksum() const noexcept;
 
   void OnTriggerEnter(PhysicsEngine::ColliderRef colliderRefA,
                       PhysicsEngine::ColliderRef colliderRefB) noexcept;

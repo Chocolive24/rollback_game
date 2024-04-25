@@ -47,7 +47,7 @@ void GameManager::Copy(const GameManager& game_manager) noexcept {
   projectile_manager_.Copy(game_manager.projectile_manager_);
 }
 
-int GameManager::ComputeChecksum() const noexcept {
+Checksum GameManager::ComputeChecksum() const noexcept {
   int checksum = 0;
 
   checksum += player_manager_.ComputeChecksum();

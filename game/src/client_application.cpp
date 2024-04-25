@@ -11,9 +11,10 @@ void ClientApplication::Setup() noexcept {
 
 void ClientApplication::Update() noexcept {
   fixed_timer_ += raylib::GetFrameTime();
-  while (fixed_timer_ >= game_constants::kFixedDeltaTime) {
-    network_manager_.Service();
 
+  network_manager_.Service();
+
+  while (fixed_timer_ >= game_constants::kFixedDeltaTime) {
     if (state_ == AppState::kInGame) {
       rollback_manager_.IncreaseCurrentFrame();
 
