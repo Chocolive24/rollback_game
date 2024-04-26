@@ -6,8 +6,28 @@ void NetworkGameManager::RegisterNetworkInterface(
   network_interface_ = network_interface;
 }
 
+void NetworkGameManager::Init(PlayerId player_id, int input_profile_id) noexcept {
+  rollback_manager_.RegisterGameManager(this);
+  GameManager::Init(player_id, input_profile_id);
+}
+
+void NetworkGameManager::FixedUpdateCurrentFrame() noexcept {
+  for (PlayerId player_id = 0; player_id < game_constants::kMaxPlayerCount;
+       player_id++) {
+    const auto input = rollback_manager_.GetPlayerInputAtFrame(
+        player_id, rollback_manager_.current_frame());
+    SetPlayerInput(input, player_id);
+  }
+
+  FixedUpdate();
+}
+
+void NetworkGameManager::IncreaseCurrentFrame() noexcept {
+  rollback_manager_.IncreaseCurrentFrame();
+}
+
 void NetworkGameManager::OnEventReceived(EventCode event_code,
-  const ExitGames::Common::Hashtable& event_content) noexcept {
+                                         const ExitGames::Common::Hashtable& event_content) noexcept {
   switch (event_code)
   {
     case EventCode::kInput: {
@@ -38,7 +58,7 @@ void NetworkGameManager::OnEventReceived(EventCode event_code,
 
       //TODO: Si l'input a deja ete recu, un confirm packet a deja ete envoye donc il faut pas
       //TODO: le renvoyer.
-      if (remote_frame_inputs.back().frame_nbr < rollback_manager_->last_remote_input_frame())
+      if (remote_frame_inputs.back().frame_nbr < rollback_manager_.last_remote_input_frame())
       {
         std::cout << "received old input, no need to send confirm packet\n";
         return;
@@ -46,7 +66,7 @@ void NetworkGameManager::OnEventReceived(EventCode event_code,
 
 
       const PlayerId other_client_id = player_id_ == 0 ? 1 : 0;
-      rollback_manager_->SetRemotePlayerInput(remote_frame_inputs,
+      rollback_manager_.SetRemotePlayerInput(remote_frame_inputs,
                                              other_client_id);
 
       if (player_id_ == kMasterClientId) {
@@ -93,22 +113,22 @@ void NetworkGameManager::OnEventReceived(EventCode event_code,
       if (player_id_ != kMasterClientId) {
         // If we did not receive the inputs before the frame to confirm, add
         // them.
-        if (rollback_manager_->last_remote_input_frame() <
+        if (rollback_manager_.last_remote_input_frame() <
             frame_to_confirm.frame_inputs.back().frame_nbr) {
           const PlayerId other_client_id = player_id_ == 0 ? 1 : 0;
-          rollback_manager_->SetRemotePlayerInput(frame_to_confirm.frame_inputs,
+          rollback_manager_.SetRemotePlayerInput(frame_to_confirm.frame_inputs,
                                                  other_client_id);
         }
 
-        const int check_sum = rollback_manager_->ConfirmFrame();
+        const int check_sum = rollback_manager_.ConfirmFrame();
 
         if (check_sum != frame_to_confirm.checksum) {
           std::cerr << "Not same checksum for frame: "
-                    << rollback_manager_->frame_to_confirm() << '\n';
+                    << rollback_manager_.frame_to_confirm() << '\n';
           return;
         }
 
-        //rollback_manager_->ConfirmFrame();
+        //rollback_manager_.ConfirmFrame();
 
         // Send a frame confirmation event with empty data to the master client
         // just to tell him that we confirmed the frame and that he can erase
@@ -130,10 +150,10 @@ void NetworkGameManager::OnEventReceived(EventCode event_code,
 
 void NetworkGameManager::SendInputEvent() noexcept {
   const auto input = inputs::GetPlayerInput(input_profile_id_);
-  const auto current_frame = rollback_manager_->current_frame();
+  const auto current_frame = rollback_manager_.current_frame();
 
   const inputs::FrameInput frame_input{input, current_frame};
-  rollback_manager_->SetLocalPlayerInput(frame_input, player_id_);
+  rollback_manager_.SetLocalPlayerInput(frame_input, player_id_);
 
   inputs_.push_back(input);
   frames_.push_back(current_frame);
@@ -152,12 +172,12 @@ void NetworkGameManager::SendFrameConfirmationEvent(
   auto frame_to_confirm_it = std::find_if(
       remote_frame_inputs.begin(), remote_frame_inputs.end(),
       [this](inputs::FrameInput frame_input) {
-        return frame_input.frame_nbr == rollback_manager_->frame_to_confirm();
+        return frame_input.frame_nbr == rollback_manager_.frame_to_confirm();
       });
 
   auto end_it = remote_frame_inputs.end();
 
-  const auto current_frame = rollback_manager_->current_frame();
+  const auto current_frame = rollback_manager_.current_frame();
 
   // If the last remote inputs is greater than the current frame. The end
   // iterator must be equal to the frame input of the local current frame.
@@ -187,7 +207,7 @@ void NetworkGameManager::SendFrameConfirmationEvent(
     //TODO: Pour debugger j'ai lancé le client 1 en debug (le master) et l'autre client en exe depuis
     //TODO: explorateur de fichier.
 
-    const int check_sum = rollback_manager_->ConfirmFrame();
+    const int check_sum = rollback_manager_.ConfirmFrame();
 
     ExitGames::Common::Hashtable event_check_sum;
 
@@ -204,7 +224,7 @@ void NetworkGameManager::SendFrameConfirmationEvent(
 
     network_interface_->RaiseEvent(true, EventCode::kFrameConfirmation, event_check_sum);
 
-    //rollback_manager_->ConfirmFrame();
+    //rollback_manager_.ConfirmFrame();
     ++frame_to_confirm_it;
   }
 }

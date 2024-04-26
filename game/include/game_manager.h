@@ -17,14 +17,11 @@ public:
   GameManager& operator=(const GameManager& other) noexcept = default;
   ~GameManager() noexcept override = default;
 
-  void Init(PlayerId player_id, int input_profile_id) noexcept;
-  void Update() noexcept;
-  void FixedUpdate(FrameNbr frame_nbr) noexcept;
+  virtual void Init(PlayerId player_id, int input_profile_id) noexcept;
+  void FixedUpdate() noexcept;
   void Deinit() noexcept;
 
-  void RegisterRollbackManager(RollbackManager* rollback_manager) noexcept {
-    rollback_manager_ = rollback_manager;
-  }
+  void SetPlayerInput(inputs::PlayerInput input, PlayerId player_id) noexcept;
 
   /**
    * \brief Copy is a method which copies the states of the game. It used
@@ -57,12 +54,6 @@ public:
 
 protected:
   GameState game_state_{};
- // PhysicsEngine::World world_{};
-
-  RollbackManager* rollback_manager_ = nullptr;
-
-  //PlayerManager player_manager_{};
-  //ProjectileManager projectile_manager_{};
   PlatformManager platform_manager_{};
 
   int input_profile_id_ = -1;

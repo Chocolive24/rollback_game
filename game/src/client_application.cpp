@@ -19,7 +19,7 @@ void ClientApplication::Update() noexcept {
       rollback_manager_.IncreaseCurrentFrame();
 
       network_game_manager_.SendInputEvent();
-      network_game_manager_.FixedUpdate(rollback_manager_.current_frame());
+      network_game_manager_.FixedUpdate();
     }
 
     fixed_timer_ -= game_constants::kFixedDeltaTime;
@@ -83,7 +83,6 @@ void ClientApplication::StartGame() noexcept {
 
   // PlayerId is in range 0-1 but ClientId is in range 1-2.
   network_game_manager_.Init(client_id_ - 1, game_constants::kLocalPlayer1InputId);
-  network_game_manager_.RegisterRollbackManager(&rollback_manager_);
   network_game_manager_.RegisterNetworkInterface(&network_manager_);
   rollback_manager_.RegisterGameManager(&network_game_manager_);
 

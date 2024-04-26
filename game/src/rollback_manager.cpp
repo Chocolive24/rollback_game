@@ -4,7 +4,7 @@
 void RollbackManager::SetLocalPlayerInput(inputs::FrameInput frame_input,
                                           PlayerId player_id) {
   inputs_[player_id][frame_input.frame_nbr] = frame_input.input;
-  //current_frame_ = frame_input.frame_nbr;
+  last_inputs_[player_id] = frame_input.input;
 }
 
 void RollbackManager::SetRemotePlayerInput(
@@ -76,6 +76,7 @@ void RollbackManager::SetRemotePlayerInput(
   //  SimulateUntilCurrentFrame();
   //}
 
+  last_inputs_[player_id] = last_remote_frame_input.input;
   last_remote_input_frame_ = last_remote_frame_input.frame_nbr;
 }
 
@@ -84,13 +85,13 @@ void RollbackManager::SimulateUntilCurrentFrame() noexcept {
 
   for (FrameNbr frame = static_cast<FrameNbr>(confirmed_frame_ + 1); 
       frame < current_frame_; frame++) {
-    /*for (PlayerId player_id = 0; player_id < game_constants::kMaxPlayerCount;
+    for (PlayerId player_id = 0; player_id < game_constants::kMaxPlayerCount;
          player_id++) {
-      const auto input = inputs_[player_id][i];
+      const auto input = inputs_[player_id][frame];
       current_game_manager_->SetPlayerInput(input, player_id);
-    }*/
+    }
 
-    current_game_manager_->FixedUpdate(frame);
+    current_game_manager_->FixedUpdate();
   }
 
   // The Fixed update of the current frame is made in the main loop after polling
@@ -98,7 +99,12 @@ void RollbackManager::SimulateUntilCurrentFrame() noexcept {
 }
 
 Checksum RollbackManager::ConfirmFrame() noexcept {
-  confirmed_game_manager_.FixedUpdate(frame_to_confirm_);
+  for (PlayerId player_id = 0; player_id < game_constants::kMaxPlayerCount;
+       player_id++) {
+    const auto input = inputs_[player_id][frame_to_confirm_];
+    confirmed_game_manager_.SetPlayerInput(input, player_id);
+  }
+  confirmed_game_manager_.FixedUpdate();
   const auto checksum = confirmed_game_manager_.ComputeChecksum();
   confirmed_frame_++;
   frame_to_confirm_++;
@@ -107,5 +113,5 @@ Checksum RollbackManager::ConfirmFrame() noexcept {
 
 inputs::PlayerInput RollbackManager::GetPlayerInputAtFrame(PlayerId player_id, 
     FrameNbr frame_nbr) const noexcept {
-  return inputs_[player_id][frame_nbr];
+  return last_inputs_[player_id];
 }

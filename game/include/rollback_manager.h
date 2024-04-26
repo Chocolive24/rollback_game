@@ -25,7 +25,6 @@ public:
   void RegisterGameManager(GameManager* player_manager) noexcept {
     current_game_manager_ = player_manager;
     confirmed_game_manager_.Init(player_manager->player_id(), player_manager->input_profile_id());
-    confirmed_game_manager_.RegisterRollbackManager(this);
   }
 
   void SetLocalPlayerInput(inputs::FrameInput frame_input, PlayerId player_id);
@@ -96,4 +95,6 @@ private:
 
   std::array<std::array<inputs::PlayerInput, kMaxFrameCount>,
              game_constants::kMaxPlayerCount> inputs_{};
+
+  std::array<inputs::PlayerInput, 2> last_inputs_{};
 };

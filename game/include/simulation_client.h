@@ -42,7 +42,6 @@ private:
   void PollInputPackets();
   void PollConfirmFramePackets();
 
-  RollbackManager rollback_manager_{};
   NetworkGameManager network_game_manager_{};
   GameRenderer game_renderer_{&network_game_manager_};
 

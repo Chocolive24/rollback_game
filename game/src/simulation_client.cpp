@@ -11,11 +11,10 @@ void SimulationClient::Init(int input_profile_id, PlayerId player_id) noexcept {
 
   network_game_manager_.Init(player_id, input_profile_id);
   network_game_manager_.RegisterNetworkInterface(this);
-  network_game_manager_.RegisterRollbackManager(&rollback_manager_);
 
   game_renderer_.Init();
 
-  rollback_manager_.RegisterGameManager(&network_game_manager_);
+
 }
 
 void SimulationClient::RegisterOtherClient(SimulationClient* other_client) noexcept {
@@ -31,13 +30,12 @@ void SimulationClient::Update() noexcept {
 }
 
 void SimulationClient::FixedUpdate() noexcept {
-  rollback_manager_.IncreaseCurrentFrame();
-
+  network_game_manager_.IncreaseCurrentFrame();
   network_game_manager_.SendInputEvent();
   PollInputPackets();
   PollConfirmFramePackets();
 
-  network_game_manager_.FixedUpdate(rollback_manager_.current_frame());
+  network_game_manager_.FixedUpdateCurrentFrame();
 }
 
 void SimulationClient::Draw(

@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-using Checksum = std::uint32_t;
+using Checksum = std::int32_t;
 using FrameNbr = std::int16_t;
 using PlayerId = std::int8_t;
 using ClientId = std::int8_t;

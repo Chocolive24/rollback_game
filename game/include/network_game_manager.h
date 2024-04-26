@@ -12,6 +12,11 @@ class NetworkGameManager final : public GameManager {
 public:
   void RegisterNetworkInterface(NetworkInterface* network_interface) noexcept;
 
+  void Init(PlayerId player_id, int input_profile_id) noexcept override;
+  void FixedUpdateCurrentFrame() noexcept;
+
+  void IncreaseCurrentFrame() noexcept;
+
   void SendInputEvent() noexcept;
   void OnEventReceived(EventCode event_code, 
       const ExitGames::Common::Hashtable& event_content) noexcept;
@@ -22,6 +27,8 @@ private:
 
   std::vector<inputs::PlayerInput> inputs_{};
   std::vector<FrameNbr> frames_{};
+
+  RollbackManager rollback_manager_;
 
   NetworkInterface* network_interface_ = nullptr;
 
