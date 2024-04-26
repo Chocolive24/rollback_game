@@ -100,7 +100,7 @@ void NetworkGameManager::OnEventReceived(EventCode event_code,
                                                  other_client_id);
         }
 
-        const int check_sum = rollback_manager_->ComputeFrameToConfirmChecksum();
+        const int check_sum = rollback_manager_->ConfirmFrame();
 
         if (check_sum != frame_to_confirm.checksum) {
           std::cerr << "Not same checksum for frame: "
@@ -108,7 +108,7 @@ void NetworkGameManager::OnEventReceived(EventCode event_code,
           return;
         }
 
-        rollback_manager_->ConfirmFrame();
+        //rollback_manager_->ConfirmFrame();
 
         // Send a frame confirmation event with empty data to the master client
         // just to tell him that we confirmed the frame and that he can erase
@@ -187,7 +187,7 @@ void NetworkGameManager::SendFrameConfirmationEvent(
     //TODO: Pour debugger j'ai lancé le client 1 en debug (le master) et l'autre client en exe depuis
     //TODO: explorateur de fichier.
 
-    const int check_sum = rollback_manager_->ComputeFrameToConfirmChecksum();
+    const int check_sum = rollback_manager_->ConfirmFrame();
 
     ExitGames::Common::Hashtable event_check_sum;
 
@@ -204,7 +204,7 @@ void NetworkGameManager::SendFrameConfirmationEvent(
 
     network_interface_->RaiseEvent(true, EventCode::kFrameConfirmation, event_check_sum);
 
-    rollback_manager_->ConfirmFrame();
+    //rollback_manager_->ConfirmFrame();
     ++frame_to_confirm_it;
   }
 }

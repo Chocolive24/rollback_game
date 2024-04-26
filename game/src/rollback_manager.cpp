@@ -97,37 +97,12 @@ void RollbackManager::SimulateUntilCurrentFrame() noexcept {
   // received events from network.
 }
 
-Checksum RollbackManager::ComputeFrameToConfirmChecksum() noexcept {
-  game_manager_to_confirm_.Copy(confirmed_game_manager_);
-
-  for (FrameNbr frame = static_cast<FrameNbr>(confirmed_frame_ + 1);
-       frame <= frame_to_confirm_; frame++) {
-   /* for (PlayerId player_id = 0; player_id < game_constants::kMaxPlayerCount;
-         player_id++) {
-      const auto input = inputs_[player_id][frame];
-      game_manager_to_confirm_.SetPlayerInput(input, player_id);
-    }*/
-
-    game_manager_to_confirm_.FixedUpdate(frame);
-  }
-
-  return game_manager_to_confirm_.ComputeChecksum();
-}
-
-void RollbackManager::ConfirmFrame() noexcept {
-  for (FrameNbr frame = static_cast<FrameNbr>(confirmed_frame_ + 1);
-       frame <= frame_to_confirm_; frame++) {
-    /*for (PlayerId player_id = 0; player_id < game_constants::kMaxPlayerCount;
-         player_id++) {
-      const auto input = inputs_[player_id][frame];
-      confirmed_game_manager_.SetPlayerInput(input, player_id);
-    }*/
-
-    confirmed_game_manager_.FixedUpdate(frame);
-  }
-
+Checksum RollbackManager::ConfirmFrame() noexcept {
+  confirmed_game_manager_.FixedUpdate(frame_to_confirm_);
+  const auto checksum = confirmed_game_manager_.ComputeChecksum();
   confirmed_frame_++;
   frame_to_confirm_++;
+  return checksum;
 }
 
 inputs::PlayerInput RollbackManager::GetPlayerInputAtFrame(PlayerId player_id, 

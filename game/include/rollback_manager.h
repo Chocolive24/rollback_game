@@ -26,8 +26,6 @@ public:
     current_game_manager_ = player_manager;
     confirmed_game_manager_.Init(player_manager->player_id(), player_manager->input_profile_id());
     confirmed_game_manager_.RegisterRollbackManager(this);
-    game_manager_to_confirm_.Init(player_manager->player_id(), player_manager->input_profile_id());
-    game_manager_to_confirm_.RegisterRollbackManager(this);
   }
 
   void SetLocalPlayerInput(inputs::FrameInput frame_input, PlayerId player_id);
@@ -35,8 +33,7 @@ public:
                             PlayerId player_id);
 
   void SimulateUntilCurrentFrame() noexcept;
-  [[nodiscard]] Checksum ComputeFrameToConfirmChecksum() noexcept;
-  void ConfirmFrame() noexcept;
+  Checksum ConfirmFrame() noexcept;
 
   [[nodiscard]] inputs::PlayerInput GetPlayerInputAtFrame(
       PlayerId player_id, FrameNbr frame_nbr) const noexcept;
@@ -70,12 +67,6 @@ private:
    * at the last confirmed frame state.
    */
   GameManager confirmed_game_manager_{};
-
-  /**
-   * \brief game_manager_to_confirm_ is a GameManager at the state that needs
-   * to be confirmed.
-   */
-  GameManager game_manager_to_confirm_{};
 
   /**
    * \brief The frame nbr of the local client.

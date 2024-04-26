@@ -1,20 +1,9 @@
 #pragma once
 
+#include "game_state.h"
 #include "platforms_manager.h"
-#include "player_manager.h"
-#include "World.h"
 
 class RollbackManager;
-
-/**
- * \brief Game is a struct containing all the variables that describe
- * the state of the game. These variables are the one that are copied
- * when a rollback is needed.
- */
-struct Game {
-  PhysicsEngine::World world;
-  std::array<inputs::PlayerInput, game_constants::kMaxPlayerCount> player_inputs{};
-};
 
 /**
  * \brief GameManager is a class that update the game logic.
@@ -44,17 +33,10 @@ public:
    */
   void Copy(const GameManager& game_manager) noexcept;
 
-  /**
-   * \brief Copy is a method which copies the states of the game. It used
-   * when rollback is applied to go back to a previous game state.
-   * \param game The game to be copied.
-   */
-  //void Copy(const Game& game) noexcept { game_ = game; }
-
   [[nodiscard]] Checksum ComputeChecksum() const noexcept;
 
   [[nodiscard]] const PlayerManager& player_manager() const noexcept {
-    return player_manager_;
+    return game_state_.player_manager;
   }
 
   [[nodiscard]] const PlatformManager& platform_manager() const noexcept {
@@ -62,7 +44,7 @@ public:
   }
 
   [[nodiscard]] const ProjectileManager& projectile_manager() const noexcept {
-    return projectile_manager_;
+    return game_state_.projectile_manager;
   }
 
   [[nodiscard]] PlayerId player_id() const noexcept {
@@ -74,13 +56,13 @@ public:
   }
 
 protected:
-  //Game game_{};
-  PhysicsEngine::World world_{};
+  GameState game_state_{};
+ // PhysicsEngine::World world_{};
 
   RollbackManager* rollback_manager_ = nullptr;
 
-  PlayerManager player_manager_{};
-  ProjectileManager projectile_manager_{};
+  //PlayerManager player_manager_{};
+  //ProjectileManager projectile_manager_{};
   PlatformManager platform_manager_{};
 
   int input_profile_id_ = -1;
