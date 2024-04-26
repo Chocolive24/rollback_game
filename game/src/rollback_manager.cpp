@@ -1,4 +1,7 @@
 #include "rollback_manager.h"
+
+#include <iostream>
+
 #include "game_manager.h"
 
 void RollbackManager::SetLocalPlayerInput(inputs::FrameInput frame_input,
@@ -42,7 +45,7 @@ void RollbackManager::SetRemotePlayerInput(
                                         last_remote_input_frame_ + 1;
                                });
 
-  //bool must_rollback = last_remote_input_frame_ == -1;
+  bool must_rollback = last_remote_input_frame_ == -1;
 
   auto idx = std::distance(frame_inputs.begin(), it);
   for (int i = last_remote_input_frame_ + 1; i < last_remote_frame_input.frame_nbr; i++) {
@@ -51,7 +54,7 @@ void RollbackManager::SetRemotePlayerInput(
     //if (last_remote_input_frame_ > -1) {
     //  // If the new remote input is different from the last remote input received
     //  // we need to rollback to correct the simulation.
-    //  if (input != inputs_[player_id][last_remote_input_frame_] && !must_rollback) {
+    //  if (input != last_inputs_[player_id]) {
     //    must_rollback = true;
     //    std::cout << "must roll" << i << "\n";
     //  }
@@ -80,7 +83,7 @@ void RollbackManager::SetRemotePlayerInput(
   last_remote_input_frame_ = last_remote_frame_input.frame_nbr;
 }
 
-void RollbackManager::SimulateUntilCurrentFrame() noexcept {
+void RollbackManager::SimulateUntilCurrentFrame() const noexcept {
   current_game_manager_->Copy(confirmed_game_manager_);
 
   for (FrameNbr frame = static_cast<FrameNbr>(confirmed_frame_ + 1); 
@@ -104,14 +107,16 @@ Checksum RollbackManager::ConfirmFrame() noexcept {
     const auto input = inputs_[player_id][frame_to_confirm_];
     confirmed_game_manager_.SetPlayerInput(input, player_id);
   }
+
   confirmed_game_manager_.FixedUpdate();
   const auto checksum = confirmed_game_manager_.ComputeChecksum();
+
   confirmed_frame_++;
   frame_to_confirm_++;
+
   return checksum;
 }
 
-inputs::PlayerInput RollbackManager::GetPlayerInputAtFrame(PlayerId player_id, 
-    FrameNbr frame_nbr) const noexcept {
+inputs::PlayerInput RollbackManager::GetLastConfirmedInput(PlayerId player_id) const noexcept {
   return last_inputs_[player_id];
 }

@@ -13,8 +13,6 @@ void SimulationClient::Init(int input_profile_id, PlayerId player_id) noexcept {
   network_game_manager_.RegisterNetworkInterface(this);
 
   game_renderer_.Init();
-
-
 }
 
 void SimulationClient::RegisterOtherClient(SimulationClient* other_client) noexcept {

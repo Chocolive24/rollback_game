@@ -31,11 +31,11 @@ public:
   void SetRemotePlayerInput(const std::vector<inputs::FrameInput>& frame_inputs, 
                             PlayerId player_id);
 
-  void SimulateUntilCurrentFrame() noexcept;
+  void SimulateUntilCurrentFrame() const noexcept;
   Checksum ConfirmFrame() noexcept;
 
-  [[nodiscard]] inputs::PlayerInput GetPlayerInputAtFrame(
-      PlayerId player_id, FrameNbr frame_nbr) const noexcept;
+  [[nodiscard]] inputs::PlayerInput GetLastConfirmedInput(
+    PlayerId player_id) const noexcept;
 
   [[nodiscard]] FrameNbr current_frame() const noexcept {
     return current_frame_;

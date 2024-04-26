@@ -14,8 +14,7 @@ void NetworkGameManager::Init(PlayerId player_id, int input_profile_id) noexcept
 void NetworkGameManager::FixedUpdateCurrentFrame() noexcept {
   for (PlayerId player_id = 0; player_id < game_constants::kMaxPlayerCount;
        player_id++) {
-    const auto input = rollback_manager_.GetPlayerInputAtFrame(
-        player_id, rollback_manager_.current_frame());
+    const auto input = rollback_manager_.GetLastConfirmedInput(player_id);
     SetPlayerInput(input, player_id);
   }
 
@@ -127,8 +126,6 @@ void NetworkGameManager::OnEventReceived(EventCode event_code,
                     << rollback_manager_.frame_to_confirm() << '\n';
           return;
         }
-
-        //rollback_manager_.ConfirmFrame();
 
         // Send a frame confirmation event with empty data to the master client
         // just to tell him that we confirmed the frame and that he can erase

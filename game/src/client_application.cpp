@@ -16,10 +16,9 @@ void ClientApplication::Update() noexcept {
 
   while (fixed_timer_ >= game_constants::kFixedDeltaTime) {
     if (state_ == AppState::kInGame) {
-      rollback_manager_.IncreaseCurrentFrame();
-
+      network_game_manager_.IncreaseCurrentFrame();
       network_game_manager_.SendInputEvent();
-      network_game_manager_.FixedUpdate();
+      network_game_manager_.FixedUpdateCurrentFrame();
     }
 
     fixed_timer_ -= game_constants::kFixedDeltaTime;
@@ -84,7 +83,6 @@ void ClientApplication::StartGame() noexcept {
   // PlayerId is in range 0-1 but ClientId is in range 1-2.
   network_game_manager_.Init(client_id_ - 1, game_constants::kLocalPlayer1InputId);
   network_game_manager_.RegisterNetworkInterface(&network_manager_);
-  rollback_manager_.RegisterGameManager(&network_game_manager_);
 
   game_renderer_.Init();
   render_texture_ = raylib::LoadRenderTexture(raylib::GetScreenWidth(),

@@ -33,7 +33,6 @@ public:
 
 private:
   NetworkGameManager network_game_manager_{};
-  RollbackManager rollback_manager_{};
   ClientNetworkManager network_manager_{PHOTON_APP_ID, L"1.0"};
 
   GameRenderer game_renderer_{&network_game_manager_};

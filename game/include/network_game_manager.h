@@ -6,7 +6,8 @@
 
 /**
  * \brief NetworkGameManager is a class which is a GameManager with a network
- * interface to send events over the network.
+ * interface to send and receive events over the network and a rollback manager to
+ * keep the integrity of the simulation.
  */
 class NetworkGameManager final : public GameManager {
 public:
@@ -29,7 +30,6 @@ private:
   std::vector<FrameNbr> frames_{};
 
   RollbackManager rollback_manager_;
-
   NetworkInterface* network_interface_ = nullptr;
 
   static constexpr PlayerId kMasterClientId = 0;
