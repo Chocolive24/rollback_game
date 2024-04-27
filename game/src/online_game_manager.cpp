@@ -11,13 +11,16 @@ void OnlineGameManager::Init(int input_profile_id) noexcept {
 }
 
 void OnlineGameManager::FixedUpdateCurrentFrame() noexcept {
+  rollback_manager_.IncreaseCurrentFrame();
+
+  PollNetworkEvents();
+  SendInputEvent();
+
   for (PlayerId player_id = 0; player_id < game_constants::kMaxPlayerCount;
        player_id++) {
     const auto input = rollback_manager_.GetLastPlayerConfirmedInput(player_id);
     SetPlayerInput(input, player_id);
   }
-
-  PollNetworkEvents();
 
   FixedUpdate();
 }

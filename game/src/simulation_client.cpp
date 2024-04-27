@@ -10,6 +10,7 @@ void SimulationClient::Init(int input_profile_id, PlayerId player_id) noexcept {
   waiting_input_queue.reserve(kBaseInputSize);
 
   online_game_manager_.Init(input_profile_id);
+  online_game_manager_.SetPlayerId(player_id);
   online_game_manager_.RegisterNetworkInterface(this);
 
   game_renderer_.Init();
@@ -20,20 +21,14 @@ void SimulationClient::RegisterOtherClient(SimulationClient* other_client) noexc
 }
 
 void SimulationClient::Update() noexcept {
-  fixed_timer_ += raylib::GetFrameTime();
-  while (fixed_timer_ >= game_constants::kFixedDeltaTime) {
-    FixedUpdate();
-    fixed_timer_ -= game_constants::kFixedDeltaTime;
-  }
-}
-
-void SimulationClient::FixedUpdate() noexcept {
-  online_game_manager_.IncreaseCurrentFrame();
-  online_game_manager_.SendInputEvent();
   PollInputPackets();
   PollConfirmFramePackets();
 
-  online_game_manager_.FixedUpdateCurrentFrame();
+  fixed_timer_ += raylib::GetFrameTime();
+  while (fixed_timer_ >= game_constants::kFixedDeltaTime) {
+    online_game_manager_.FixedUpdateCurrentFrame();
+    fixed_timer_ -= game_constants::kFixedDeltaTime;
+  }
 }
 
 void SimulationClient::Draw(
@@ -70,7 +65,8 @@ void SimulationClient::PollInputPackets() {
        event_data.put(static_cast<nByte>(NetworkEventKey::kFrameNbr),
            remote_frames.data(), static_cast<int>(remote_frames.size()));
 
-      online_game_manager_.OnEventReceived(NetworkEventCode::kInput, event_data);
+      NetworkEvent network_event{NetworkEventCode::kInput, event_data};
+      online_game_manager_.PushNetworkEvent(network_event);
 
       it = waiting_input_queue.erase(it);
     }
@@ -107,8 +103,8 @@ void SimulationClient::PollConfirmFramePackets() {
                      remote_frames.data(),
                      static_cast<int>(remote_frames.size()));
 
-      online_game_manager_.OnEventReceived(NetworkEventCode::kFrameConfirmation,
-                                            event_data);
+      NetworkEvent network_event{NetworkEventCode::kFrameConfirmation, event_data};
+      online_game_manager_.PushNetworkEvent(network_event);
 
       frame_it = waiting_frame_queue_.erase(frame_it);
     }

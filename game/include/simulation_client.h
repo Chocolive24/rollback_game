@@ -24,7 +24,6 @@ class SimulationClient final : public NetworkInterface {
   void Init(int input_profile_id, PlayerId player_id) noexcept;
   void RegisterOtherClient(SimulationClient* other_client) noexcept;
   void Update() noexcept;
-  void FixedUpdate() noexcept;
   void Draw(const raylib::RenderTexture2D& render_target) noexcept;
   void Deinit() noexcept;
 
