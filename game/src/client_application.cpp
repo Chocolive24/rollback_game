@@ -6,6 +6,8 @@ void ClientApplication::Setup() noexcept {
 
   render_texture_ = raylib::LoadRenderTexture(raylib::GetScreenWidth(),
                                               raylib::GetScreenHeight());
+
+  input::FrameInput::registerType();
 }
 
 void ClientApplication::Update() noexcept {
@@ -33,4 +35,6 @@ void ClientApplication::DrawImGui() noexcept {
 
 void ClientApplication::TearDown() noexcept {
   client_.Deinit();
+
+  input::FrameInput::registerType();
 }

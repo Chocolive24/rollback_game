@@ -135,8 +135,6 @@ void OnlineGameManager::SendFrameConfirmationEvent(
 
 void OnlineGameManager::OnInputReceived(
     const ExitGames::Common::Hashtable& event_content) {
- // std::vector<input::FrameInput> remote_frame_inputs_old{};
-
   std::vector<input::FrameInput> remote_frame_inputs{};
 
   const auto input_value =
@@ -154,9 +152,6 @@ void OnlineGameManager::OnInputReceived(
   for (int i = 0; i < inputs_count; i++) {
     input::FrameInput frame_input{inputs[i]};
     remote_frame_inputs.push_back(frame_input);
-
-    //remote_frame_inputs_old.push_back(
-    //    input::FrameInput{inputs[i].input(), inputs[i].frame_nbr()});
   }
 
   if (remote_frame_inputs.back().frame_nbr() <
@@ -186,8 +181,6 @@ void OnlineGameManager::OnFrameConfirmationReceived(
   Checksum checksum = 0;
   std::vector<input::FrameInput> frame_inputs{};
 
-  //std::vector<input::FrameInput> remote_frame_inputs_old{};
-
   const auto checksum_value =
       event_content.getValue(static_cast<nByte>(NetworkEventKey::kCheckSum));
   checksum = ExitGames::Common::ValueObject<int>(checksum_value).getDataCopy();
@@ -207,9 +200,6 @@ void OnlineGameManager::OnFrameConfirmationReceived(
   for (int i = 0; i < inputs_count; i++) {
     input::FrameInput frame_input = inputs[i];
     frame_inputs.push_back(frame_input);
-
-    //remote_frame_inputs_old.push_back(
-    //    input::FrameInput{inputs[i].input(), inputs[i].frame_nbr()});
   }
 
   // If we did not receive the inputs before the frame to confirm, add them.

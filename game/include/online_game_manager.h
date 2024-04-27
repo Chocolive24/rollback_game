@@ -1,10 +1,10 @@
 #pragma once
 
-#include <queue>
-
 #include "local_game_manager.h"
 #include "network_interface.h"
 #include "rollback_manager.h"
+
+#include <queue>
 
 /**
  * \brief OnlineGameManager is a class that is a LocalGameManager adding features
@@ -38,9 +38,6 @@ private:
 
   std::queue<NetworkEvent> network_event_queue_{};
   std::vector<input::FrameInput> frame_inputs_{};
-
-  //std::vector<input::PlayerInput> inputs_{};
-  //std::vector<FrameNbr> frames_{};
 
   RollbackManager rollback_manager_;
   NetworkInterface* network_interface_ = nullptr;

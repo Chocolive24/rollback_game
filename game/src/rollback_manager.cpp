@@ -68,8 +68,6 @@ void RollbackManager::SetRemotePlayerInput(
     inputs_[player_id][frame] = last_remote_frame_input.input();
   }
 
-  //SimulateUntilCurrentFrame();
-
   if (must_rollback)
   {
     SimulateUntilCurrentFrame();
