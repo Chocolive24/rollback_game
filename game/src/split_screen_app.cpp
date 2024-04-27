@@ -10,7 +10,7 @@ void SplitScreenApp::Setup() noexcept {
         raylib::LoadRenderTexture(texture_size.X, texture_size.Y);
   }
 
-  FrameInput::registerType();
+  input::FrameInput::registerType();
 }
 
 void SplitScreenApp::Update() noexcept {
@@ -62,5 +62,5 @@ void SplitScreenApp::TearDown() noexcept {
     raylib::UnloadRenderTexture(render_target);
   }
 
-    FrameInput::unregisterType();
+  input::FrameInput::unregisterType();
 }

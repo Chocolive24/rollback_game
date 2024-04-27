@@ -12,13 +12,13 @@
  */
 struct SimulationInput {
   // std::vector<FrameInput> frame_inputs;
-  std::vector<FrameInput> frame_inputs;
+  std::vector<input::FrameInput> frame_inputs;
   float delay = 0.f;
 };
 
 struct SimulationFrameToConfirm {
   int check_sum = 0;
-  std::vector<FrameInput> frame_inputs{};
+  std::vector<input::FrameInput> frame_inputs{};
   float delay = 0.f;
 };
 

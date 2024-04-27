@@ -29,17 +29,14 @@ void OnlineGameManager::FixedUpdateCurrentFrame() noexcept {
   FixedUpdate();
 }
 
-void OnlineGameManager::Deinit() noexcept {
-  LocalGameManager::Deinit();
-}
+void OnlineGameManager::Deinit() noexcept { LocalGameManager::Deinit(); }
 
 void OnlineGameManager::IncreaseCurrentFrame() noexcept {
   rollback_manager_.IncreaseCurrentFrame();
 }
 
 void OnlineGameManager::PollNetworkEvents() noexcept {
-  while (!network_event_queue_.empty())
-  {
+  while (!network_event_queue_.empty()) {
     const auto& event = network_event_queue_.front();
 
     switch (event.code) {
@@ -63,16 +60,15 @@ void OnlineGameManager::SendInputEvent() noexcept {
 #endif  // TRACY_ENABLE
 
   const auto input = input::GetPlayerInput(input_profile_id_);
-  
   const auto current_frame = rollback_manager_.current_frame();
-
-  const input::FrameInput frame_input{input, current_frame};
+  const input::FrameInput frame_input(Math::Vec2F::One(), current_frame, input);
+ // const input::FrameInput frame_input{input, current_frame};
   rollback_manager_.SetLocalPlayerInput(frame_input, player_id_);
 
   ExitGames::Common::Hashtable event;
-  frame_inputs_.push_back(FrameInput(Math::Vec2F::One(), current_frame, input));
+  frame_inputs_.push_back(frame_input);
 
-  event.put<nByte, FrameInput*>(
+  event.put<nByte, input::FrameInput*>(
       static_cast<nByte>(NetworkEventKey::kPlayerInput), frame_inputs_.data(),
       frame_inputs_.size());
 
@@ -80,14 +76,14 @@ void OnlineGameManager::SendInputEvent() noexcept {
 }
 
 void OnlineGameManager::SendFrameConfirmationEvent(
-  const std::vector<FrameInput>& remote_frame_inputs) noexcept {
+    const std::vector<input::FrameInput>& remote_frame_inputs) noexcept {
 #ifdef TRACY_ENABLE
   ZoneScoped;
 #endif  // TRACY_ENABLE
 
   auto frame_to_confirm_it = std::find_if(
       remote_frame_inputs.begin(), remote_frame_inputs.end(),
-      [this](const FrameInput& frame_input) {
+      [this](const input::FrameInput& frame_input) {
         return frame_input.frame_nbr() == rollback_manager_.frame_to_confirm();
       });
 
@@ -98,12 +94,11 @@ void OnlineGameManager::SendFrameConfirmationEvent(
   // If the last remote inputs is greater than the current frame. The end
   // iterator must be equal to the frame input of the local current frame.
   if (remote_frame_inputs.back().frame_nbr() > current_frame) {
-
     // Get the iterator of the inputs at the current frame to avoid to confirm
     // a frame greater than the local current frame.
     const auto current_frame_it =
         std::find_if(remote_frame_inputs.begin(), remote_frame_inputs.end(),
-                     [current_frame](const FrameInput& frame_input) {
+                     [current_frame](const input::FrameInput& frame_input) {
                        return frame_input.frame_nbr() == current_frame;
                      });
 
@@ -122,7 +117,8 @@ void OnlineGameManager::SendFrameConfirmationEvent(
 
     ExitGames::Common::Hashtable event_check_sum;
 
-    event_check_sum.put(static_cast<nByte>(NetworkEventKey::kCheckSum), check_sum);
+    event_check_sum.put(static_cast<nByte>(NetworkEventKey::kCheckSum),
+                        check_sum);
     const auto& frame_nbr_it =
         std::find(frame_inputs_.begin(), frame_inputs_.end(), frame_to_confirm);
     const auto& dist = std::distance(frame_inputs_.begin(), frame_nbr_it);
@@ -139,29 +135,28 @@ void OnlineGameManager::SendFrameConfirmationEvent(
 
 void OnlineGameManager::OnInputReceived(
     const ExitGames::Common::Hashtable& event_content) {
+ // std::vector<input::FrameInput> remote_frame_inputs_old{};
 
-  std::vector<input::FrameInput> remote_frame_inputs_old{};
-
-  std::vector<FrameInput> remote_frame_inputs{};
+  std::vector<input::FrameInput> remote_frame_inputs{};
 
   const auto input_value =
       event_content.getValue(static_cast<nByte>(NetworkEventKey::kPlayerInput));
 
-  const FrameInput* inputs =
-      ExitGames::Common::ValueObject<FrameInput*>(input_value)
+  const input::FrameInput* inputs =
+      ExitGames::Common::ValueObject<input::FrameInput*>(input_value)
           .getDataCopy();
 
   const int inputs_count =
-      *ExitGames::Common::ValueObject<FrameInput*>(input_value).getSizes();
+      *ExitGames::Common::ValueObject<input::FrameInput*>(input_value)
+           .getSizes();
 
   remote_frame_inputs.reserve(inputs_count);
   for (int i = 0; i < inputs_count; i++) {
-    FrameInput frame_input{inputs[i]};
+    input::FrameInput frame_input{inputs[i]};
     remote_frame_inputs.push_back(frame_input);
-  
 
-    remote_frame_inputs_old.push_back(
-        input::FrameInput{inputs[i].input(), inputs[i].frame_nbr()});
+    //remote_frame_inputs_old.push_back(
+    //    input::FrameInput{inputs[i].input(), inputs[i].frame_nbr()});
   }
 
   if (remote_frame_inputs.back().frame_nbr() <
@@ -171,7 +166,8 @@ void OnlineGameManager::OnInputReceived(
   }
 
   const PlayerId other_client_id = player_id_ == 0 ? 1 : 0;
-  rollback_manager_.SetRemotePlayerInput(remote_frame_inputs_old, other_client_id);
+  rollback_manager_.SetRemotePlayerInput(remote_frame_inputs,
+                                         other_client_id);
 
   if (player_id_ == kMasterClientId) {
     SendFrameConfirmationEvent(remote_frame_inputs);
@@ -182,17 +178,15 @@ void OnlineGameManager::OnInputReceived(
 
 void OnlineGameManager::OnFrameConfirmationReceived(
     const ExitGames::Common::Hashtable& event_content) {
-
-    if (player_id_ == kMasterClientId)
-    {
-      frame_inputs_.erase(frame_inputs_.begin());
-      return;
-    }
+  if (player_id_ == kMasterClientId) {
+    frame_inputs_.erase(frame_inputs_.begin());
+    return;
+  }
 
   Checksum checksum = 0;
-  std::vector<FrameInput> frame_inputs{};
+  std::vector<input::FrameInput> frame_inputs{};
 
-  std::vector<input::FrameInput> remote_frame_inputs_old{};
+  //std::vector<input::FrameInput> remote_frame_inputs_old{};
 
   const auto checksum_value =
       event_content.getValue(static_cast<nByte>(NetworkEventKey::kCheckSum));
@@ -201,43 +195,44 @@ void OnlineGameManager::OnFrameConfirmationReceived(
   const auto input_value =
       event_content.getValue(static_cast<nByte>(NetworkEventKey::kPlayerInput));
 
-  const FrameInput* inputs =
-      ExitGames::Common::ValueObject<FrameInput*>(input_value).getDataCopy();
+  const input::FrameInput* inputs =
+      ExitGames::Common::ValueObject<input::FrameInput*>(input_value)
+          .getDataCopy();
 
   const int inputs_count =
-      *ExitGames::Common::ValueObject<FrameInput*>(input_value).getSizes();
+      *ExitGames::Common::ValueObject<input::FrameInput*>(input_value)
+           .getSizes();
 
   frame_inputs.reserve(inputs_count);
   for (int i = 0; i < inputs_count; i++) {
-    FrameInput frame_input = inputs[i];
+    input::FrameInput frame_input = inputs[i];
     frame_inputs.push_back(frame_input);
 
-    remote_frame_inputs_old.push_back(
-        input::FrameInput{inputs[i].input(), inputs[i].frame_nbr()});
+    //remote_frame_inputs_old.push_back(
+    //    input::FrameInput{inputs[i].input(), inputs[i].frame_nbr()});
   }
 
-  if (player_id_ != kMasterClientId) {
-    // If we did not receive the inputs before the frame to confirm, add them.
-    if (rollback_manager_.last_remote_input_frame() < frame_inputs.back().frame_nbr()) {
-      const PlayerId other_client_id = player_id_ == 0 ? 1 : 0;
-      rollback_manager_.SetRemotePlayerInput(remote_frame_inputs_old,
-                                             other_client_id);
-    }
-
-    const int check_sum = rollback_manager_.ConfirmFrame();
-
-    if (check_sum != checksum) {
-      std::cerr << "Not same checksum for frame: "
-                << rollback_manager_.frame_to_confirm() << '\n';
-      return;
-    }
-
-    // Send a frame confirmation event with empty data to the master client
-    // just to tell him that we confirmed the frame and that he can erase
-    // the input at the confirmed frame in its vector of inputs.
-    network_interface_->RaiseEvent(true, NetworkEventCode::kFrameConfirmation,
-                                   ExitGames::Common::Hashtable());
+  // If we did not receive the inputs before the frame to confirm, add them.
+  if (rollback_manager_.last_remote_input_frame() <
+      frame_inputs.back().frame_nbr()) {
+    const PlayerId other_client_id = player_id_ == 0 ? 1 : 0;
+    rollback_manager_.SetRemotePlayerInput(frame_inputs,
+                                           other_client_id);
   }
+
+  const int check_sum = rollback_manager_.ConfirmFrame();
+
+  if (check_sum != checksum) {
+    std::cerr << "Not same checksum for frame: "
+              << rollback_manager_.frame_to_confirm() << '\n';
+    return;
+  }
+
+  // Send a frame confirmation event with empty data to the master client
+  // just to tell him that we confirmed the frame and that he can erase
+  // the input at the confirmed frame in its vector of inputs.
+  network_interface_->RaiseEvent(true, NetworkEventCode::kFrameConfirmation,
+                                 ExitGames::Common::Hashtable());
 
   frame_inputs_.erase(frame_inputs_.begin());
   ExitGames::Common::MemoryManagement::deallocateArray(inputs);

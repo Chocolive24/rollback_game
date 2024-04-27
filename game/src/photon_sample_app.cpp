@@ -13,28 +13,30 @@ void PhotonSampleApp::Update() noexcept {
   networkLogic_.Service();
 
   ExitGames::Common::Hashtable evData;
-  std::vector<FrameInput> fs{};
+  std::vector<input::FrameInput> fs{};
 
-  FrameInput frame_input(Math::Vec2F::One(), 42, 2);
+  input::FrameInput frame_input(Math::Vec2F::One(), 42, 2);
 
   fs.push_back(frame_input);
   fs.push_back(frame_input);
   fs.push_back(frame_input);
 
-  evData.put<nByte, FrameInput*>(static_cast<nByte>(NetworkEventKey::kPlayerInput), 
+  evData.put<nByte, input::FrameInput*>(
+      static_cast<nByte>(NetworkEventKey::kPlayerInput), 
       fs.data(), fs.size());
 
-  FrameInput* f;
+  input::FrameInput* f;
   int count = 0;
 
   if (evData.getValue(static_cast<nByte>(NetworkEventKey::kPlayerInput))) {
      const auto input_value = evData.getValue(static_cast<nByte>(NetworkEventKey::kPlayerInput));
-     f = ExitGames::Common::ValueObject<FrameInput*>(input_value).getDataCopy();
-     count =
-         *ExitGames::Common::ValueObject<FrameInput*>(input_value).getSizes();
+    f = ExitGames::Common::ValueObject<input::FrameInput*>(input_value)
+            .getDataCopy();
+     count = *ExitGames::Common::ValueObject<input::FrameInput*>(input_value)
+                 .getSizes();
   }
 
-  std::vector<FrameInput> fsss{};
+  std::vector<input::FrameInput> fsss{};
 
   for (int i = 0; i < count; i++)
   {

@@ -34,10 +34,10 @@ public:
 private:
   void PollNetworkEvents() noexcept;
   void SendFrameConfirmationEvent(
-    const std::vector<FrameInput>& remote_frame_inputs) noexcept;
+    const std::vector<input::FrameInput>& remote_frame_inputs) noexcept;
 
   std::queue<NetworkEvent> network_event_queue_{};
-  std::vector<FrameInput> frame_inputs_{};
+  std::vector<input::FrameInput> frame_inputs_{};
 
   //std::vector<input::PlayerInput> inputs_{};
   //std::vector<FrameNbr> frames_{};

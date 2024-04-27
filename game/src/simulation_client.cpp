@@ -99,11 +99,13 @@ void SimulationClient::RaiseEvent(bool reliable,
    const auto input_value =
       event_data.getValue(static_cast<nByte>(NetworkEventKey::kPlayerInput));
 
-  const FrameInput* inputs =
-      ExitGames::Common::ValueObject<FrameInput*>(input_value).getDataCopy();
+  const input::FrameInput* inputs =
+       ExitGames::Common::ValueObject<input::FrameInput*>(input_value)
+           .getDataCopy();
 
   const int inputs_count =
-      *ExitGames::Common::ValueObject<FrameInput*>(input_value).getSizes();
+      *ExitGames::Common::ValueObject<input::FrameInput*>(input_value)
+           .getSizes();
 
   ExitGames::Common::Hashtable simulated_event = event_data;
   const auto delay =
@@ -126,15 +128,16 @@ void SimulationClient::ReceiveEvent(int player_nr, NetworkEventCode event_code,
       const auto input_value = event_content.getValue(
           static_cast<nByte>(NetworkEventKey::kPlayerInput));
 
-      const FrameInput* inputs =
-          ExitGames::Common::ValueObject<FrameInput*>(input_value)
+      const input::FrameInput* inputs =
+          ExitGames::Common::ValueObject<input::FrameInput*>(input_value)
               .getDataCopy();
 
       const int inputs_count =
-          *ExitGames::Common::ValueObject<FrameInput*>(input_value).getSizes();
+          *ExitGames::Common::ValueObject<input::FrameInput*>(input_value)
+               .getSizes();
 
       for (int i = 0; i < inputs_count; i++) {
-        FrameInput frame_input{inputs[i]};
+        input::FrameInput frame_input{inputs[i]};
         simulation_input.frame_inputs.push_back(frame_input);
       }
 
@@ -168,12 +171,13 @@ void SimulationClient::ReceiveEvent(int player_nr, NetworkEventCode event_code,
       const auto input_value = event_content.getValue(
           static_cast<nByte>(NetworkEventKey::kPlayerInput));
 
-      const FrameInput* inputs =
-          ExitGames::Common::ValueObject<FrameInput*>(input_value)
+      const input::FrameInput* inputs =
+          ExitGames::Common::ValueObject<input::FrameInput*>(input_value)
               .getDataCopy();
 
       const int inputs_count =
-          *ExitGames::Common::ValueObject<FrameInput*>(input_value).getSizes();
+          *ExitGames::Common::ValueObject<input::FrameInput*>(input_value)
+               .getSizes();
 
       for (int i = 0; i < inputs_count; i++) {
         frame_to_confirm.frame_inputs.push_back(inputs[i]);
