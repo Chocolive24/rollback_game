@@ -62,15 +62,15 @@ void OnlineGameManager::SendInputEvent() noexcept {
   ZoneScoped;
 #endif  // TRACY_ENABLE
 
-  auto input = input::GetPlayerInput(input_profile_id_);
-  input = 2;
+  const auto input = input::GetPlayerInput(input_profile_id_);
+  
   const auto current_frame = rollback_manager_.current_frame();
 
   const input::FrameInput frame_input{input, current_frame};
   rollback_manager_.SetLocalPlayerInput(frame_input, player_id_);
 
   ExitGames::Common::Hashtable event;
-  frame_inputs_.push_back(FrameInput(Math::Vec2F::Zero(), current_frame, input));
+  frame_inputs_.push_back(FrameInput(Math::Vec2F::One(), current_frame, input));
 
   event.put<nByte, FrameInput*>(
       static_cast<nByte>(NetworkEventKey::kPlayerInput), frame_inputs_.data(),
@@ -128,7 +128,7 @@ void OnlineGameManager::SendFrameConfirmationEvent(
     const auto& dist = std::distance(frame_inputs_.begin(), frame_nbr_it);
 
     event_check_sum.put(static_cast<nByte>(NetworkEventKey::kPlayerInput),
-                        frame_inputs_.data(), dist + 1);
+                        frame_inputs_.data(), frame_inputs_.size());
 
     network_interface_->RaiseEvent(true, NetworkEventCode::kFrameConfirmation,
                                    event_check_sum);
@@ -174,7 +174,7 @@ void OnlineGameManager::OnInputReceived(
   rollback_manager_.SetRemotePlayerInput(remote_frame_inputs_old, other_client_id);
 
   if (player_id_ == kMasterClientId) {
-    //SendFrameConfirmationEvent(remote_frame_inputs);
+    SendFrameConfirmationEvent(remote_frame_inputs);
   }
 
   ExitGames::Common::MemoryManagement::deallocateArray(inputs);
@@ -182,6 +182,12 @@ void OnlineGameManager::OnInputReceived(
 
 void OnlineGameManager::OnFrameConfirmationReceived(
     const ExitGames::Common::Hashtable& event_content) {
+
+    if (player_id_ == kMasterClientId)
+    {
+      frame_inputs_.erase(frame_inputs_.begin());
+      return;
+    }
 
   Checksum checksum = 0;
   std::vector<FrameInput> frame_inputs{};

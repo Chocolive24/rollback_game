@@ -38,10 +38,10 @@ class FrameInput final : public ExitGames::Common::CustomType<FrameInput, 1> {
   FrameInput() noexcept = default;
   FrameInput(Math::Vec2F dir_to_mouse, FrameNbr frame_nbr, 
 	  input::PlayerInput input) noexcept;
-  FrameInput(FrameInput&& toMove);
-  FrameInput& operator=(FrameInput&& toMove);
-  FrameInput(const FrameInput& toCopy);
-  FrameInput& operator=(const FrameInput& toCopy);
+  FrameInput(FrameInput&& toMove) noexcept = default;
+  FrameInput& operator=(FrameInput&& toMove) noexcept = default;
+  FrameInput(const FrameInput& toCopy) noexcept = default;
+  FrameInput& operator=(const FrameInput& toCopy) noexcept = default;
   ~FrameInput() override = default;
 
   ExitGames::Common::JString& toString(ExitGames::Common::JString& retStr,
@@ -58,9 +58,9 @@ class FrameInput final : public ExitGames::Common::CustomType<FrameInput, 1> {
   [[nodiscard]] input::PlayerInput input() const noexcept { return input_; }
 
 private:
-  Math::Vec2F dir_to_mouse_{};
-  FrameNbr frame_nbr_;
-  input::PlayerInput input_;
+  Math::Vec2F dir_to_mouse_ = Math::Vec2F::Zero();
+  FrameNbr frame_nbr_ = 0;
+  input::PlayerInput input_ = 0;
   
   static nByte serialization_protocol_;
 };
