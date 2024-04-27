@@ -1,9 +1,8 @@
 #pragma once
 
 #include "network_interface.h"
-#include "rollback_manager.h"
 #include "game_renderer.h"
-#include "network_game_manager.h"
+#include "online_game_manager.h"
 
 #include <vector>
 
@@ -29,9 +28,9 @@ class SimulationClient final : public NetworkInterface {
   void Draw(const raylib::RenderTexture2D& render_target) noexcept;
   void Deinit() noexcept;
 
-  void RaiseEvent(bool reliable, EventCode event_code,
+  void RaiseEvent(bool reliable, NetworkEventCode event_code,
                   const ExitGames::Common::Hashtable& event_data) noexcept override;
-  void ReceiveEvent(int player_nr, EventCode event_code,
+  void ReceiveEvent(int player_nr, NetworkEventCode event_code,
                     const ExitGames::Common::Hashtable& event_content) noexcept override;
 
   static float min_packet_delay;
@@ -41,9 +40,8 @@ class SimulationClient final : public NetworkInterface {
 private:
   void PollInputPackets();
   void PollConfirmFramePackets();
-
-  NetworkGameManager network_game_manager_{};
-  GameRenderer game_renderer_{&network_game_manager_};
+  OnlineGameManager online_game_manager_{};
+  GameRenderer game_renderer_{&online_game_manager_};
 
   SimulationClient* other_client_ = nullptr;
   std::vector<inputs::SimulationInput> waiting_input_queue{};

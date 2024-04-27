@@ -215,13 +215,15 @@ namespace Math
         {
             U length = Length();
 
-          /*  if (length <= Epsilon)
+            if (length <= Epsilon)
             {
+                // Avoid throwing exception.
+                return;
                 throw DivisionByZeroException();
             }
 
             X /= length;
-            Y /= length;*/
+            Y /= length;
         }
 
         [[nodiscard]] NOALIAS constexpr bool IsPerpendicular(const Vec2<T> vec) const noexcept

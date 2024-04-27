@@ -1,7 +1,7 @@
 #pragma once
 
 #include "application.h"
-#include "client_network_manager.h"
+#include "network_manager.h"
 
 class PhotonSampleApp final : public Application {
 public:
@@ -14,5 +14,5 @@ public:
 private:
   ExitGames::Common::JString app_id_ = PHOTON_APP_ID;
   ExitGames::Common::JString app_version_ = L"1.0";
-  ClientNetworkManager networkLogic_{app_id_, app_version_};
+  NetworkManager networkLogic_{app_id_, app_version_};
 };

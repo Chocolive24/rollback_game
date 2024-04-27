@@ -1,12 +1,13 @@
 #pragma once
 
-#include "types.h"
 #include "game_constants.h"
+#include "local_game_manager.h"
 #include "inputs.h"
-#include "game_manager.h"
+#include "types.h"
 
 /**
- * \brief RollbackManager is a class responsible of the integrity of the game simulation.
+ * \brief RollbackManager is a class responsible of the integrity of the game
+ * simulation.
  *
  * It has 3 game states with different temporalities.
  *
@@ -21,21 +22,21 @@
  * corresponds to their checksum for this given state.
  */
 class RollbackManager {
-public:
-  void RegisterGameManager(GameManager* player_manager) noexcept {
-    current_game_manager_ = player_manager;
-    confirmed_game_manager_.Init(player_manager->player_id(), player_manager->input_profile_id());
+ public:
+  void RegisterGameManager(LocalGameManager* current_game_manager) noexcept {
+    current_game_manager_ = current_game_manager;
+    confirmed_game_manager_.Init(current_game_manager->input_profile_id());
   }
 
   void SetLocalPlayerInput(inputs::FrameInput frame_input, PlayerId player_id);
-  void SetRemotePlayerInput(const std::vector<inputs::FrameInput>& frame_inputs, 
+  void SetRemotePlayerInput(const std::vector<inputs::FrameInput>& frame_inputs,
                             PlayerId player_id);
 
   void SimulateUntilCurrentFrame() const noexcept;
   Checksum ConfirmFrame() noexcept;
 
-  [[nodiscard]] inputs::PlayerInput GetLastConfirmedInput(
-    PlayerId player_id) const noexcept;
+  [[nodiscard]] inputs::PlayerInput GetLastPlayerConfirmedInput(
+      PlayerId player_id) const noexcept;
 
   [[nodiscard]] FrameNbr current_frame() const noexcept {
     return current_frame_;
@@ -55,17 +56,17 @@ public:
     return frame_to_confirm_;
   }
 
-private:
+ private:
   /**
    * \brief current_game_manager_ is a pointer to local client's GameManager.
    */
-  GameManager* current_game_manager_ = nullptr;
+  LocalGameManager* current_game_manager_ = nullptr;
 
   /**
    * \brief confirmed_player_manager_ is a copy of the client's player_manager
    * at the last confirmed frame state.
    */
-  GameManager confirmed_game_manager_{};
+  LocalGameManager confirmed_game_manager_{};
 
   /**
    * \brief The frame nbr of the local client.
@@ -83,7 +84,8 @@ private:
   FrameNbr frame_to_confirm_ = 0;
 
   /**
-   * \brief The frame number of the last confirmed frame (frame verified with checksum).
+   * \brief The frame number of the last confirmed frame (frame verified with
+   * checksum).
    */
   FrameNbr confirmed_frame_ = -1;
 

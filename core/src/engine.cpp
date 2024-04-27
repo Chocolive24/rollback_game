@@ -3,7 +3,9 @@
 #include <imgui_impl_raylib.h>
 #include <rlImGui.h>
 
-#include "../../game/include/game_constants.h"
+#ifdef TRACY_ENABLE
+#include <Tracy.hpp>
+#endif
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
@@ -65,6 +67,10 @@ void Engine::ProcessFrame() {
     ImGui_ImplRaylib_RenderDrawData(ImGui::GetDrawData());
   }
   EndDrawing();
+
+#ifdef TRACY_ENABLE
+  FrameMark;
+#endif
 }
 
 void Engine::Setup() noexcept {

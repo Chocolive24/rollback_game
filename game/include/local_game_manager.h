@@ -3,23 +3,27 @@
 #include "game_state.h"
 #include "platforms_manager.h"
 
-class RollbackManager;
-
 /**
- * \brief GameManager is a class that update the game logic.
+ * \brief LocalGameManager is a class that update the game logic.
+ *
+ * It is designed for local multiplayer.
  */
-class GameManager : public PhysicsEngine::ContactListener {
+class LocalGameManager : public PhysicsEngine::ContactListener {
 public:
-  constexpr explicit GameManager() noexcept = default;
-  GameManager(GameManager&& other) noexcept = default;
-  GameManager& operator=(GameManager&& other) noexcept = default;
-  GameManager(const GameManager& other) noexcept = default;
-  GameManager& operator=(const GameManager& other) noexcept = default;
-  ~GameManager() noexcept override = default;
+  constexpr explicit LocalGameManager() noexcept = default;
+  LocalGameManager(LocalGameManager&& other) noexcept = default;
+  LocalGameManager& operator=(LocalGameManager&& other) noexcept = default;
+  LocalGameManager(const LocalGameManager& other) noexcept = default;
+  LocalGameManager& operator=(const LocalGameManager& other) noexcept = default;
+  ~LocalGameManager() noexcept override = default;
 
-  virtual void Init(PlayerId player_id, int input_profile_id) noexcept;
+  virtual void Init(int input_profile_id) noexcept;
   void FixedUpdate() noexcept;
   void Deinit() noexcept;
+
+  void SetPlayerId(const PlayerId player_id) noexcept {
+    player_id_ = player_id;
+  }
 
   void SetPlayerInput(inputs::PlayerInput input, PlayerId player_id) noexcept;
 
@@ -28,7 +32,7 @@ public:
    * when rollback is applied to go back to a previous game state.
    * \param game_manager The game manager to be copied.
    */
-  void Copy(const GameManager& game_manager) noexcept;
+  void Copy(const LocalGameManager& game_manager) noexcept;
 
   [[nodiscard]] Checksum ComputeChecksum() const noexcept;
 

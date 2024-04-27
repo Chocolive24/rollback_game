@@ -1,8 +1,5 @@
 #include "rollback_manager.h"
-
-#include <iostream>
-
-#include "game_manager.h"
+#include "local_game_manager.h"
 
 void RollbackManager::SetLocalPlayerInput(inputs::FrameInput frame_input,
                                           PlayerId player_id) {
@@ -117,6 +114,6 @@ Checksum RollbackManager::ConfirmFrame() noexcept {
   return checksum;
 }
 
-inputs::PlayerInput RollbackManager::GetLastConfirmedInput(PlayerId player_id) const noexcept {
+inputs::PlayerInput RollbackManager::GetLastPlayerConfirmedInput(PlayerId player_id) const noexcept {
   return last_inputs_[player_id];
 }

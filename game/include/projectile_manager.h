@@ -1,5 +1,6 @@
 #pragma once
 
+#include "types.h"
 #include "World.h"
 
 /**
@@ -24,6 +25,8 @@ public:
   void CreateProjectile(Math::Vec2F position, Math::Vec2F mov_dir) noexcept;
   void OnTriggerEnter(PhysicsEngine::ColliderRef colliderRefA,
                       PhysicsEngine::ColliderRef colliderRefB) noexcept;
+
+  Checksum ComputeChecksum() const noexcept;
 
   void Copy(const ProjectileManager& projectile_manager) noexcept;
 

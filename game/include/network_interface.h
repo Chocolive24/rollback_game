@@ -2,9 +2,6 @@
 
 #include "event.h"
 
-#include <Common-cpp/inc/defines.h>
-#include <Common-cpp/inc/Containers/Hashtable.h>
-
 /**
  * \brief The NetworkInterface class defines an interface for events
  * communication over the network.
@@ -38,7 +35,7 @@ public:
    * event.
    */
   virtual void RaiseEvent(bool reliable,
-                          EventCode event_code,
+                          NetworkEventCode event_code,
                           const ExitGames::Common::Hashtable& event_data) noexcept = 0;
 
   /**
@@ -54,6 +51,6 @@ public:
    * received event.
    * \param event_content  The data or payload of the received event.
    */
-  virtual void ReceiveEvent(int player_nr, EventCode event_code,
+  virtual void ReceiveEvent(int player_nr, NetworkEventCode event_code,
                             const ExitGames::Common::Hashtable& event_content) noexcept = 0;
 };

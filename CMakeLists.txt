@@ -159,6 +159,9 @@ if (NOT EMSCRIPTEN)
 
     add_executable(simulation_app main/simulation_app_entry_point.cpp)
     target_link_libraries(simulation_app PRIVATE game)
+
+    add_executable(split_screen_app main/split_screen_app_entry_point.cpp)
+    target_link_libraries(split_screen_app PRIVATE game)
 endif()
 
 # Copy all of the resource files to the destination

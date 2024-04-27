@@ -1,8 +1,10 @@
-#include "game_manager.h"
-#include "rollback_manager.h"
-#include "raylib_wrapper.h"
+#include "local_game_manager.h"
 
-void GameManager::Init(PlayerId player_id, int input_profile_id) noexcept {
+#ifdef TRACY_ENABLE
+#include <Tracy.hpp>
+#endif
+
+void LocalGameManager::Init(int input_profile_id) noexcept {
   game_state_.world.Init(Math::Vec2F(0.f, 0.f), 110);
   game_state_.world.SetContactListener(this);
 
@@ -13,48 +15,52 @@ void GameManager::Init(PlayerId player_id, int input_profile_id) noexcept {
   game_state_.projectile_manager.Init(&game_state_.world);
   platform_manager_.Init(&game_state_.world);
 
-  player_id_ = player_id;
   input_profile_id_ = input_profile_id;
 }
 
-void GameManager::FixedUpdate() noexcept {
+void LocalGameManager::FixedUpdate() noexcept {
+#ifdef TRACY_ENABLE
+    ZoneScoped;
+#endif  // TRACY_ENABLE
+
   game_state_.player_manager.FixedUpdate();
 
   game_state_.world.Update(game_constants::kFixedDeltaTime);
 }
 
-void GameManager::Deinit() noexcept {
+void LocalGameManager::Deinit() noexcept {
   game_state_.world.Deinit();
 }
 
-void GameManager::SetPlayerInput(inputs::PlayerInput input, PlayerId player_id) noexcept {
+void LocalGameManager::SetPlayerInput(inputs::PlayerInput input, PlayerId player_id) noexcept {
   game_state_.player_manager.SetPlayerInput(input, player_id);
 }
 
-void GameManager::Copy(const GameManager& game_manager) noexcept {
+void LocalGameManager::Copy(const LocalGameManager& game_manager) noexcept {
   game_state_.world = game_manager.game_state_.world;
   game_state_.player_manager.Copy(game_manager.game_state_.player_manager);
   game_state_.projectile_manager.Copy(game_manager.game_state_.projectile_manager);
 }
 
-Checksum GameManager::ComputeChecksum() const noexcept {
+Checksum LocalGameManager::ComputeChecksum() const noexcept {
   Checksum checksum = 0;
 
   checksum += game_state_.player_manager.ComputeChecksum();
+  checksum += game_state_.projectile_manager.ComputeChecksum();
 
   return checksum;
 }
 
-void GameManager::OnTriggerEnter(PhysicsEngine::ColliderRef colliderRefA,
+void LocalGameManager::OnTriggerEnter(PhysicsEngine::ColliderRef colliderRefA,
                                  PhysicsEngine::ColliderRef colliderRefB) noexcept {
   game_state_.player_manager.OnTriggerEnter(colliderRefA, colliderRefB);
 }
 
-void GameManager::OnTriggerStay(PhysicsEngine::ColliderRef colliderRefA,
+void LocalGameManager::OnTriggerStay(PhysicsEngine::ColliderRef colliderRefA,
   PhysicsEngine::ColliderRef colliderRefB) noexcept {
 
 }
 
-void GameManager::OnTriggerExit(PhysicsEngine::ColliderRef colliderRefA,
+void LocalGameManager::OnTriggerExit(PhysicsEngine::ColliderRef colliderRefA,
   PhysicsEngine::ColliderRef colliderRefB) noexcept {
 }

@@ -3,7 +3,9 @@
 #include "application.h"
 #include "client.h"
 
-class ClientApplication final : public Application {
+#include <array>
+
+class SplitScreenApp final : public Application {
 public:
   void Setup() noexcept override;
   void Update() noexcept override;
@@ -12,6 +14,7 @@ public:
   void TearDown() noexcept override;
 
 private:
-  Client client_{};
-  raylib::RenderTexture2D render_texture_{};
+  std::array<Client, game_constants::kMaxPlayerCount> clients_{};
+  std::array<raylib::RenderTexture2D, game_constants::kMaxPlayerCount>
+     render_targets_{};
 };

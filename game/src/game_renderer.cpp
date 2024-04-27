@@ -8,7 +8,7 @@ using namespace raylib;
 
 #include <iostream>
 
-GameRenderer::GameRenderer(GameManager* game_manager) noexcept
+GameRenderer::GameRenderer(LocalGameManager* game_manager) noexcept
     : game_manager_(game_manager) {}
 
 void GameRenderer::Init() noexcept {

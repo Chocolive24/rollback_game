@@ -9,8 +9,8 @@ float SimulationClient::packet_loss_percentage = 0.1f;
 void SimulationClient::Init(int input_profile_id, PlayerId player_id) noexcept {
   waiting_input_queue.reserve(kBaseInputSize);
 
-  network_game_manager_.Init(player_id, input_profile_id);
-  network_game_manager_.RegisterNetworkInterface(this);
+  online_game_manager_.Init(input_profile_id);
+  online_game_manager_.RegisterNetworkInterface(this);
 
   game_renderer_.Init();
 }
@@ -28,12 +28,12 @@ void SimulationClient::Update() noexcept {
 }
 
 void SimulationClient::FixedUpdate() noexcept {
-  network_game_manager_.IncreaseCurrentFrame();
-  network_game_manager_.SendInputEvent();
+  online_game_manager_.IncreaseCurrentFrame();
+  online_game_manager_.SendInputEvent();
   PollInputPackets();
   PollConfirmFramePackets();
 
-  network_game_manager_.FixedUpdateCurrentFrame();
+  online_game_manager_.FixedUpdateCurrentFrame();
 }
 
 void SimulationClient::Draw(
@@ -42,7 +42,7 @@ void SimulationClient::Draw(
 }
 
 void SimulationClient::Deinit() noexcept {
-  network_game_manager_.Deinit();
+  online_game_manager_.Deinit();
   game_renderer_.Deinit();
 }
 
@@ -65,12 +65,12 @@ void SimulationClient::PollInputPackets() {
       }
 
        ExitGames::Common::Hashtable event_data;
-       event_data.put(static_cast<nByte>(EventKey::kPlayerInput),
+       event_data.put(static_cast<nByte>(NetworkEventKey::kPlayerInput),
        remote_inputs.data(), static_cast<int>(remote_inputs.size()));
-       event_data.put(static_cast<nByte>(EventKey::kFrameNbr),
+       event_data.put(static_cast<nByte>(NetworkEventKey::kFrameNbr),
            remote_frames.data(), static_cast<int>(remote_frames.size()));
 
-      network_game_manager_.OnEventReceived(EventCode::kInput, event_data);
+      online_game_manager_.OnEventReceived(NetworkEventCode::kInput, event_data);
 
       it = waiting_input_queue.erase(it);
     }
@@ -98,16 +98,16 @@ void SimulationClient::PollConfirmFramePackets() {
       }
 
       ExitGames::Common::Hashtable event_data;
-      event_data.put(static_cast<nByte>(EventKey::kCheckSum),
+      event_data.put(static_cast<nByte>(NetworkEventKey::kCheckSum),
                      frame_it->check_sum);
-      event_data.put(static_cast<nByte>(EventKey::kPlayerInput),
+      event_data.put(static_cast<nByte>(NetworkEventKey::kPlayerInput),
                      remote_inputs.data(),
                      static_cast<int>(remote_inputs.size()));
-      event_data.put(static_cast<nByte>(EventKey::kFrameNbr),
+      event_data.put(static_cast<nByte>(NetworkEventKey::kFrameNbr),
                      remote_frames.data(),
                      static_cast<int>(remote_frames.size()));
 
-      network_game_manager_.OnEventReceived(EventCode::kFrameConfirmation,
+      online_game_manager_.OnEventReceived(NetworkEventCode::kFrameConfirmation,
                                             event_data);
 
       frame_it = waiting_frame_queue_.erase(frame_it);
@@ -122,7 +122,7 @@ void SimulationClient::PollConfirmFramePackets() {
 
 
 void SimulationClient::RaiseEvent(bool reliable,
-                                  EventCode event_code,
+                                  NetworkEventCode event_code,
                                   const ExitGames::Common::Hashtable& event_data) noexcept {
   if (!reliable && Math::Random::Range(0.f, 1.f) < packet_loss_percentage) {
     return;
@@ -132,22 +132,22 @@ void SimulationClient::RaiseEvent(bool reliable,
   const auto delay =
       reliable ? 0.08f
                : Math::Random::Range(min_packet_delay, max_packet_delay);
-  simulated_event.put(static_cast<nByte>(EventKey::kDelay), delay);
+  simulated_event.put(static_cast<nByte>(NetworkEventKey::kDelay), delay);
 
   if (other_client_ != nullptr){
-    other_client_->ReceiveEvent(network_game_manager_.player_id(), event_code, simulated_event);
+    other_client_->ReceiveEvent(online_game_manager_.player_id(), event_code, simulated_event);
   }
 }
 
-void SimulationClient::ReceiveEvent(int player_nr, EventCode event_code,
+void SimulationClient::ReceiveEvent(int player_nr, NetworkEventCode event_code,
                                     const ExitGames::Common::Hashtable& event_content) noexcept {
   switch (event_code)
   {
-    case EventCode::kInput: {
+    case NetworkEventCode::kInput: {
       inputs::SimulationInput simulation_input{};
 
       const auto input_value =
-          event_content.getValue(static_cast<nByte>(EventKey::kPlayerInput));
+          event_content.getValue(static_cast<nByte>(NetworkEventKey::kPlayerInput));
 
       const inputs::PlayerInput* inputs =
           ExitGames::Common::ValueObject<inputs::PlayerInput*>(input_value).getDataCopy();
@@ -156,7 +156,7 @@ void SimulationClient::ReceiveEvent(int player_nr, EventCode event_code,
           *ExitGames::Common::ValueObject<inputs::PlayerInput*>(input_value).getSizes();
 
       const auto frame_value =
-          event_content.getValue(static_cast<nByte>(EventKey::kFrameNbr));
+          event_content.getValue(static_cast<nByte>(NetworkEventKey::kFrameNbr));
 
        const FrameNbr* frames =
           ExitGames::Common::ValueObject<FrameNbr*>(frame_value).getDataCopy();
@@ -167,7 +167,7 @@ void SimulationClient::ReceiveEvent(int player_nr, EventCode event_code,
       }
 
       const auto delay_value =
-          event_content.getValue(static_cast<nByte>(EventKey::kDelay));
+          event_content.getValue(static_cast<nByte>(NetworkEventKey::kDelay));
       simulation_input.delay =
           ExitGames::Common::ValueObject<float>(delay_value).getDataCopy();
 
@@ -178,9 +178,9 @@ void SimulationClient::ReceiveEvent(int player_nr, EventCode event_code,
 
       break;
     }
-    case EventCode::kFrameConfirmation: {
+    case NetworkEventCode::kFrameConfirmation: {
 
-      if (network_game_manager_.player_id() == kMasterClientId)
+      if (online_game_manager_.player_id() == kMasterClientId)
       {
         const SimulationFrameToConfirm f{0, {}, 0.08f};
         waiting_frame_queue_.push_back(f);
@@ -190,12 +190,12 @@ void SimulationClient::ReceiveEvent(int player_nr, EventCode event_code,
       SimulationFrameToConfirm frame_to_confirm{};
 
       const auto check_sum_value =
-          event_content.getValue(static_cast<nByte>(EventKey::kCheckSum));
+          event_content.getValue(static_cast<nByte>(NetworkEventKey::kCheckSum));
       frame_to_confirm.check_sum =
           ExitGames::Common::ValueObject<int>(check_sum_value).getDataCopy();
 
       const auto input_value =
-          event_content.getValue(static_cast<nByte>(EventKey::kPlayerInput));
+          event_content.getValue(static_cast<nByte>(NetworkEventKey::kPlayerInput));
 
       const inputs::PlayerInput* inputs =
           ExitGames::Common::ValueObject<inputs::PlayerInput*>(input_value)
@@ -206,7 +206,7 @@ void SimulationClient::ReceiveEvent(int player_nr, EventCode event_code,
                .getSizes();
 
       const auto frame_value =
-          event_content.getValue(static_cast<nByte>(EventKey::kFrameNbr));
+          event_content.getValue(static_cast<nByte>(NetworkEventKey::kFrameNbr));
 
       const FrameNbr* frames =
           ExitGames::Common::ValueObject<FrameNbr*>(frame_value).getDataCopy();
@@ -217,7 +217,7 @@ void SimulationClient::ReceiveEvent(int player_nr, EventCode event_code,
       }
 
       const auto delay_value =
-          event_content.getValue(static_cast<nByte>(EventKey::kDelay));
+          event_content.getValue(static_cast<nByte>(NetworkEventKey::kDelay));
       frame_to_confirm.delay =
           ExitGames::Common::ValueObject<float>(delay_value).getDataCopy();
 

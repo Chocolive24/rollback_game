@@ -48,6 +48,36 @@ void ProjectileManager::OnTriggerEnter(
   //TODO: increase collider count and disable collider if the max collision count is reached.
 }
 
+Checksum ProjectileManager::ComputeChecksum() const noexcept {
+  Checksum checksum = 0;
+
+  for (const auto& proj : projectiles_) {
+    const auto& body_ref = world_->GetCollider(proj.collider_ref).GetBodyRef();
+    const auto& body = world_->GetBody(body_ref);
+
+    // Add position.
+    const auto& pos = body.Position();
+    const auto* pos_ptr = reinterpret_cast<const Checksum*>(&pos);
+    for (size_t i = 0; i < sizeof(Math::Vec2F) / sizeof(Checksum); i++) {
+      checksum += pos_ptr[i];
+    }
+
+    // Add velocity.
+    const auto& velocity = body.Velocity();
+    const auto* velocity_ptr = reinterpret_cast<const Checksum*>(&velocity);
+    for (size_t i = 0; i < sizeof(Math::Vec2F) / sizeof(Checksum); i++) {
+      checksum += velocity_ptr[i];
+    }
+
+    // Add is enabled.
+    const auto& collider = world_->GetCollider(proj.collider_ref);
+    const auto& is_enabled = collider.Enabled();
+    checksum += is_enabled ? 1 : 0;
+  }
+
+  return checksum;
+}
+
 void ProjectileManager::Copy(const ProjectileManager& projectile_manager) noexcept {
   projectiles_ = projectile_manager.projectiles_;
   projectile_count_ = projectile_manager.projectile_count_;

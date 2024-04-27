@@ -13,10 +13,10 @@ void PhotonSampleApp::Update() noexcept {
   networkLogic_.Service();
 
   ExitGames::Common::Hashtable evData;
-  evData.put<nByte, int>(static_cast<nByte>(EventKey::kPlayerInput), 42);
+  evData.put<nByte, int>(static_cast<nByte>(NetworkEventKey::kPlayerInput), 42);
 
   constexpr bool sendReliable = false;
-  networkLogic_.RaiseEvent(sendReliable, EventCode::kInput, evData);
+  networkLogic_.RaiseEvent(sendReliable, NetworkEventCode::kInput, evData);
 }
 
 void PhotonSampleApp::Draw() noexcept {
@@ -58,10 +58,10 @@ void PhotonSampleApp::DrawImGui() noexcept {
 
     if (ImGui::Button("Send event", ImVec2(125, 25))) {
       ExitGames::Common::Hashtable evData;  
-      evData.put<nByte, int>(static_cast<nByte>(EventKey::kPlayerInput),42);
+      evData.put<nByte, int>(static_cast<nByte>(NetworkEventKey::kPlayerInput),42);
 
       constexpr bool sendReliable = false; 
-      networkLogic_.RaiseEvent(sendReliable, EventCode::kInput, evData);
+      networkLogic_.RaiseEvent(sendReliable, NetworkEventCode::kInput, evData);
     }
   }
   ImGui::End();

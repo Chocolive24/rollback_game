@@ -1,21 +1,22 @@
-#include "client_network_manager.h"
+#include "network_manager.h"
 #include "event.h"
-#include "client_application.h"
-ClientNetworkManager::ClientNetworkManager(
+#include "client.h"
+
+NetworkManager::NetworkManager(
     const ExitGames::Common::JString& appID,
     const ExitGames::Common::JString& appVersion)
     : load_balancing_client_(*this, appID, appVersion) {}
 
-void ClientNetworkManager::Connect() {
+void NetworkManager::Connect() {
   // Connect() is asynchronous - the actual result arrives in the
   // ClientNetworkManager::connectReturn() or the ClientNetworkManager::connectionErrorReturn() callback
   if (!load_balancing_client_.connect())
     EGLOG(ExitGames::Common::DebugLevel::ERRORS, L"Could not Connect.");
 }
 
-void ClientNetworkManager::Service() { load_balancing_client_.service(); }
+void NetworkManager::Service() { load_balancing_client_.service(); }
 
-void ClientNetworkManager::JoinRandomOrCreateRoom() noexcept {
+void NetworkManager::JoinRandomOrCreateRoom() noexcept {
    const auto game_id = ExitGames::Common::JString();
    const ExitGames::LoadBalancing::RoomOptions room_options(
       true, true, 2); 
@@ -23,12 +24,12 @@ void ClientNetworkManager::JoinRandomOrCreateRoom() noexcept {
     EGLOG(ExitGames::Common::DebugLevel::ERRORS, L"Could not join or create room.");
 }
 
-void ClientNetworkManager::Disconnect() {
+void NetworkManager::Disconnect() {
   load_balancing_client_.disconnect();  // Disconnect() is asynchronous - the actual result
                       // arrives in the ClientNetworkManager::disconnectReturn() callback
 }
 
-void ClientNetworkManager::CreateRoom(
+void NetworkManager::CreateRoom(
     const ExitGames::Common::JString& roomName, nByte maxPlayers) {
   if (load_balancing_client_.opCreateRoom(roomName,
           ExitGames::LoadBalancing::RoomOptions().setMaxPlayers(maxPlayers))) {
@@ -38,15 +39,15 @@ void ClientNetworkManager::CreateRoom(
   }
 }
 
-void ClientNetworkManager::JoinRandomRoom(ExitGames::Common::Hashtable expectedCustomRoomProperties) {
+void NetworkManager::JoinRandomRoom(ExitGames::Common::Hashtable expectedCustomRoomProperties) {
   load_balancing_client_.opJoinRandomRoom(expectedCustomRoomProperties);
 
   //is_master_ = load_balancing_client_.getLocalPlayer().getIsMasterClient();
   //std::cout << "is master: " << is_master_ << '\n';
 }
 
-void ClientNetworkManager::RaiseEvent(bool reliable,
-                                      EventCode event_code,
+void NetworkManager::RaiseEvent(bool reliable,
+                                      NetworkEventCode event_code,
                                       const ExitGames::Common::Hashtable& event_data) noexcept {
   if (!load_balancing_client_.opRaiseEvent(reliable, event_data,
                                       static_cast<nByte>(event_code))) {
@@ -54,7 +55,7 @@ void ClientNetworkManager::RaiseEvent(bool reliable,
   }
 }
 
-void ClientNetworkManager::ReceiveEvent(int player_nr, EventCode event_code,
+void NetworkManager::ReceiveEvent(int player_nr, NetworkEventCode event_code,
     const ExitGames::Common::Hashtable& event_content) noexcept {
 
    // logging the string representation of the eventContent can be really useful
@@ -71,7 +72,9 @@ void ClientNetworkManager::ReceiveEvent(int player_nr, EventCode event_code,
   if (network_game_manager_ == nullptr) 
       return;
 
-  network_game_manager_->OnEventReceived(event_code, event_content);
+  const NetworkEvent network_event{event_code, event_content};
+  network_game_manager_->PushNetworkEvent(network_event);
+  //network_game_manager_->OnEventReceived(event_code, event_content);
 
   //switch (event_code) {
   //  case EventCode::kInput: {
@@ -85,55 +88,55 @@ void ClientNetworkManager::ReceiveEvent(int player_nr, EventCode event_code,
 }
 
 
-void ClientNetworkManager::debugReturn(int debugLevel,
+void NetworkManager::debugReturn(int debugLevel,
                            const ExitGames::Common::JString& string) {
   std::cout << "debug return: debug level: " << debugLevel
             << " string: " << string.UTF8Representation().cstr() << '\n';
 }
 
-void ClientNetworkManager::connectionErrorReturn(int errorCode) {
+void NetworkManager::connectionErrorReturn(int errorCode) {
   std::cout << "error connection\n";
 }
 
-void ClientNetworkManager::clientErrorReturn(int errorCode) {
+void NetworkManager::clientErrorReturn(int errorCode) {
   std::cout << "client error code : " << errorCode << '\n';
 }
 
-void ClientNetworkManager::warningReturn(int warningCode) {
+void NetworkManager::warningReturn(int warningCode) {
   std::cout << "client warning code : " << warningCode << '\n';
 }
 
-void ClientNetworkManager::serverErrorReturn(int errorCode) {
+void NetworkManager::serverErrorReturn(int errorCode) {
   std::cout << "server error code : " << errorCode << '\n';
 }
 
-void ClientNetworkManager::joinRoomEventAction(
+void NetworkManager::joinRoomEventAction(
     int playerNr, const ExitGames::Common::JVector<int>& playernrs,
     const ExitGames::LoadBalancing::Player& player) {
   std::cout << "Room state: player nr: " << playerNr
             << " player nrs size: " << playernrs.getSize() << " player userID: "
             << player.getUserID().UTF8Representation().cstr() << '\n';
 
-  if (client_application_ == nullptr) return;
+  if (client_ == nullptr) return;
 
-  if (client_application_->client_id() == game_constants::kInvalidClientId)
+  if (client_->client_id() == game_constants::kInvalidClientId)
   {
-    client_application_->SetClientId(playerNr);
-    client_application_->SetState(AppState::kInRoom);
+    client_->SetClientId(playerNr);
+    client_->SetState(ClientState::kInRoom);
   }
 
 
   if (playerNr == game_constants::kMaxPlayerCount) {
-    client_application_->StartGame();
+    client_->StartGame();
   }
 }
 
-void ClientNetworkManager::leaveRoomEventAction(int playerNr, bool isInactive) {
+void NetworkManager::leaveRoomEventAction(int playerNr, bool isInactive) {
   std::cout << "player nr: " << playerNr << " is inactive: " << isInactive
             << '\n';
 }
 
-void ClientNetworkManager::customEventAction(int playerNr, nByte eventCode,
+void NetworkManager::customEventAction(int playerNr, nByte eventCode,
     const ExitGames::Common::Object& eventContent) {
   if (eventContent.getType() != ExitGames::Common::TypeCode::HASHTABLE) {
     std::cerr << "Unsupported event content type \n";
@@ -143,10 +146,10 @@ void ClientNetworkManager::customEventAction(int playerNr, nByte eventCode,
   const ExitGames::Common::Hashtable& event_data =
       ExitGames::Common::ValueObject<ExitGames::Common::Hashtable>(eventContent).getDataCopy();
 
-   ReceiveEvent(playerNr, static_cast<EventCode>(eventCode), event_data);
+   ReceiveEvent(playerNr, static_cast<NetworkEventCode>(eventCode), event_data);
 }
 
-void ClientNetworkManager::connectReturn(int errorCode,
+void NetworkManager::connectReturn(int errorCode,
                              const ExitGames::Common::JString& errorString,
                              const ExitGames::Common::JString& region,
                              const ExitGames::Common::JString& cluster) {
@@ -156,21 +159,21 @@ void ClientNetworkManager::connectReturn(int errorCode,
             << "region: " << region.UTF8Representation().cstr() << " "
             << "cluster: " << cluster.UTF8Representation().cstr() << '\n';
 
-  if (client_application_ == nullptr) return;
+  if (client_ == nullptr) return;
 
-  client_application_->SetState(AppState::kInMainMenu);
+  client_->SetState(ClientState::kInMainMenu);
 }
 
-void ClientNetworkManager::disconnectReturn() { std::cout << "client disconnected\n"; }
+void NetworkManager::disconnectReturn() { std::cout << "client disconnected\n"; }
 
-void ClientNetworkManager::leaveRoomReturn(int errorCode,
+void NetworkManager::leaveRoomReturn(int errorCode,
                                const ExitGames::Common::JString& errorString) {
   std::cout << "Leave room return: error code: " << errorCode
             << " error string: " << errorString.UTF8Representation().cstr()
             << '\n';
 }
 
-void ClientNetworkManager::joinRandomOrCreateRoomReturn(
+void NetworkManager::joinRandomOrCreateRoomReturn(
     int i, const ExitGames::Common::Hashtable& hashtable,
     const ExitGames::Common::Hashtable& hashtable1, int i1,
     const ExitGames::Common::JString& string) {

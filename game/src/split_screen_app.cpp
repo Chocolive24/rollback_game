@@ -1,29 +1,23 @@
-#include "simulation_app.h"
+#include "split_screen_app.h"
 #include "engine.h"
 
-#include <imgui.h>
-
-void SimulationApp::Setup() noexcept {
+void SplitScreenApp::Setup() noexcept {
   auto texture_size = Engine::window_size();
   texture_size.X /= 2;
   for (int i = 0; i < game_constants::kMaxPlayerCount; i++) {
-    clients_[i].Init(i, i);
+    clients_[i].Init(i);
     render_targets_[i] =
         raylib::LoadRenderTexture(texture_size.X, texture_size.Y);
   }
-
-  clients_[0].RegisterOtherClient(&clients_[1]);
-  clients_[1].RegisterOtherClient(&clients_[0]);
 }
 
-void SimulationApp::Update() noexcept {
-  for (auto& client : clients_)
-  {
+void SplitScreenApp::Update() noexcept {
+  for (auto& client : clients_) {
     client.Update();
   }
 }
 
-void SimulationApp::Draw() noexcept {
+void SplitScreenApp::Draw() noexcept {
   for (int i = 0; i < game_constants::kMaxPlayerCount; i++) {
     auto& client = clients_[i];
 
@@ -40,10 +34,10 @@ void SimulationApp::Draw() noexcept {
     // NOTE: Render texture must be y-flipped due to default OpenGL coordinates
     // (left-bottom)
     const auto& render_tex = render_targets_[i].texture;
-    const raylib::Vector2 pos = i == 0
-                                  ? raylib::Vector2{0, 0}
+    const raylib::Vector2 pos =
+        i == 0 ? raylib::Vector2{0, 0}
                : raylib::Vector2{static_cast<float>(render_tex.width), 0};
-    
+
     DrawTextureRec(render_tex,
                    raylib::Rectangle{0, 0, static_cast<float>(render_tex.width),
                                      static_cast<float>(-render_tex.height)},
@@ -51,22 +45,14 @@ void SimulationApp::Draw() noexcept {
   }
 }
 
-void SimulationApp::DrawImGui() noexcept {
-  ImGui::SetNextWindowSize(ImVec2(300, 200), ImGuiCond_Once);
-
-  ImGui::Begin("Mock network values.");
-  {
-    ImGui::SliderFloat("Min delay", &SimulationClient::min_packet_delay, 0.f, 1.f);
-    ImGui::SliderFloat("Max delay", &SimulationClient::max_packet_delay, 0.f, 1.f);
-    ImGui::SliderFloat("PacketLossPercentage", &SimulationClient::packet_loss_percentage, 0.f,
-                       1.f);
+void SplitScreenApp::DrawImGui() noexcept {
+  for (auto& client : clients_) {
+    client.DrawImGui();
   }
-  ImGui::End();
 }
 
-void SimulationApp::TearDown() noexcept {
-  for (auto& client : clients_)
-  {
+void SplitScreenApp::TearDown() noexcept {
+  for (auto& client : clients_) {
     client.Deinit();
   }
 

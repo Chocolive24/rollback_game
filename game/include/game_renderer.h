@@ -1,6 +1,6 @@
 #pragma once
 
-#include "game_manager.h"
+#include "local_game_manager.h"
 #include "raylib_wrapper.h"
 
 /**
@@ -8,7 +8,7 @@
  */
 class GameRenderer {
 public:
-  explicit GameRenderer(GameManager* game_manager) noexcept;
+  explicit GameRenderer(LocalGameManager* game_manager) noexcept;
 
   void Init() noexcept;
   void Draw(const raylib::RenderTexture2D& render_target) noexcept;
@@ -20,6 +20,6 @@ private:
   void DrawProjectiles() const noexcept;
   void DrawPlayer() const noexcept;
 
-  GameManager* game_manager_ = nullptr;
+  LocalGameManager* game_manager_ = nullptr;
   raylib::Camera2D camera_{};
 };

@@ -5,9 +5,9 @@
 #include <Common-cpp/inc/Logger.h>
 #include <LoadBalancing-cpp/inc/Client.h>
 
-#include "network_game_manager.h"
+#include "online_game_manager.h"
 
-class ClientApplication;
+class Client;
 
 /**
  * \brief ClientNetworkManager is a class responsible for managing network
@@ -17,8 +17,8 @@ class ClientApplication;
  * for various network events such as connection, disconnection, errors, room
  * joins, and custom events.
  */
-class ClientNetworkManager final : public NetworkInterface,
-                                   private ExitGames::LoadBalancing::Listener {
+class NetworkManager final : public NetworkInterface,
+                             private ExitGames::LoadBalancing::Listener {
  public:
   /**
    * \brief Constructor for the ClientNetworkManager class.
@@ -26,15 +26,14 @@ class ClientNetworkManager final : public NetworkInterface,
    * \param appVersion The application version used for connecting to the Photon
    * server.
    */
-  ClientNetworkManager(const ExitGames::Common::JString& appID,
+  NetworkManager(const ExitGames::Common::JString& appID,
                        const ExitGames::Common::JString& appVersion);
 
-  void RegisterClientApplication(
-      ClientApplication* client_application) noexcept {
-    client_application_ = client_application;
+  void RegisterClient(Client* client) noexcept {
+    client_ = client;
   }
 
-  void RegisterNetworkGameManager(NetworkGameManager* network_game_manager) noexcept {
+  void RegisterNetworkGameManager(OnlineGameManager* network_game_manager) noexcept {
     network_game_manager_ = network_game_manager;
   }
 
@@ -79,7 +78,7 @@ class ClientNetworkManager final : public NetworkInterface,
    * \param event_code The code representing the type of event being raised.
    * \param event_data The data associated with the event.
    */
-  void RaiseEvent(bool reliable, EventCode event_code,
+  void RaiseEvent(bool reliable, NetworkEventCode event_code,
       const ExitGames::Common::Hashtable& event_data) noexcept override;
 
   /**
@@ -88,7 +87,7 @@ class ClientNetworkManager final : public NetworkInterface,
    * event_code The code representing the type of event received. \param
    * event_content The data associated with the received event.
    */
-  void ReceiveEvent(int player_nr, EventCode event_code,
+  void ReceiveEvent(int player_nr, NetworkEventCode event_code,
                     const ExitGames::Common::Hashtable& event_content) noexcept override;
 
 
@@ -131,8 +130,8 @@ class ClientNetworkManager final : public NetworkInterface,
 
   // Member variables.
   // =================
-  ClientApplication* client_application_ = nullptr;
-  NetworkGameManager* network_game_manager_ = nullptr;
+  Client* client_ = nullptr;
+  OnlineGameManager* network_game_manager_ = nullptr;
   ExitGames::LoadBalancing::Client load_balancing_client_;
   ExitGames::Common::Logger mLogger;  // name must be mLogger because it is accessed by EGLOG()
 };
