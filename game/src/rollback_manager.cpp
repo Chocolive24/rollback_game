@@ -21,7 +21,7 @@ void RollbackManager::SetRemotePlayerInput(
   {
     const auto& current_frame_it =
         std::find_if(frame_inputs.begin(), frame_inputs.end(),
-                     [this](input::FrameInput frame_input) {
+                     [this](const input::FrameInput& frame_input) {
                        return frame_input.frame_nbr() == current_frame_;
                      });
 
@@ -37,7 +37,7 @@ void RollbackManager::SetRemotePlayerInput(
   // If we didn't receive some inputs between the last time and the new inputs,
   // iterates over the missing inputs to add them in the inputs array.
   const auto it = std::find_if(frame_inputs.begin(), frame_inputs.end(),
-                               [this](input::FrameInput frame_input) {
+                               [this](const input::FrameInput& frame_input) {
                                  return frame_input.frame_nbr() ==
                                         last_remote_input_frame_ + 1;
                                });
@@ -45,17 +45,16 @@ void RollbackManager::SetRemotePlayerInput(
   bool must_rollback = last_remote_input_frame_ == -1;
 
   auto idx = std::distance(frame_inputs.begin(), it);
-  for (int i = last_remote_input_frame_ + 1; i < last_remote_frame_input.frame_nbr(); i++) {
+  for (int i = last_remote_input_frame_ + 1; i <= last_remote_frame_input.frame_nbr(); i++) {
     const auto input = frame_inputs[idx].input();
 
-    //if (last_remote_input_frame_ > -1) {
-    //  // If the new remote input is different from the last remote input received
-    //  // we need to rollback to correct the simulation.
-    //  if (input != last_inputs_[player_id]) {
-    //    must_rollback = true;
-    //    std::cout << "must roll" << i << "\n";
-    //  }
-    //}
+    if (last_remote_input_frame_ > -1) {
+      // If the new remote input is different from the last remote input received
+      // we need to rollback to correct the simulation.
+      if (input != last_inputs_[player_id]) {
+        must_rollback = true;
+      }
+    }
 
     inputs_[player_id][i] = input;
 
@@ -69,18 +68,22 @@ void RollbackManager::SetRemotePlayerInput(
     inputs_[player_id][frame] = last_remote_frame_input.input();
   }
 
-  SimulateUntilCurrentFrame();
+  //SimulateUntilCurrentFrame();
 
-  //if (must_rollback)
-  //{
-  //  SimulateUntilCurrentFrame();
-  //}
+  if (must_rollback)
+  {
+    SimulateUntilCurrentFrame();
+  }
 
   last_inputs_[player_id] = last_remote_frame_input.input();
   last_remote_input_frame_ = last_remote_frame_input.frame_nbr();
 }
 
 void RollbackManager::SimulateUntilCurrentFrame() const noexcept {
+#ifdef TRACY_ENABLE
+  ZoneScoped;
+#endif
+
   current_game_manager_->Copy(confirmed_game_manager_);
 
   for (FrameNbr frame = static_cast<FrameNbr>(confirmed_frame_ + 1); 
