@@ -39,13 +39,4 @@ struct FrameToConfirm {
   std::vector<FrameInput> frame_inputs{};
 };
 
-/**
- * \brief SimulationInput is a struct containing a frame input and have a delay value
- * to simulate the network delay.
- */
-struct SimulationInput {
-  std::vector<FrameInput> frame_inputs;
-  float delay = 0.f;
-};
-
 }  // namespace input

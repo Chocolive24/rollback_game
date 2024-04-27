@@ -36,8 +36,9 @@ class Client {
   }
 
 private:
-  OnlineGameManager network_game_manager_{};
   NetworkManager network_manager_{PHOTON_APP_ID, L"1.0"};
+  OnlineGameManager network_game_manager_{};
+
 
   GameRenderer game_renderer_{&network_game_manager_};
 

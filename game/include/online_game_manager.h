@@ -20,6 +20,7 @@ public:
 
   void Init(int input_profile_id) noexcept override;
   void FixedUpdateCurrentFrame() noexcept;
+  void Deinit() noexcept override;
 
   void IncreaseCurrentFrame() noexcept;
   void OnInputReceived(const ExitGames::Common::Hashtable& event_content);
@@ -29,18 +30,17 @@ public:
   void PushNetworkEvent(const NetworkEvent& network_event) noexcept {
     network_event_queue_.push(network_event);
   }
-  void OnEventReceived(NetworkEventCode event_code, 
-      const ExitGames::Common::Hashtable& event_content) noexcept;
 
 private:
   void PollNetworkEvents() noexcept;
   void SendFrameConfirmationEvent(
-      const std::vector<input::FrameInput>& remote_frame_inputs) noexcept;
+    const std::vector<FrameInput>& remote_frame_inputs) noexcept;
 
   std::queue<NetworkEvent> network_event_queue_{};
+  std::vector<FrameInput> frame_inputs_{};
 
-  std::vector<input::PlayerInput> inputs_{};
-  std::vector<FrameNbr> frames_{};
+  //std::vector<input::PlayerInput> inputs_{};
+  //std::vector<FrameNbr> frames_{};
 
   RollbackManager rollback_manager_;
   NetworkInterface* network_interface_ = nullptr;

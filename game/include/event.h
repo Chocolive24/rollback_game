@@ -4,7 +4,8 @@
 #include <Common-cpp/inc/Containers/Hashtable.h>
 
 #include "inputs.h"
-#include "Mat2x2.h"
+#include "Vec2.h"
+
 /**
  * \brief EventCode is an enum which differentiates between the various
  * events in the application.
@@ -37,8 +38,8 @@ class FrameInput final : public ExitGames::Common::CustomType<FrameInput, 1> {
   FrameInput() noexcept = default;
   FrameInput(Math::Vec2F dir_to_mouse, FrameNbr frame_nbr, 
 	  input::PlayerInput input) noexcept;
-  FrameInput(FrameInput&& toMove) = default;
-  FrameInput& operator=(FrameInput&& toMove) = default;
+  FrameInput(FrameInput&& toMove);
+  FrameInput& operator=(FrameInput&& toMove);
   FrameInput(const FrameInput& toCopy);
   FrameInput& operator=(const FrameInput& toCopy);
   ~FrameInput() override = default;
@@ -49,6 +50,12 @@ class FrameInput final : public ExitGames::Common::CustomType<FrameInput, 1> {
   void deserialize(const nByte* pData, short length) override;
   short serialize(nByte* pRetVal) const override;
   void duplicate(CustomTypeBase* pRetVal) const override;
+
+  bool operator==(const FrameInput& other) const noexcept;
+
+  [[nodiscard]] Math::Vec2F dir_to_mouse() const noexcept { return dir_to_mouse_; }
+  [[nodiscard]] FrameNbr frame_nbr() const noexcept { return frame_nbr_; }
+  [[nodiscard]] input::PlayerInput input() const noexcept { return input_; }
 
 private:
   Math::Vec2F dir_to_mouse_{};

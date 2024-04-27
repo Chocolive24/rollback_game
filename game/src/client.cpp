@@ -12,6 +12,8 @@ void Client::Init(int input_profile_id) noexcept {
   network_game_manager_.RegisterNetworkInterface(&network_manager_);
 
   game_renderer_.Init();
+
+  //FrameInput::registerType();
 }
 
 void Client::Update() noexcept {
@@ -68,6 +70,8 @@ void Client::Deinit() noexcept {
   game_renderer_.Deinit();
 
   network_manager_.Disconnect();
+
+  //FrameInput::unregisterType();
 }
 
 void Client::StartGame() noexcept {

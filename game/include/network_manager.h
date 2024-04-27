@@ -39,7 +39,7 @@ class NetworkManager final : public NetworkInterface,
   }
 
   void RegisterNetworkGameManager(OnlineGameManager* network_game_manager) noexcept {
-    network_game_manager_ = network_game_manager;
+    online_game_manager_ = network_game_manager;
   }
 
   /**
@@ -136,7 +136,7 @@ class NetworkManager final : public NetworkInterface,
   // Member variables.
   // =================
   Client* client_ = nullptr;
-  OnlineGameManager* network_game_manager_ = nullptr;
+  OnlineGameManager* online_game_manager_ = nullptr;
   ExitGames::LoadBalancing::Client load_balancing_client_;
   ExitGames::Common::Logger mLogger;  // name must be mLogger because it is accessed by EGLOG()
 };

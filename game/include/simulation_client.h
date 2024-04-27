@@ -6,9 +6,19 @@
 
 #include <vector>
 
+/**
+ * \brief SimulationInput is a struct containing a frame input and have a delay
+ * value to simulate the network delay.
+ */
+struct SimulationInput {
+  // std::vector<FrameInput> frame_inputs;
+  std::vector<FrameInput> frame_inputs;
+  float delay = 0.f;
+};
+
 struct SimulationFrameToConfirm {
   int check_sum = 0;
-  std::vector<input::FrameInput> frame_inputs{};
+  std::vector<FrameInput> frame_inputs{};
   float delay = 0.f;
 };
 
@@ -43,7 +53,7 @@ private:
   GameRenderer game_renderer_{&online_game_manager_};
 
   SimulationClient* other_client_ = nullptr;
-  std::vector<input::SimulationInput> waiting_input_queue{};
+  std::vector<SimulationInput> waiting_input_queue{};
   std::vector<SimulationFrameToConfirm> waiting_frame_queue_{};
 
   float fixed_timer_ = game_constants::kFixedDeltaTime;

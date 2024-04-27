@@ -14,6 +14,8 @@ void SimulationApp::Setup() noexcept {
 
   clients_[0].RegisterOtherClient(&clients_[1]);
   clients_[1].RegisterOtherClient(&clients_[0]);
+
+  FrameInput::registerType();
 }
 
 void SimulationApp::Update() noexcept {
@@ -73,4 +75,6 @@ void SimulationApp::TearDown() noexcept {
   for (const auto& render_target : render_targets_) {
     raylib::UnloadRenderTexture(render_target);
   }
+
+  FrameInput::unregisterType();
 }

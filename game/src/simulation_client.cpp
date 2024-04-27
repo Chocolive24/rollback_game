@@ -47,23 +47,9 @@ void SimulationClient::PollInputPackets() {
     it->delay -= game_constants::kFixedDeltaTime;
 
     if (it->delay <= 0.f) {
-      std::vector<input::PlayerInput> remote_inputs{};
-      remote_inputs.reserve(it->frame_inputs.size());
-
-      std::vector<FrameNbr> remote_frames{};
-      remote_frames.reserve(it->frame_inputs.size());
-
-      for (const auto& frame_input : it->frame_inputs)
-      {
-        remote_inputs.push_back(frame_input.input);
-        remote_frames.push_back(frame_input.frame_nbr);
-      }
-
        ExitGames::Common::Hashtable event_data;
        event_data.put(static_cast<nByte>(NetworkEventKey::kPlayerInput),
-       remote_inputs.data(), static_cast<int>(remote_inputs.size()));
-       event_data.put(static_cast<nByte>(NetworkEventKey::kFrameNbr),
-           remote_frames.data(), static_cast<int>(remote_frames.size()));
+       it->frame_inputs.data(), static_cast<int>(it->frame_inputs.size()));
 
       NetworkEvent network_event{NetworkEventCode::kInput, event_data};
       online_game_manager_.PushNetworkEvent(network_event);
@@ -82,26 +68,12 @@ void SimulationClient::PollConfirmFramePackets() {
     frame_it->delay -= raylib::GetFrameTime();
 
     if (frame_it->delay <= 0.f) {
-      std::vector<input::PlayerInput> remote_inputs{};
-      remote_inputs.reserve(frame_it->frame_inputs.size());
-
-      std::vector<FrameNbr> remote_frames{};
-      remote_frames.reserve(frame_it->frame_inputs.size());
-
-      for (const auto& frame_input : frame_it->frame_inputs) {
-        remote_inputs.push_back(frame_input.input);
-        remote_frames.push_back(frame_input.frame_nbr);
-      }
-
       ExitGames::Common::Hashtable event_data;
       event_data.put(static_cast<nByte>(NetworkEventKey::kCheckSum),
                      frame_it->check_sum);
       event_data.put(static_cast<nByte>(NetworkEventKey::kPlayerInput),
-                     remote_inputs.data(),
-                     static_cast<int>(remote_inputs.size()));
-      event_data.put(static_cast<nByte>(NetworkEventKey::kFrameNbr),
-                     remote_frames.data(),
-                     static_cast<int>(remote_frames.size()));
+                     frame_it->frame_inputs.data(),
+                     static_cast<int>(frame_it->frame_inputs.size()));
 
       NetworkEvent network_event{NetworkEventCode::kFrameConfirmation, event_data};
       online_game_manager_.PushNetworkEvent(network_event);
@@ -124,6 +96,15 @@ void SimulationClient::RaiseEvent(bool reliable,
     return;
   }
 
+   const auto input_value =
+      event_data.getValue(static_cast<nByte>(NetworkEventKey::kPlayerInput));
+
+  const FrameInput* inputs =
+      ExitGames::Common::ValueObject<FrameInput*>(input_value).getDataCopy();
+
+  const int inputs_count =
+      *ExitGames::Common::ValueObject<FrameInput*>(input_value).getSizes();
+
   ExitGames::Common::Hashtable simulated_event = event_data;
   const auto delay =
       reliable ? 0.08f
@@ -140,25 +121,20 @@ void SimulationClient::ReceiveEvent(int player_nr, NetworkEventCode event_code,
   switch (event_code)
   {
     case NetworkEventCode::kInput: {
-      input::SimulationInput simulation_input{};
+      SimulationInput simulation_input{};
 
-      const auto input_value =
-          event_content.getValue(static_cast<nByte>(NetworkEventKey::kPlayerInput));
+      const auto input_value = event_content.getValue(
+          static_cast<nByte>(NetworkEventKey::kPlayerInput));
 
-      const input::PlayerInput* inputs =
-          ExitGames::Common::ValueObject<input::PlayerInput*>(input_value).getDataCopy();
+      const FrameInput* inputs =
+          ExitGames::Common::ValueObject<FrameInput*>(input_value)
+              .getDataCopy();
 
       const int inputs_count =
-          *ExitGames::Common::ValueObject<input::PlayerInput*>(input_value).getSizes();
-
-      const auto frame_value =
-          event_content.getValue(static_cast<nByte>(NetworkEventKey::kFrameNbr));
-
-       const FrameNbr* frames =
-          ExitGames::Common::ValueObject<FrameNbr*>(frame_value).getDataCopy();
+          *ExitGames::Common::ValueObject<FrameInput*>(input_value).getSizes();
 
       for (int i = 0; i < inputs_count; i++) {
-        input::FrameInput frame_input{inputs[i], frames[i]};
+        FrameInput frame_input{inputs[i]};
         simulation_input.frame_inputs.push_back(frame_input);
       }
 
@@ -170,7 +146,6 @@ void SimulationClient::ReceiveEvent(int player_nr, NetworkEventCode event_code,
       waiting_input_queue.push_back(simulation_input);
 
       ExitGames::Common::MemoryManagement::deallocateArray(inputs);
-      ExitGames::Common::MemoryManagement::deallocateArray(frames);
 
       break;
     }
@@ -190,26 +165,18 @@ void SimulationClient::ReceiveEvent(int player_nr, NetworkEventCode event_code,
       frame_to_confirm.check_sum =
           ExitGames::Common::ValueObject<int>(check_sum_value).getDataCopy();
 
-      const auto input_value =
-          event_content.getValue(static_cast<nByte>(NetworkEventKey::kPlayerInput));
+      const auto input_value = event_content.getValue(
+          static_cast<nByte>(NetworkEventKey::kPlayerInput));
 
-      const input::PlayerInput* inputs =
-          ExitGames::Common::ValueObject<input::PlayerInput*>(input_value)
+      const FrameInput* inputs =
+          ExitGames::Common::ValueObject<FrameInput*>(input_value)
               .getDataCopy();
 
       const int inputs_count =
-          *ExitGames::Common::ValueObject<input::PlayerInput*>(input_value)
-               .getSizes();
-
-      const auto frame_value =
-          event_content.getValue(static_cast<nByte>(NetworkEventKey::kFrameNbr));
-
-      const FrameNbr* frames =
-          ExitGames::Common::ValueObject<FrameNbr*>(frame_value).getDataCopy();
+          *ExitGames::Common::ValueObject<FrameInput*>(input_value).getSizes();
 
       for (int i = 0; i < inputs_count; i++) {
-        input::FrameInput frame_input{inputs[i], frames[i]};
-        frame_to_confirm.frame_inputs.push_back(frame_input);
+        frame_to_confirm.frame_inputs.push_back(inputs[i]);
       }
 
       const auto delay_value =
@@ -220,8 +187,6 @@ void SimulationClient::ReceiveEvent(int player_nr, NetworkEventCode event_code,
       waiting_frame_queue_.push_back(frame_to_confirm);
 
       ExitGames::Common::MemoryManagement::deallocateArray(inputs);
-      ExitGames::Common::MemoryManagement::deallocateArray(frames);
-
       break;
     }
   }

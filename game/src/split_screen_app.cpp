@@ -9,6 +9,8 @@ void SplitScreenApp::Setup() noexcept {
     render_targets_[i] =
         raylib::LoadRenderTexture(texture_size.X, texture_size.Y);
   }
+
+  FrameInput::registerType();
 }
 
 void SplitScreenApp::Update() noexcept {
@@ -59,4 +61,6 @@ void SplitScreenApp::TearDown() noexcept {
   for (const auto& render_target : render_targets_) {
     raylib::UnloadRenderTexture(render_target);
   }
+
+    FrameInput::unregisterType();
 }

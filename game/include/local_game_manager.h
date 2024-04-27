@@ -19,7 +19,7 @@ public:
 
   virtual void Init(int input_profile_id) noexcept;
   void FixedUpdate() noexcept;
-  void Deinit() noexcept;
+  virtual void Deinit() noexcept;
 
   void SetPlayerId(const PlayerId player_id) noexcept {
     player_id_ = player_id;

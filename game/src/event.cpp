@@ -13,6 +13,20 @@ FrameInput::FrameInput(Math::Vec2F dir_to_mouse, FrameNbr frame_nbr,
 {
 }
 
+FrameInput::FrameInput(FrameInput&& toMove) : super() {
+  dir_to_mouse_ = toMove.dir_to_mouse_;
+  frame_nbr_ = toMove.frame_nbr_;
+  input_ = toMove.input_;
+}
+
+
+FrameInput& FrameInput::operator=(FrameInput&& toMove) {
+  dir_to_mouse_ = toMove.dir_to_mouse_;
+  frame_nbr_ = toMove.frame_nbr_;
+  input_ = toMove.input_;
+  return *this;
+}
+
 FrameInput::FrameInput(const FrameInput& toCopy) : super() {
   dir_to_mouse_ = toCopy.dir_to_mouse_;
   frame_nbr_ = toCopy.frame_nbr_;
@@ -75,4 +89,10 @@ short FrameInput::serialize(nByte* pRetVal) const {
 
 void FrameInput::duplicate(CustomTypeBase* pRetVal) const {
   *reinterpret_cast<FrameInput*>(pRetVal) = *this;
+}
+
+bool FrameInput::operator==(const FrameInput& other) const noexcept {
+  return dir_to_mouse_ == other.dir_to_mouse_ &&
+         frame_nbr_ == other.frame_nbr_ &&
+         input_ == other.input_;
 }

@@ -13,8 +13,41 @@ void PhotonSampleApp::Update() noexcept {
   networkLogic_.Service();
 
   ExitGames::Common::Hashtable evData;
+  std::vector<FrameInput> fs{};
+
   FrameInput frame_input(Math::Vec2F::One(), 42, 2);
-  evData.put<nByte, FrameInput>(static_cast<nByte>(NetworkEventKey::kPlayerInput), frame_input);
+
+  fs.push_back(frame_input);
+  fs.push_back(frame_input);
+  fs.push_back(frame_input);
+
+  evData.put<nByte, FrameInput*>(static_cast<nByte>(NetworkEventKey::kPlayerInput), 
+      fs.data(), fs.size());
+
+  FrameInput* f;
+  int count = 0;
+
+  if (evData.getValue(static_cast<nByte>(NetworkEventKey::kPlayerInput))) {
+     const auto input_value = evData.getValue(static_cast<nByte>(NetworkEventKey::kPlayerInput));
+     f = ExitGames::Common::ValueObject<FrameInput*>(input_value).getDataCopy();
+     count =
+         *ExitGames::Common::ValueObject<FrameInput*>(input_value).getSizes();
+  }
+
+  std::vector<FrameInput> fsss{};
+
+  for (int i = 0; i < count; i++)
+  {
+     fsss.push_back(f[i]);
+     
+  }
+
+ for (auto s : fsss)
+ {
+     std::cout << s.frame_nbr() << '\n';
+     std::cout << s.input() << '\n';
+     std::cout << s.dir_to_mouse().X << '\n';
+ }
 
   constexpr bool sendReliable = false;
   networkLogic_.RaiseEvent(sendReliable, NetworkEventCode::kInput, evData);
