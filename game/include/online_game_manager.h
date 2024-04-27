@@ -35,11 +35,11 @@ public:
 private:
   void PollNetworkEvents() noexcept;
   void SendFrameConfirmationEvent(
-      const std::vector<inputs::FrameInput>& remote_frame_inputs) noexcept;
+      const std::vector<input::FrameInput>& remote_frame_inputs) noexcept;
 
   std::queue<NetworkEvent> network_event_queue_{};
 
-  std::vector<inputs::PlayerInput> inputs_{};
+  std::vector<input::PlayerInput> inputs_{};
   std::vector<FrameNbr> frames_{};
 
   RollbackManager rollback_manager_;

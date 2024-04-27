@@ -5,7 +5,13 @@
 NetworkManager::NetworkManager(
     const ExitGames::Common::JString& appID,
     const ExitGames::Common::JString& appVersion)
-    : load_balancing_client_(*this, appID, appVersion) {}
+    : load_balancing_client_(*this, appID, appVersion) {
+  FrameInput::registerType();
+}
+
+NetworkManager::~NetworkManager() noexcept {
+  FrameInput::unregisterType();
+}
 
 void NetworkManager::Connect() {
   // Connect() is asynchronous - the actual result arrives in the
@@ -60,14 +66,14 @@ void NetworkManager::ReceiveEvent(int player_nr, NetworkEventCode event_code,
 
    // logging the string representation of the eventContent can be really useful
   // for debugging, but use with care: for big events this might get expensive
-  //EGLOG(ExitGames::Common::DebugLevel::ALL,
-  //      L"an event of type %d from player Nr %d with the following content has "
-  //      L"just arrived: %ls",
-  //      static_cast<nByte>(event_code), player_nr,
-  //      event_content.toString(true).cstr());
+  EGLOG(ExitGames::Common::DebugLevel::ALL,
+        L"an event of type %d from player Nr %d with the following content has "
+        L"just arrived: %ls",
+        static_cast<nByte>(event_code), player_nr,
+        event_content.toString(true).cstr());
 
-  //std::cout << "event content: "
-  //          << event_content.toString().UTF8Representation().cstr() << '\n';
+  std::cout << "event content: "
+            << event_content.toString().UTF8Representation().cstr() << '\n';
 
   if (network_game_manager_ == nullptr) 
       return;

@@ -1,7 +1,7 @@
 #pragma once
+
 #include "network_manager.h"
 #include "game_renderer.h"
-#include "local_game_manager.h"
 #include "online_game_manager.h"
 #include "types.h"
 

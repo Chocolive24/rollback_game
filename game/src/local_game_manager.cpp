@@ -32,7 +32,7 @@ void LocalGameManager::Deinit() noexcept {
   game_state_.world.Deinit();
 }
 
-void LocalGameManager::SetPlayerInput(inputs::PlayerInput input, PlayerId player_id) noexcept {
+void LocalGameManager::SetPlayerInput(input::PlayerInput input, PlayerId player_id) noexcept {
   game_state_.player_manager.SetPlayerInput(input, player_id);
 }
 

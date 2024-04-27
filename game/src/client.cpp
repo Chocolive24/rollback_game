@@ -21,8 +21,6 @@ void Client::Update() noexcept {
 
   while (fixed_timer_ >= game_constants::kFixedDeltaTime) {
     if (state_ == ClientState::kInGame) {
-      network_game_manager_.IncreaseCurrentFrame();
-      network_game_manager_.SendInputEvent();
       network_game_manager_.FixedUpdateCurrentFrame();
     }
 

@@ -1,14 +1,14 @@
 #include "rollback_manager.h"
 #include "local_game_manager.h"
 
-void RollbackManager::SetLocalPlayerInput(inputs::FrameInput frame_input,
+void RollbackManager::SetLocalPlayerInput(input::FrameInput frame_input,
                                           PlayerId player_id) {
   inputs_[player_id][frame_input.frame_nbr] = frame_input.input;
   last_inputs_[player_id] = frame_input.input;
 }
 
 void RollbackManager::SetRemotePlayerInput(
-  const std::vector<inputs::FrameInput>& frame_inputs, PlayerId player_id) {
+  const std::vector<input::FrameInput>& frame_inputs, PlayerId player_id) {
 
   auto last_remote_frame_input = frame_inputs.back();
   const auto frame_diff =
@@ -21,7 +21,7 @@ void RollbackManager::SetRemotePlayerInput(
   {
     const auto& current_frame_it =
         std::find_if(frame_inputs.begin(), frame_inputs.end(),
-                     [this](inputs::FrameInput frame_input) {
+                     [this](input::FrameInput frame_input) {
                        return frame_input.frame_nbr == current_frame_;
                      });
 
@@ -37,7 +37,7 @@ void RollbackManager::SetRemotePlayerInput(
   // If we didn't receive some inputs between the last time and the new inputs,
   // iterates over the missing inputs to add them in the inputs array.
   const auto it = std::find_if(frame_inputs.begin(), frame_inputs.end(),
-                               [this](inputs::FrameInput frame_input) {
+                               [this](input::FrameInput frame_input) {
                                  return frame_input.frame_nbr ==
                                         last_remote_input_frame_ + 1;
                                });
@@ -114,6 +114,6 @@ Checksum RollbackManager::ConfirmFrame() noexcept {
   return checksum;
 }
 
-inputs::PlayerInput RollbackManager::GetLastPlayerConfirmedInput(PlayerId player_id) const noexcept {
+input::PlayerInput RollbackManager::GetLastPlayerConfirmedInput(PlayerId player_id) const noexcept {
   return last_inputs_[player_id];
 }

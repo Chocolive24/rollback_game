@@ -64,7 +64,7 @@ void PlayerManager::FixedUpdate() noexcept {
 
     // TODO: pas de creation de proj si le click s'est fait dans le joueur.
     if (player.input &
-        static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kShoot)) {
+        static_cast<input::PlayerInput>(input::PlayerInputType::kShoot)) {
       const auto& body = world_->GetBody(
           world_->GetCollider(player.main_col_ref).GetBodyRef());
       // const auto proj_v = mouse_pos - body.Position();
@@ -82,19 +82,19 @@ void PlayerManager::Move(const Player& player) const noexcept {
   auto move_direction = Math::Vec2F::Zero();
 
   if (player.input &
-      static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kUp)) {
+      static_cast<input::PlayerInput>(input::PlayerInputType::kUp)) {
     move_direction += Math::Vec2F::Down();
   }
   if (player.input &
-      static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kLeft)) {
+      static_cast<input::PlayerInput>(input::PlayerInputType::kLeft)) {
     move_direction += Math::Vec2F::Left();
   }
   if (player.input &
-      static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kDown)) {
+      static_cast<input::PlayerInput>(input::PlayerInputType::kDown)) {
     move_direction += Math::Vec2F::Up();
   }
   if (player.input &
-      static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kRight)) {
+      static_cast<input::PlayerInput>(input::PlayerInputType::kRight)) {
     move_direction += Math::Vec2F::Right();
   }
 
@@ -117,7 +117,7 @@ void PlayerManager::Shoot(const Player& player) const noexcept {
 
     // TODO: pas de creation de proj si le click s'est fait dans le joueur.
    if (player.input &
-      static_cast<inputs::PlayerInput>(inputs::PlayerInputType::kShoot)) {
+      static_cast<input::PlayerInput>(input::PlayerInputType::kShoot)) {
     
      const auto& body =
          world_->GetBody(world_->GetCollider(player.main_col_ref).GetBodyRef());
@@ -189,7 +189,7 @@ void PlayerManager::OnTriggerEnter(
   // }
 }
 
-void PlayerManager::SetPlayerInput(inputs::PlayerInput input, PlayerId player_id) {
+void PlayerManager::SetPlayerInput(input::PlayerInput input, PlayerId player_id) {
   players_[player_id].input = input;
 }
 

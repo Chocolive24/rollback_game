@@ -28,14 +28,14 @@ class RollbackManager {
     confirmed_game_manager_.Init(current_game_manager->input_profile_id());
   }
 
-  void SetLocalPlayerInput(inputs::FrameInput frame_input, PlayerId player_id);
-  void SetRemotePlayerInput(const std::vector<inputs::FrameInput>& frame_inputs,
+  void SetLocalPlayerInput(input::FrameInput frame_input, PlayerId player_id);
+  void SetRemotePlayerInput(const std::vector<input::FrameInput>& frame_inputs,
                             PlayerId player_id);
 
   void SimulateUntilCurrentFrame() const noexcept;
   Checksum ConfirmFrame() noexcept;
 
-  [[nodiscard]] inputs::PlayerInput GetLastPlayerConfirmedInput(
+  [[nodiscard]] input::PlayerInput GetLastPlayerConfirmedInput(
       PlayerId player_id) const noexcept;
 
   [[nodiscard]] FrameNbr current_frame() const noexcept {
@@ -95,8 +95,8 @@ class RollbackManager {
    */
   static constexpr FrameNbr kMaxFrameCount = 30'000;
 
-  std::array<std::array<inputs::PlayerInput, kMaxFrameCount>,
+  std::array<std::array<input::PlayerInput, kMaxFrameCount>,
              game_constants::kMaxPlayerCount> inputs_{};
 
-  std::array<inputs::PlayerInput, 2> last_inputs_{};
+  std::array<input::PlayerInput, 2> last_inputs_{};
 };

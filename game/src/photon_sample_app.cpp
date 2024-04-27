@@ -13,7 +13,8 @@ void PhotonSampleApp::Update() noexcept {
   networkLogic_.Service();
 
   ExitGames::Common::Hashtable evData;
-  evData.put<nByte, int>(static_cast<nByte>(NetworkEventKey::kPlayerInput), 42);
+  FrameInput frame_input(Math::Vec2F::One(), 42, 2);
+  evData.put<nByte, FrameInput>(static_cast<nByte>(NetworkEventKey::kPlayerInput), frame_input);
 
   constexpr bool sendReliable = false;
   networkLogic_.RaiseEvent(sendReliable, NetworkEventCode::kInput, evData);

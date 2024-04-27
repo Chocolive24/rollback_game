@@ -28,6 +28,11 @@ class NetworkManager final : public NetworkInterface,
    */
   NetworkManager(const ExitGames::Common::JString& appID,
                        const ExitGames::Common::JString& appVersion);
+  NetworkManager(NetworkManager&& other) noexcept = delete;
+  NetworkManager& operator=(NetworkManager&& other) noexcept = delete;
+  NetworkManager(const NetworkManager& other) noexcept = delete;
+  NetworkManager& operator=(const NetworkManager& other) noexcept = delete;
+  ~NetworkManager() noexcept override;
 
   void RegisterClient(Client* client) noexcept {
     client_ = client;

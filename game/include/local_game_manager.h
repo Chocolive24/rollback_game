@@ -25,7 +25,7 @@ public:
     player_id_ = player_id;
   }
 
-  void SetPlayerInput(inputs::PlayerInput input, PlayerId player_id) noexcept;
+  void SetPlayerInput(input::PlayerInput input, PlayerId player_id) noexcept;
 
   /**
    * \brief Copy is a method which copies the states of the game. It used

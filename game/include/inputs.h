@@ -1,10 +1,10 @@
 #pragma once
 
-#include <vector>
-
 #include "types.h"
 
-namespace inputs {
+#include <vector>
+
+namespace input {
 
 enum class PlayerInputType : std::uint8_t {
   kUp = 1 << 0,
@@ -35,7 +35,7 @@ struct FrameInput {
 };
 
 struct FrameToConfirm {
-  int checksum;
+  Checksum checksum;
   std::vector<FrameInput> frame_inputs{};
 };
 
@@ -46,17 +46,6 @@ struct FrameToConfirm {
 struct SimulationInput {
   std::vector<FrameInput> frame_inputs;
   float delay = 0.f;
-};
-
-//struct SimulationInput {
-//  FrameInput frame_input;
-//  float delay = 0.f;
-//};
-
-struct DebugInput {
-  FrameInput frame_inputs{};
-  float delay = 0.f;
-  int client_idx = 0;
 };
 
 }  // namespace input

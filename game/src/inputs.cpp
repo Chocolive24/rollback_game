@@ -1,9 +1,8 @@
 #include "inputs.h"
 
-#include <iostream>
 #include <raylib.h>
 
-namespace inputs {
+namespace input {
 
 PlayerInput GetPlayerInput(int input_profile_id) noexcept {
   switch (input_profile_id) {

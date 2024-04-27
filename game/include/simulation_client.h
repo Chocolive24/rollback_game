@@ -8,7 +8,7 @@
 
 struct SimulationFrameToConfirm {
   int check_sum = 0;
-  std::vector<inputs::FrameInput> frame_inputs{};
+  std::vector<input::FrameInput> frame_inputs{};
   float delay = 0.f;
 };
 
@@ -43,7 +43,7 @@ private:
   GameRenderer game_renderer_{&online_game_manager_};
 
   SimulationClient* other_client_ = nullptr;
-  std::vector<inputs::SimulationInput> waiting_input_queue{};
+  std::vector<input::SimulationInput> waiting_input_queue{};
   std::vector<SimulationFrameToConfirm> waiting_frame_queue_{};
 
   float fixed_timer_ = game_constants::kFixedDeltaTime;
