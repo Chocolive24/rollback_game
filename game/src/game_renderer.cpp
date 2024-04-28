@@ -18,16 +18,32 @@ void GameRenderer::Init() noexcept {
   camera_.offset = Vector2{0.f, 0.f};
   camera_.zoom = 1.f;
   camera_.rotation = 0.f;
+
+  auto& body = graphic_bodies_[0];
+  body.SetPosition(game_constants::kPlayer1StartPos);
+  body.SetDamping(PlayerManager::kPlayerDamping);
+  body.SetMass(PlayerManager::kPlayerMass);
+}
+
+void GameRenderer::Update(float delta_time) noexcept {
+  UpdateObjectsGraphicPositions(delta_time);
+}
+
+void GameRenderer::FixedUpdate() noexcept {
+  //graphic_bodies_[0].ApplyForce(
+  //    game_manager_->player_manager().GetPlayerForces(0));
 }
 
 void GameRenderer::Draw(const RenderTexture2D& render_target, 
-    Vector2 render_target_pos) noexcept {
+                        Vector2 render_target_pos) noexcept {
   UpdateCamera(render_target, render_target_pos);
 
   BeginTextureMode(render_target); {
     BeginMode2D(camera_); {
       ClearBackground(BLACK);
 
+      DrawRectangle(350, 0, game_constants::kArenaSize.X,
+                    game_constants::kArenaSize.Y, RED);
       DrawPlatforms();
       DrawProjectiles();
       DrawPlayer();
@@ -38,6 +54,51 @@ void GameRenderer::Draw(const RenderTexture2D& render_target,
 }
 
 void GameRenderer::Deinit() noexcept { texture_manager::DestroyAllSprites(); }
+
+void GameRenderer::UpdateObjectsGraphicPositions(float delta_time) noexcept {
+  return;
+  graphic_bodies_[0].ApplyForce(
+      game_manager_->player_manager().GetPlayerForces(0));
+
+  for (auto& body : graphic_bodies_)
+  {
+    if (!body.IsValid()) continue;
+
+    switch (body.GetBodyType()) {
+    case PhysicsEngine::BodyType::Dynamic: {
+
+      // a = F / m
+      Math::Vec2F acceleration = body.Forces() * body.InverseMass();
+
+      // Change velocity according to delta time.
+      body.SetVelocity(body.Velocity() + acceleration * delta_time);
+
+      // Apply damping to velocity according to delta time.
+      body.SetVelocity(body.Velocity() * (1.0f - body.Damping() * delta_time));
+
+      // Change position according to velocity and delta time.
+      body.SetPosition(body.Position() + body.Velocity() * delta_time);
+
+      body.ResetForces();
+
+      break;
+    }
+
+    case PhysicsEngine::BodyType::Kinematic: {
+      // Kinematic bodies are not impacted by forces.
+
+      // Change position according to velocity and delta time.
+      body.SetPosition(body.Position() + body.Velocity() * delta_time);
+
+      break;
+    }
+
+    case PhysicsEngine::BodyType::Static:
+    case PhysicsEngine::BodyType::None:
+      break;
+    }
+  }
+}
 
 
 void GameRenderer::UpdateCamera(const RenderTexture2D& render_target, Vector2 render_target_pos) {
@@ -96,12 +157,11 @@ void GameRenderer::UpdateCamera(const RenderTexture2D& render_target, Vector2 re
 }
 
 void GameRenderer::DrawPlatforms() const noexcept {
-  for (std::size_t i = 0; i < game_constants::kPlatformCount; i++) {
-    const auto pos = game_manager_->platform_manager().GetPlatformPosition(i);
+  for (std::size_t i = 0; i < game_constants::kArenaWallCount; i++) {
+    const auto pos = PlatformManager::wall_positions[i];
     const auto pixel_pos = Metrics::MetersToPixels(pos);
 
-    const auto col_size =
-        game_manager_->platform_manager().GetPlatformShape(i).Size();
+    const auto col_size = PlatformManager::wall_shapes[i].Size();
     const auto col_pix_size = Metrics::MetersToPixels(col_size);
 
     const auto centered_pix_pos = pixel_pos - col_pix_size * 0.5f;
@@ -140,6 +200,12 @@ void GameRenderer::DrawPlayer() const noexcept {
   for (std::size_t i = 0; i < game_constants::kMaxPlayerCount; i++) {
     const auto player_pos =
       game_manager_->player_manager().GetPlayerPosition(i);
+
+    //if (i == 0)
+    //{
+    //  player_pos = graphic_bodies_[0].Position();
+    //}
+
     const auto player_pix_pos = Metrics::MetersToPixels(player_pos);
     
     texture_manager::penguin.Draw(Vector2{player_pix_pos.X, player_pix_pos.Y});

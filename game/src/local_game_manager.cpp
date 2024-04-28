@@ -5,7 +5,7 @@
 #endif
 
 void LocalGameManager::Init(int input_profile_id) noexcept {
-  game_state_.world.Init(Math::Vec2F(0.f, 0.f), 110);
+  game_state_.world.Init(Math::Vec2F(0.f, 0.f), game_constants::kGameBodyCount);
   game_state_.world.SetContactListener(this);
 
   game_state_.player_manager.RegisterWorld(&game_state_.world);
@@ -23,9 +23,9 @@ void LocalGameManager::FixedUpdate() noexcept {
     ZoneScoped;
 #endif  // TRACY_ENABLE
 
-  game_state_.player_manager.FixedUpdate();
-
   game_state_.world.Update(game_constants::kFixedDeltaTime);
+
+  game_state_.player_manager.FixedUpdate();
 }
 
 void LocalGameManager::Deinit() noexcept {

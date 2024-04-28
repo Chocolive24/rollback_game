@@ -46,10 +46,14 @@ public:
   void SetPlayerInput(const input::FrameInput& input, PlayerId player_id);
 
   [[nodiscard]] Math::Vec2F GetPlayerPosition(std::size_t idx) const noexcept;
+  [[nodiscard]] Math::Vec2F GetPlayerForces(std::size_t idx) const noexcept;
   [[nodiscard]] Math::Vec2F GetJumpColliderPosition(
       std::size_t idx) const noexcept;
   [[nodiscard]] Math::CircleF GetJumpColliderShape(
       std::size_t idx) const noexcept;
+
+  static constexpr float kPlayerDamping = 0.3f;
+  static constexpr float kPlayerMass = 1.f;
 
 private:
  void Move(const Player& player) const noexcept;

@@ -11,10 +11,14 @@ public:
   explicit GameRenderer(LocalGameManager* game_manager) noexcept;
 
   void Init() noexcept;
-  void Draw(const raylib::RenderTexture2D& render_target, raylib::Vector2 render_target_pos) noexcept;
+  void Update(float delta_time) noexcept;
+  void FixedUpdate() noexcept;
+  void Draw(const raylib::RenderTexture2D& render_target, 
+	  raylib::Vector2 render_target_pos) noexcept;
   void Deinit() noexcept;
 
 private:
+  void UpdateObjectsGraphicPositions(float delta_time) noexcept;
   void UpdateCamera(const raylib::RenderTexture2D& render_target, 
 	  raylib::Vector2 render_target_pos);
   void DrawPlatforms() const noexcept;
@@ -23,4 +27,7 @@ private:
 
   LocalGameManager* game_manager_ = nullptr;
   raylib::Camera2D camera_{};
+
+  std::array<PhysicsEngine::Body, game_constants::kGameBodyCount>
+      graphic_bodies_{};
 };

@@ -19,7 +19,8 @@ void PlayerManager::Init() noexcept {
     const auto& body_ref = world_->CreateBody();
     auto& body = world_->GetBody(body_ref);
     body.SetPosition(start_pos);
-    body.SetDamping(0.3f);
+    body.SetDamping(kPlayerDamping);
+    body.SetMass(kPlayerMass);
     const auto main_col_ref = world_->CreateCollider(body_ref);
     auto& collider = world_->GetCollider(main_col_ref);
 
@@ -123,9 +124,6 @@ void PlayerManager::Move(const Player& player) const noexcept {
 
 void PlayerManager::Copy(const PlayerManager& player_manager) noexcept {
   players_ = player_manager.players_;
-  //for (std::size_t i = 0; i < game_constants::kMaxPlayerCount; i++) {
-  //  players_[i] = player_manager.players_[i];
-  //}
 }
 
 // Function to compute checksum for the players state.
@@ -191,6 +189,13 @@ Math::Vec2F PlayerManager::GetPlayerPosition(std::size_t idx) const noexcept {
       world_->GetCollider(players_[idx].main_col_ref).GetBodyRef();
    const auto& body = world_->GetBody(body_ref);
    return body.Position();
+}
+
+Math::Vec2F PlayerManager::GetPlayerForces(std::size_t idx) const noexcept {
+   const auto& body_ref =
+       world_->GetCollider(players_[idx].main_col_ref).GetBodyRef();
+   const auto& body = world_->GetBody(body_ref);
+   return body.Forces();
 }
 
 Math::Vec2F PlayerManager::GetJumpColliderPosition(

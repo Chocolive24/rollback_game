@@ -24,11 +24,16 @@ void SimulationClient::Update() noexcept {
   PollInputPackets();
   PollConfirmFramePackets();
 
-  fixed_timer_ += raylib::GetFrameTime();
+  const auto delta_time = raylib::GetFrameTime();
+  fixed_timer_ += delta_time;
+
   while (fixed_timer_ >= game_constants::kFixedDeltaTime) {
     online_game_manager_.FixedUpdateCurrentFrame();
+    game_renderer_.FixedUpdate();
     fixed_timer_ -= game_constants::kFixedDeltaTime;
   }
+
+  game_renderer_.Update(delta_time);
 }
 
 void SimulationClient::Draw(
