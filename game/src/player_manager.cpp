@@ -1,8 +1,5 @@
 #include "player_manager.h"
-#include "raylib_wrapper.h"
 #include "Metrics.h"
-
-#include <cassert>
 
 void PlayerManager::Init() noexcept {
   for (std::size_t i = 0; i < game_constants::kMaxPlayerCount; i++) {
@@ -59,19 +56,14 @@ void PlayerManager::FixedUpdate() noexcept {
       return;
     }
 
-    assert(projectile_manager_ != nullptr,
-           "No projectiles manager pointer given to player manager.\n");
-
     // TODO: pas de creation de proj si le click s'est fait dans le joueur.
     if (player.input &
         static_cast<input::PlayerInput>(input::PlayerInputType::kShoot)) {
       const auto& body = world_->GetBody(
           world_->GetCollider(player.main_col_ref).GetBodyRef());
-      // const auto proj_v = mouse_pos - body.Position();
-      // const auto proj_dir = proj_v.Normalized();
 
-      projectile_manager_->CreateProjectile(
-          body.Position() + Math::Vec2F(0.5f, 0.f), Math::Vec2F::Right());
+       projectile_manager_->CreateProjectile(
+          body.Position() + Math::Vec2F(0.5f, 0.f), player.dir_to_mouse);
       player.shoot_timer_ = kShootCooldown;
     }
     
@@ -111,23 +103,23 @@ void PlayerManager::Move(const Player& player) const noexcept {
 }
 
 
-void PlayerManager::Shoot(const Player& player) const noexcept {
-  assert(projectile_manager_ != nullptr,
-         "No projectiles manager pointer given to player manager.\n");
-
-    // TODO: pas de creation de proj si le click s'est fait dans le joueur.
-   if (player.input &
-      static_cast<input::PlayerInput>(input::PlayerInputType::kShoot)) {
-    
-     const auto& body =
-         world_->GetBody(world_->GetCollider(player.main_col_ref).GetBodyRef());
-     //const auto proj_v = mouse_pos - body.Position();
-     //const auto proj_dir = proj_v.Normalized();
-
-     projectile_manager_->CreateProjectile(body.Position() + Math::Vec2F(0.5f, 0.f),
-                                           Math::Vec2F::Right());
-   }
-}
+//void PlayerManager::Shoot(const Player& player) const noexcept {
+//  assert(projectile_manager_ != nullptr,
+//         "No projectiles manager pointer given to player manager.\n");
+//
+//    // TODO: pas de creation de proj si le click s'est fait dans le joueur.
+//   if (player.input &
+//      static_cast<input::PlayerInput>(input::PlayerInputType::kShoot)) {
+//    
+//     const auto& body =
+//         world_->GetBody(world_->GetCollider(player.main_col_ref).GetBodyRef());
+//     //const auto proj_v = mouse_pos - body.Position();
+//     //const auto proj_dir = proj_v.Normalized();
+//
+//     projectile_manager_->CreateProjectile(body.Position() + Math::Vec2F(0.5f, 0.f),
+//                                           player.dir_to_mouse);
+//   }
+//}
 
 void PlayerManager::Copy(const PlayerManager& player_manager) noexcept {
   players_ = player_manager.players_;
@@ -189,8 +181,9 @@ void PlayerManager::OnTriggerEnter(
   // }
 }
 
-void PlayerManager::SetPlayerInput(input::PlayerInput input, PlayerId player_id) {
-  players_[player_id].input = input;
+void PlayerManager::SetPlayerInput(const input::FrameInput& input, PlayerId player_id) {
+  players_[player_id].input = input.input();
+  players_[player_id].dir_to_mouse = input.dir_to_mouse();
 }
 
 Math::Vec2F PlayerManager::GetPlayerPosition(std::size_t idx) const noexcept {

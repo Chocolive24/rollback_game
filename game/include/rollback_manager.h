@@ -26,17 +26,21 @@ class RollbackManager {
   void RegisterGameManager(LocalGameManager* current_game_manager) noexcept {
     current_game_manager_ = current_game_manager;
     confirmed_game_manager_.Init(current_game_manager->input_profile_id());
+
+    for (std::size_t i = 0; i < game_constants::kMaxPlayerCount; i++) {
+      inputs_[i].resize(kMaxFrameCount);
+    }
   }
 
-  void SetLocalPlayerInput(input::FrameInput frame_input, PlayerId player_id);
-  void SetRemotePlayerInput(const std::vector<input::FrameInput>& frame_inputs,
+  void SetLocalPlayerInput(const input::FrameInput& local_input, PlayerId player_id) noexcept;
+  void SetRemotePlayerInput(const std::vector<input::FrameInput>& new_remote_inputs,
                             PlayerId player_id);
 
   void SimulateUntilCurrentFrame() const noexcept;
   Checksum ConfirmFrame() noexcept;
 
-  [[nodiscard]] input::PlayerInput GetLastPlayerConfirmedInput(
-      PlayerId player_id) const noexcept;
+  [[nodiscard]] const input::FrameInput& GetLastPlayerConfirmedInput(
+    PlayerId player_id) const noexcept;
 
   [[nodiscard]] FrameNbr current_frame() const noexcept {
     return current_frame_;
@@ -91,12 +95,15 @@ class RollbackManager {
 
   /**
    * \brief kMaxFrameCount is the maximum of frame that the game can last.
-   * Here 30'000 corresponds to 10 minutes.
+   * Here 30'000 corresponds to 10 minutes at a fixed 50fps.
    */
   static constexpr FrameNbr kMaxFrameCount = 30'000;
 
-  std::array<std::array<input::PlayerInput, kMaxFrameCount>,
+  std::array<std::vector<input::FrameInput>,
              game_constants::kMaxPlayerCount> inputs_{};
-
-  std::array<input::PlayerInput, 2> last_inputs_{};
+  /**
+   * \brief last_inputs_ is an array which stores the last inputs received by the
+   * different players.
+   */
+  std::array<input::FrameInput, 2> last_inputs_{};
 };

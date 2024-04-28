@@ -1,10 +1,12 @@
 #include "inputs.h"
+#include "Metrics.h"
 
 #include <Common-cpp/inc/Common.h>
-
 #include <raylib_wrapper.h>
 
 namespace input {
+
+extern std::array<Math::Vec2F, game_constants::kMaxPlayerCount> mouse_pos{};
 
 PlayerInput GetPlayerInput(int input_profile_id) noexcept {
   switch (input_profile_id) {
@@ -27,7 +29,6 @@ PlayerInput GetPlayerInput(int input_profile_id) noexcept {
         // Check if the mouse is not being used for window move.
         if (!raylib::IsWindowResized() && !raylib::IsWindowMinimized()) {
           player_1_inputs |= static_cast<std::uint8_t>(PlayerInputType::kShoot);
-          //std::cout << "input shoot\n";
         }
       }
       if (IsKeyPressed(raylib::KEY_SPACE)) {
@@ -62,6 +63,11 @@ PlayerInput GetPlayerInput(int input_profile_id) noexcept {
     default:
       return PlayerInput();
   }
+}
+
+Math::Vec2F CalculateDirToMouse(const Math::Vec2F pos, PlayerId player_id) noexcept {
+  //return Math::Vec2F::Right();
+  return  (mouse_pos[player_id] - pos).Normalized();
 }
 
 nByte FrameInput::serialization_protocol_ =

@@ -7,6 +7,8 @@
 
 #include <vector>
 
+#include "game_constants.h"
+
 namespace input {
 
 enum class PlayerInputType : std::uint8_t {
@@ -24,9 +26,12 @@ enum class PlayerInputType : std::uint8_t {
  */
 using PlayerInput = std::uint8_t;
 
-  constexpr PlayerInput kInvalidInput = 255;
+constexpr PlayerInput kInvalidInput = 255;
+
+extern std::array<Math::Vec2F, game_constants::kMaxPlayerCount> mouse_pos;
 
 [[nodiscard]] PlayerInput GetPlayerInput(int input_profile_id) noexcept;
+[[nodiscard]] Math::Vec2F CalculateDirToMouse(Math::Vec2F pos, PlayerId player_id) noexcept;
 
 class FrameInput final : public ExitGames::Common::CustomType<FrameInput, 1> {
   typedef CustomType<FrameInput, 1> super;
@@ -53,6 +58,7 @@ class FrameInput final : public ExitGames::Common::CustomType<FrameInput, 1> {
   [[nodiscard]] Math::Vec2F dir_to_mouse() const noexcept {
     return dir_to_mouse_;
   }
+
   [[nodiscard]] FrameNbr frame_nbr() const noexcept { return frame_nbr_; }
   [[nodiscard]] input::PlayerInput input() const noexcept { return input_; }
 

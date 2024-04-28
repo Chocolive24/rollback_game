@@ -1,4 +1,5 @@
 #include "online_game_manager.h"
+#include "Metrics.h"
 
 void OnlineGameManager::RegisterNetworkInterface(
     NetworkInterface* network_interface) noexcept {
@@ -61,13 +62,15 @@ void OnlineGameManager::SendInputEvent() noexcept {
 
   const auto input = input::GetPlayerInput(input_profile_id_);
   const auto current_frame = rollback_manager_.current_frame();
-  const input::FrameInput frame_input(Math::Vec2F::One(), current_frame, input);
- // const input::FrameInput frame_input{input, current_frame};
-  rollback_manager_.SetLocalPlayerInput(frame_input, player_id_);
 
-  ExitGames::Common::Hashtable event;
+  const auto pos = game_state_.player_manager.GetPlayerPosition(player_id_);
+  const auto dir_to_mouse = input::CalculateDirToMouse(pos, player_id_);
+  const input::FrameInput frame_input(dir_to_mouse, current_frame, input);
+  
+  rollback_manager_.SetLocalPlayerInput(frame_input, player_id_);
   frame_inputs_.push_back(frame_input);
 
+  ExitGames::Common::Hashtable event;
   event.put<nByte, input::FrameInput*>(
       static_cast<nByte>(NetworkEventKey::kPlayerInput), frame_inputs_.data(),
       frame_inputs_.size());
@@ -116,13 +119,7 @@ void OnlineGameManager::SendFrameConfirmationEvent(
     const int check_sum = rollback_manager_.ConfirmFrame();
 
     ExitGames::Common::Hashtable event_check_sum;
-
-    event_check_sum.put(static_cast<nByte>(NetworkEventKey::kCheckSum),
-                        check_sum);
-    const auto& frame_nbr_it =
-        std::find(frame_inputs_.begin(), frame_inputs_.end(), frame_to_confirm);
-    const auto& dist = std::distance(frame_inputs_.begin(), frame_nbr_it);
-
+    event_check_sum.put(static_cast<nByte>(NetworkEventKey::kCheckSum), check_sum);
     event_check_sum.put(static_cast<nByte>(NetworkEventKey::kPlayerInput),
                         frame_inputs_.data(), frame_inputs_.size());
 
@@ -193,8 +190,7 @@ void OnlineGameManager::OnFrameConfirmationReceived(
           .getDataCopy();
 
   const int inputs_count =
-      *ExitGames::Common::ValueObject<input::FrameInput*>(input_value)
-           .getSizes();
+      *ExitGames::Common::ValueObject<input::FrameInput*>(input_value).getSizes();
 
   frame_inputs.reserve(inputs_count);
   for (int i = 0; i < inputs_count; i++) {

@@ -20,8 +20,9 @@ void GameRenderer::Init() noexcept {
   camera_.rotation = 0.f;
 }
 
-void GameRenderer::Draw(const RenderTexture2D& render_target) noexcept {
-  UpdateCamera(render_target);
+void GameRenderer::Draw(const RenderTexture2D& render_target, 
+    Vector2 render_target_pos) noexcept {
+  UpdateCamera(render_target, render_target_pos);
 
   BeginTextureMode(render_target); {
     BeginMode2D(camera_); {
@@ -39,7 +40,7 @@ void GameRenderer::Draw(const RenderTexture2D& render_target) noexcept {
 void GameRenderer::Deinit() noexcept { texture_manager::DestroyAllSprites(); }
 
 
-void GameRenderer::UpdateCamera(const RenderTexture2D& render_target) {
+void GameRenderer::UpdateCamera(const RenderTexture2D& render_target, Vector2 render_target_pos) {
   // Calculate aspect ratios
   constexpr float game_aspect_ratio =
       static_cast<float>(game_constants::kGameScreenSize.X) /
@@ -76,6 +77,22 @@ void GameRenderer::UpdateCamera(const RenderTexture2D& render_target) {
                                   game_constants::kGameScreenSize.Y);
   camera_.zoom = minZoom;
   camera_.offset = offset;
+
+  Vector2 mouse_position = GetMousePosition();
+
+  // Adjust mouse position based on player's portion of the screen.
+  // ==============================================================
+  mouse_position.x -= render_target_pos.x;
+  mouse_position.y -= render_target_pos.y;
+
+  mouse_position.x -= offset.x;
+  mouse_position.y -= offset.y;
+
+  mouse_position.x /= scale;
+  mouse_position.y /= scale;
+
+  input::mouse_pos[game_manager_->player_id()] = 
+      Metrics::PixelsToMeters(Math::Vec2F(mouse_position.x, mouse_position.y));
 }
 
 void GameRenderer::DrawPlatforms() const noexcept {

@@ -11,10 +11,11 @@
  * when a rollback is needed.
  */
 struct Player {
-  input::PlayerInput input = 0;
+  input::PlayerInput input{};
   float shoot_timer_ = 0.f;
   PhysicsEngine::ColliderRef main_col_ref{};
   PhysicsEngine::ColliderRef jump_col_ref{};
+  Math::Vec2F dir_to_mouse{};
 };
 
 /**
@@ -42,7 +43,7 @@ public:
   void OnTriggerEnter(PhysicsEngine::ColliderRef colliderRefA,
                       PhysicsEngine::ColliderRef colliderRefB) noexcept;
 
-  void SetPlayerInput(input::PlayerInput input, PlayerId player_id);
+  void SetPlayerInput(const input::FrameInput& input, PlayerId player_id);
 
   [[nodiscard]] Math::Vec2F GetPlayerPosition(std::size_t idx) const noexcept;
   [[nodiscard]] Math::Vec2F GetJumpColliderPosition(

@@ -31,7 +31,7 @@ void SplitScreenApp::Draw() noexcept {
           raylib::LoadRenderTexture(new_tex_size.X, new_tex_size.Y);
     }
 
-    client.Draw(render_targets_[i]);
+
 
     // NOTE: Render texture must be y-flipped due to default OpenGL coordinates
     // (left-bottom)
@@ -39,6 +39,8 @@ void SplitScreenApp::Draw() noexcept {
     const raylib::Vector2 pos =
         i == 0 ? raylib::Vector2{0, 0}
                : raylib::Vector2{static_cast<float>(render_tex.width), 0};
+
+    client.Draw(render_targets_[i], pos);
 
     DrawTextureRec(render_tex,
                    raylib::Rectangle{0, 0, static_cast<float>(render_tex.width),

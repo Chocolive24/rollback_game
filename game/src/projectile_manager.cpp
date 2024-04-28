@@ -23,9 +23,6 @@ void ProjectileManager::Init(PhysicsEngine::World* world) noexcept {
 
 void ProjectileManager::CreateProjectile(Math::Vec2F position,
                                          Math::Vec2F mov_dir) noexcept {
-  assert(world_ != nullptr,
-         "No pointer to world was given to the projectile manager.");
-
   if (projectile_count_ >= kMaxProjectileCount)
   {
     std::cerr << "No more space to create a projectile. \n";

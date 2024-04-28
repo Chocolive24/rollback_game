@@ -22,7 +22,7 @@ class Client {
  public:
   void Init(int input_profile_id) noexcept;
   void Update() noexcept;
-  void Draw(const raylib::RenderTexture2D& render_texture) noexcept;
+  void Draw(const raylib::RenderTexture2D& render_texture, raylib::Vector2 render_target_pos) noexcept;
   void DrawImGui() noexcept;
   void Deinit() noexcept;
 

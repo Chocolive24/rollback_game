@@ -11,11 +11,12 @@ public:
   explicit GameRenderer(LocalGameManager* game_manager) noexcept;
 
   void Init() noexcept;
-  void Draw(const raylib::RenderTexture2D& render_target) noexcept;
+  void Draw(const raylib::RenderTexture2D& render_target, raylib::Vector2 render_target_pos) noexcept;
   void Deinit() noexcept;
 
 private:
-  void UpdateCamera(const raylib::RenderTexture2D& render_target);
+  void UpdateCamera(const raylib::RenderTexture2D& render_target, 
+	  raylib::Vector2 render_target_pos);
   void DrawPlatforms() const noexcept;
   void DrawProjectiles() const noexcept;
   void DrawPlayer() const noexcept;

@@ -1,81 +1,81 @@
 #include "rollback_manager.h"
 #include "local_game_manager.h"
 
-void RollbackManager::SetLocalPlayerInput(input::FrameInput frame_input,
-                                          PlayerId player_id) {
-  inputs_[player_id][frame_input.frame_nbr()] = frame_input.input();
-  last_inputs_[player_id] = frame_input.input();
+void RollbackManager::SetLocalPlayerInput(const input::FrameInput& local_input,
+                                          PlayerId player_id) noexcept {
+  inputs_[player_id][local_input.frame_nbr()] = local_input;
+  last_inputs_[player_id] = local_input;
 }
 
 void RollbackManager::SetRemotePlayerInput(
-  const std::vector<input::FrameInput>& frame_inputs, PlayerId player_id) {
+    const std::vector<input::FrameInput>& new_remote_inputs, PlayerId player_id) {
+  // Retrieve the last remote frame input
+  auto last_new_remote_input = new_remote_inputs.back();
 
-  auto last_remote_frame_input = frame_inputs.back();
-  const auto frame_diff =
-      last_remote_frame_input.frame_nbr() - last_remote_input_frame_;
+  // Calculate the difference between the last new remote frame and the last remote
+  // input frame
+  const auto frame_diff = last_new_remote_input.frame_nbr() - last_remote_input_frame_;
 
-  // If the last remote input is greater than the local current frame, set the
-  // last_remote_frame_input value with the remote input value for my current_frame to
-  // avoid the confirmation of a future frame without the local inputs.
-  if (last_remote_frame_input.frame_nbr() > current_frame_)
-  {
-    const auto& current_frame_it =
-        std::find_if(frame_inputs.begin(), frame_inputs.end(),
-                     [this](const input::FrameInput& frame_input) {
-                       return frame_input.frame_nbr() == current_frame_;
-                     });
-
-    last_remote_frame_input = *current_frame_it;
-  }
-
-  // The inputs are already received.
-  if (frame_diff < 1)
-  {
+  // If no new inputs received, return
+  if (frame_diff < 1) {
     return;
   }
 
-  // If we didn't receive some inputs between the last time and the new inputs,
-  // iterates over the missing inputs to add them in the inputs array.
-  const auto it = std::find_if(frame_inputs.begin(), frame_inputs.end(),
-                               [this](const input::FrameInput& frame_input) {
-                                 return frame_input.frame_nbr() ==
-                                        last_remote_input_frame_ + 1;
-                               });
+  // If the last remote input frame is greater than the current frame, adjust
+  // last_new_remote_input
+  if (last_new_remote_input.frame_nbr() > current_frame_) {
+    const auto& current_frame_it =
+        std::find_if(new_remote_inputs.begin(), new_remote_inputs.end(),
+                     [this](const input::FrameInput& frame_input) {
+                       return frame_input.frame_nbr() == current_frame_;
+                     });
+    last_new_remote_input = *current_frame_it;
+  }
 
+  // Find the position of the first missing input
+  auto missing_input_it = std::find_if(
+      new_remote_inputs.begin(), new_remote_inputs.end(),
+      [this](const input::FrameInput& frame_input) {
+        return frame_input.frame_nbr() == last_remote_input_frame_ + 1;
+      });
+
+  // Check if rollback is necessary
   bool must_rollback = last_remote_input_frame_ == -1;
 
-  auto idx = std::distance(frame_inputs.begin(), it);
-  for (int i = last_remote_input_frame_ + 1; i <= last_remote_frame_input.frame_nbr(); i++) {
-    const auto input = frame_inputs[idx].input();
+  // Iterate over the missing inputs and update the inputs array
+  for (FrameNbr frame = last_remote_input_frame_ + 1;
+       frame <= last_new_remote_input.frame_nbr(); frame++) {
+    // Get the input for the current frame
+    const auto input = missing_input_it->input();
 
-    if (last_remote_input_frame_ > -1) {
-      // If the new remote input is different from the last remote input received
-      // we need to rollback to correct the simulation.
-      if (input != last_inputs_[player_id]) {
-        must_rollback = true;
-      }
+    // Check if rollback is necessary
+    if (last_remote_input_frame_ > -1 && input != last_inputs_[player_id].input()) {
+      must_rollback = true;
     }
 
-    inputs_[player_id][i] = input;
+    // Update the inputs array
+    inputs_[player_id][frame] = *missing_input_it;
 
-    idx++;
+    // Move to the next missing input
+    ++missing_input_it;
   }
 
-  // Predicts the remote client would not change its inputs until the current
-  // frame to have a realtime simulation.
-  for (FrameNbr frame = last_remote_frame_input.frame_nbr(); frame <= current_frame_;
-       frame++) {
-    inputs_[player_id][frame] = last_remote_frame_input.input();
+  // Predict inputs for frames up to the current frame with the last remote input.
+  for (FrameNbr frame = last_new_remote_input.frame_nbr();
+       frame <= current_frame_; frame++) {
+    inputs_[player_id][frame] = last_new_remote_input;
   }
 
-  if (must_rollback)
-  {
+  // Rollback if necessary.
+  if (must_rollback) {
     SimulateUntilCurrentFrame();
   }
 
-  last_inputs_[player_id] = last_remote_frame_input.input();
-  last_remote_input_frame_ = last_remote_frame_input.frame_nbr();
+  // Update last inputs and last remote input frame.
+  last_inputs_[player_id] = last_new_remote_input;
+  last_remote_input_frame_ = last_new_remote_input.frame_nbr();
 }
+
 
 void RollbackManager::SimulateUntilCurrentFrame() const noexcept {
 #ifdef TRACY_ENABLE
@@ -115,6 +115,7 @@ Checksum RollbackManager::ConfirmFrame() noexcept {
   return checksum;
 }
 
-input::PlayerInput RollbackManager::GetLastPlayerConfirmedInput(PlayerId player_id) const noexcept {
+const input::FrameInput& RollbackManager::GetLastPlayerConfirmedInput(
+    const PlayerId player_id) const noexcept {
   return last_inputs_[player_id];
 }

@@ -18,7 +18,7 @@ void Client::Init(int input_profile_id) noexcept {
 
 void Client::Update() noexcept {
   fixed_timer_ += raylib::GetFrameTime();
-
+  
   network_manager_.Service();
 
   while (fixed_timer_ >= game_constants::kFixedDeltaTime) {
@@ -30,11 +30,12 @@ void Client::Update() noexcept {
   }
 }
 
-void Client::Draw(const raylib::RenderTexture2D& render_texture) noexcept {
+void Client::Draw(const raylib::RenderTexture2D& render_texture, 
+    raylib::Vector2 render_target_pos) noexcept {
   if (state_ != ClientState::kInGame) 
       return;
 
-  game_renderer_.Draw(render_texture);
+  game_renderer_.Draw(render_texture, render_target_pos);
 }
 
 void Client::DrawImGui() noexcept {

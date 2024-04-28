@@ -21,7 +21,7 @@ void ClientApplication::Draw() noexcept {
     render_texture_ = raylib::LoadRenderTexture(new_tex_size.X, new_tex_size.Y);
   }
 
-  client_.Draw(render_texture_);
+  client_.Draw(render_texture_, raylib::Vector2{0.f, 0.f});
 
   raylib::DrawTextureRec(render_texture_.texture,
       raylib::Rectangle{0, 0, static_cast<float>(render_texture_.texture.width),

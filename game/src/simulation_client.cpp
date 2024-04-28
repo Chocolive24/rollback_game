@@ -32,8 +32,8 @@ void SimulationClient::Update() noexcept {
 }
 
 void SimulationClient::Draw(
-    const raylib::RenderTexture2D& render_target) noexcept {
-  game_renderer_.Draw(render_target);
+  const raylib::RenderTexture2D& render_target, raylib::Vector2 render_target_pos) noexcept {
+  game_renderer_.Draw(render_target, render_target_pos);
 }
 
 void SimulationClient::Deinit() noexcept {
