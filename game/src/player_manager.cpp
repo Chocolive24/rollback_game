@@ -30,15 +30,15 @@ void PlayerManager::Init() noexcept {
     collider.SetShape(Math::RectangleF(-half_size, half_size));
     collider.SetRestitution(0.3f);
 
-    const auto jump_col_ref = world_->CreateCollider(body_ref);
-    auto& can_jump_col = world_->GetCollider(jump_col_ref);
+    //const auto jump_col_ref = world_->CreateCollider(body_ref);
+    //auto& can_jump_col = world_->GetCollider(jump_col_ref);
 
-    can_jump_col.SetShape(Math::CircleF(Math::Vec2F(0.f, 0.f), 0.1f));
-    can_jump_col.SetOffset(game_constants::kPlayerJumpColOffset);
-    can_jump_col.SetIsTrigger(true);
+    //can_jump_col.SetShape(Math::CircleF(Math::Vec2F(0.f, 0.f), 0.1f));
+    //can_jump_col.SetOffset(game_constants::kPlayerJumpColOffset);
+    //can_jump_col.SetIsTrigger(true);
 
     players_[i].main_col_ref = main_col_ref;
-    players_[i].jump_col_ref = jump_col_ref;
+   // players_[i].jump_col_ref = jump_col_ref;
   }
 }
 
@@ -67,7 +67,6 @@ void PlayerManager::FixedUpdate() noexcept {
           body.Position() + Math::Vec2F(0.5f, 0.f), player.dir_to_mouse);
       player.shoot_timer_ = kShootCooldown;
     }
-    
   }
 }
 
@@ -122,7 +121,7 @@ void PlayerManager::Move(const Player& player) const noexcept {
 //   }
 //}
 
-void PlayerManager::Copy(const PlayerManager& player_manager) noexcept {
+void PlayerManager::Rollback(const PlayerManager& player_manager) noexcept {
   players_ = player_manager.players_;
 }
 
@@ -151,6 +150,10 @@ Checksum PlayerManager::ComputeChecksum() const noexcept {
 
     // Add input.
     checksum += player.input;
+
+    // Add shoot_timer.
+    const auto* timer_ptr = reinterpret_cast<const Checksum*>(&player.shoot_timer_);
+    checksum += *timer_ptr;
   }
 
   return checksum;
@@ -206,8 +209,7 @@ Math::Vec2F PlayerManager::GetJumpColliderPosition(
    return body.Position() + game_constants::kPlayerJumpColOffset;
 }
 
-Math::CircleF PlayerManager::GetJumpColliderShape(
-    std::size_t idx) const noexcept {
+Math::CircleF PlayerManager::GetJumpColliderShape(std::size_t idx) const noexcept {
    const auto& col = world_->GetCollider(players_[idx].jump_col_ref);
    return std::get<Math::CircleF>(col.Shape());
 }

@@ -36,7 +36,7 @@ public:
    * rollback is applied to go back to the previous players state.
    * \param player_manager The player manager to be copied.
    */
-  void Copy(const PlayerManager& player_manager) noexcept;
+  void Rollback(const PlayerManager& player_manager) noexcept;
 
   [[nodiscard]] Checksum ComputeChecksum() const noexcept;
 

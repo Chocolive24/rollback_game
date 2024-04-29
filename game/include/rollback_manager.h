@@ -1,6 +1,5 @@
 #pragma once
 
-#include "game_constants.h"
 #include "local_game_manager.h"
 #include "inputs.h"
 #include "types.h"

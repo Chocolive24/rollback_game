@@ -27,7 +27,7 @@ void OnlineGameManager::FixedUpdateCurrentFrame() noexcept {
     SetPlayerInput(input, player_id);
   }
 
-  FixedUpdate();
+  LocalGameManager::FixedUpdate();
 }
 
 void OnlineGameManager::Deinit() noexcept { LocalGameManager::Deinit(); }

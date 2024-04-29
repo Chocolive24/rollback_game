@@ -74,7 +74,7 @@ nByte FrameInput::serialization_protocol_ =
     ExitGames::Common::SerializationProtocol::DEFAULT;
 
 FrameInput::FrameInput(Math::Vec2F dir_to_mouse, FrameNbr frame_nbr,
-                       input::PlayerInput input) noexcept
+                       PlayerInput input) noexcept
     : dir_to_mouse_(dir_to_mouse), frame_nbr_(frame_nbr), input_(input) {}
 
 ExitGames::Common::JString& FrameInput::toString(

@@ -38,7 +38,7 @@ class NetworkManager final : public NetworkInterface,
     client_ = client;
   }
 
-  void RegisterNetworkGameManager(OnlineGameManager* network_game_manager) noexcept {
+  void RegisterOnlineGameManager(OnlineGameManager* network_game_manager) noexcept {
     online_game_manager_ = network_game_manager;
   }
 

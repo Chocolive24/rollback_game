@@ -32,7 +32,7 @@ public:
    * when rollback is applied to go back to a previous game state.
    * \param game_manager The game manager to be copied.
    */
-  void Copy(const LocalGameManager& game_manager) noexcept;
+  void Rollback(const LocalGameManager& game_manager) noexcept;
 
   [[nodiscard]] Checksum ComputeChecksum() const noexcept;
 
@@ -74,7 +74,7 @@ protected:
                      PhysicsEngine::ColliderRef colliderRefB) noexcept override;
   void OnCollisionEnter(
       PhysicsEngine::ColliderRef colliderRefA,
-      PhysicsEngine::ColliderRef colliderRefB) noexcept override {}
+      PhysicsEngine::ColliderRef colliderRefB) noexcept override;
   void OnCollisionExit(
       PhysicsEngine::ColliderRef colliderRefA,
       PhysicsEngine::ColliderRef colliderRefB) noexcept override {}

@@ -26,6 +26,7 @@ void LocalGameManager::FixedUpdate() noexcept {
   game_state_.world.Update(game_constants::kFixedDeltaTime);
 
   game_state_.player_manager.FixedUpdate();
+  game_state_.projectile_manager.FixedUpdate();
 }
 
 void LocalGameManager::Deinit() noexcept {
@@ -36,10 +37,11 @@ void LocalGameManager::SetPlayerInput(const input::FrameInput& input, PlayerId p
   game_state_.player_manager.SetPlayerInput(input, player_id);
 }
 
-void LocalGameManager::Copy(const LocalGameManager& game_manager) noexcept {
+void LocalGameManager::Rollback(const LocalGameManager& game_manager) noexcept {
   game_state_.world = game_manager.game_state_.world;
-  game_state_.player_manager.Copy(game_manager.game_state_.player_manager);
-  game_state_.projectile_manager.Copy(game_manager.game_state_.projectile_manager);
+  game_state_.world.SetContactListener(this);
+  game_state_.player_manager.Rollback(game_manager.game_state_.player_manager);
+  game_state_.projectile_manager.Rollback(game_manager.game_state_.projectile_manager);
 }
 
 Checksum LocalGameManager::ComputeChecksum() const noexcept {
@@ -63,4 +65,11 @@ void LocalGameManager::OnTriggerStay(PhysicsEngine::ColliderRef colliderRefA,
 
 void LocalGameManager::OnTriggerExit(PhysicsEngine::ColliderRef colliderRefA,
   PhysicsEngine::ColliderRef colliderRefB) noexcept {
+}
+
+void LocalGameManager::OnCollisionEnter(
+    PhysicsEngine::ColliderRef colliderRefA,
+    PhysicsEngine::ColliderRef colliderRefB) noexcept {
+
+  game_state_.projectile_manager.OnCollisionEnter(colliderRefA, colliderRefB);
 }

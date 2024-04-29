@@ -1,12 +1,14 @@
 #include "projectile_manager.h"
 
-#include <cassert>
+#include "game_constants.h"
+
 #include <iostream>
+#include <algorithm>
 
 void ProjectileManager::Init(PhysicsEngine::World* world) noexcept {
   world_ = world;
 
-  for (std::size_t i = 0; i < 100; i++)
+  for (std::size_t i = 0; i < kMaxProjectileCount; i++)
   {
     const auto& body_ref = world_->CreateBody();
     auto& body = world_->GetBody(body_ref);
@@ -23,26 +25,78 @@ void ProjectileManager::Init(PhysicsEngine::World* world) noexcept {
 
 void ProjectileManager::CreateProjectile(Math::Vec2F position,
                                          Math::Vec2F mov_dir) noexcept {
-  if (projectile_count_ >= kMaxProjectileCount)
-  {
+  //if (projectile_count_ >= kMaxProjectileCount)
+  //{
+  //  std::cerr << "No more space to create a projectile. \n";
+  //  return;
+  //}
+
+  // Find the first projectile not enabled.
+  const auto& proj_it = std::find_if(
+      projectiles_.begin(), projectiles_.end(),
+               [this](const Projectile& proj) {
+                 return !world_->GetCollider(proj.collider_ref).Enabled();
+               });
+
+  // If all projectiles in the pool are already used, return.
+  if (proj_it == projectiles_.end()) {
     std::cerr << "No more space to create a projectile. \n";
     return;
   }
 
-  auto& collider = world_->GetCollider(projectiles_[projectile_count_].collider_ref);
+  // Reset the projectile state and set its position and velocity.
+  auto& proj = *proj_it;
+  proj.collision_count = 0;
+  proj.life_time_ = 2.f;
+
+  auto& collider = world_->GetCollider(proj.collider_ref);
   collider.SetEnabled(true);
 
   auto& body = world_->GetBody(collider.GetBodyRef());
   body.SetPosition(position);
   body.SetVelocity(mov_dir * kProjectileMoveAmplitude);
+  body.SetMass(5.f);
 
-  projectile_count_++;
+  //projectile_count_++;
 }
 
-void ProjectileManager::OnTriggerEnter(
+void ProjectileManager::FixedUpdate() noexcept {
+  for (auto& proj : projectiles_) {
+    auto& collider = world_->GetCollider(proj.collider_ref);
+    if (!collider.Enabled()) 
+        continue;
+
+    /*if (proj.life_time_ > Math::Epsilon) {
+      proj.life_time_ -= game_constants::kFixedDeltaTime;
+
+      if (proj.life_time_ <= Math::Epsilon) {
+        collider.SetEnabled(false);
+      }
+    }*/
+
+
+    //proj.life_time_ -= game_constants::kFixedDeltaTime;
+    if (proj.collision_count >= kMaxCollisionCount)
+    {
+        collider.SetEnabled(false);
+    }
+  }
+}
+
+
+void ProjectileManager::OnCollisionEnter(
     PhysicsEngine::ColliderRef colliderRefA,
     PhysicsEngine::ColliderRef colliderRefB) noexcept {
-  //TODO: increase collider count and disable collider if the max collision count is reached.
+  for (auto& proj : projectiles_) {
+    auto& collider = world_->GetCollider(proj.collider_ref);
+
+    if (!collider.Enabled()) 
+        continue;
+
+    if (proj.collider_ref == colliderRefA || proj.collider_ref == colliderRefB) {
+      proj.collision_count++;
+    }
+  }
 }
 
 Checksum ProjectileManager::ComputeChecksum() const noexcept {
@@ -66,6 +120,9 @@ Checksum ProjectileManager::ComputeChecksum() const noexcept {
       checksum += velocity_ptr[i];
     }
 
+    // Add collision count.
+    checksum += proj.collision_count;
+
     // Add is enabled.
     const auto& collider = world_->GetCollider(proj.collider_ref);
     const auto& is_enabled = collider.Enabled();
@@ -75,9 +132,9 @@ Checksum ProjectileManager::ComputeChecksum() const noexcept {
   return checksum;
 }
 
-void ProjectileManager::Copy(const ProjectileManager& projectile_manager) noexcept {
+void ProjectileManager::Rollback(const ProjectileManager& projectile_manager) noexcept {
   projectiles_ = projectile_manager.projectiles_;
-  projectile_count_ = projectile_manager.projectile_count_;
+  //projectile_count_ = projectile_manager.projectile_count_;
 }
 
 Math::Vec2F ProjectileManager::GetProjectilePosition(std::size_t idx) const noexcept {
@@ -92,12 +149,4 @@ Math::CircleF ProjectileManager::GetProjectileCircle(std::size_t idx) const noex
   const auto& collider = world_->GetCollider(projectiles_[idx].collider_ref);
 
   return std::get<Math::CircleF>(collider.Shape());
-}
-
-void ProjectileManager::DestroyProjectile() noexcept {
-  for (std::size_t i = 0; i < kMaxProjectileCount; i++) {
-    projectiles_[i] = projectiles_[projectile_count_ - 1];
-    projectile_count_--;
-    i--;
-  }
 }

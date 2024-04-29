@@ -66,6 +66,7 @@ void RollbackManager::SetRemotePlayerInput(
     inputs_[player_id][frame] = last_new_remote_input;
   }
 
+  //SimulateUntilCurrentFrame();
   // Rollback if necessary.
   if (must_rollback) {
     SimulateUntilCurrentFrame();
@@ -82,7 +83,7 @@ void RollbackManager::SimulateUntilCurrentFrame() const noexcept {
   ZoneScoped;
 #endif
 
-  current_game_manager_->Copy(confirmed_game_manager_);
+  current_game_manager_->Rollback(confirmed_game_manager_);
 
   for (FrameNbr frame = static_cast<FrameNbr>(confirmed_frame_ + 1); 
       frame < current_frame_; frame++) {

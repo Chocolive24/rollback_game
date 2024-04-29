@@ -37,10 +37,10 @@ class Client {
 
 private:
   NetworkManager network_manager_{PHOTON_APP_ID, L"1.0"};
-  OnlineGameManager network_game_manager_{};
+  OnlineGameManager online_game_manager_{};
 
 
-  GameRenderer game_renderer_{&network_game_manager_};
+  GameRenderer game_renderer_{&online_game_manager_};
 
   float fixed_timer_ = game_constants::kFixedDeltaTime;
   ClientState state_ = ClientState::kConnecting;

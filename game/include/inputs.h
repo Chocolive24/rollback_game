@@ -2,12 +2,11 @@
 
 #include "Vec2.h"
 #include "types.h"
+#include "game_constants.h"
 
 #include <Common-cpp/inc/CustomType.h>
 
 #include <vector>
-
-#include "game_constants.h"
 
 namespace input {
 

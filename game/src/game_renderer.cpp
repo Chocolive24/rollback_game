@@ -180,8 +180,13 @@ void GameRenderer::DrawPlatforms() const noexcept {
 }
 
 void GameRenderer::DrawProjectiles() const noexcept {
-  for (std::size_t i = 0; 
-      i < game_manager_->projectile_manager().projectile_count(); i++) {
+  for (std::size_t i = 0; i < ProjectileManager::kMaxProjectileCount; i++) {
+
+    if (!game_manager_->projectile_manager().IsProjectileEnabled(i)) {
+      // Projectile not enabled.
+      continue;
+    }
+
     const auto proj_pos =
         game_manager_->projectile_manager().GetProjectilePosition(i);
     const auto proj_pix_pos = Metrics::MetersToPixels(proj_pos);
@@ -219,16 +224,16 @@ void GameRenderer::DrawPlayer() const noexcept {
                        player_pix_pos.Y - main_col_pix_length * 0.5f,
                        main_col_pix_length, main_col_pix_length, RED);
     
-    const auto jump_col_pos =
-        game_manager_->player_manager().GetJumpColliderPosition(i);
-    const auto jump_col_pix_pos = Metrics::MetersToPixels(jump_col_pos);
-    
-    const auto radius =
-        game_manager_->player_manager().GetJumpColliderShape(i).Radius();
-    
-    const auto pix_radius = Metrics::MetersToPixels(radius);
-    
-    DrawCircleLines(jump_col_pix_pos.X, jump_col_pix_pos.Y, pix_radius, RED);
+    //const auto jump_col_pos =
+    //    game_manager_->player_manager().GetJumpColliderPosition(i);
+    //const auto jump_col_pix_pos = Metrics::MetersToPixels(jump_col_pos);
+    //
+    //const auto radius =
+    //    game_manager_->player_manager().GetJumpColliderShape(i).Radius();
+    //
+    //const auto pix_radius = Metrics::MetersToPixels(radius);
+    //
+    //DrawCircleLines(jump_col_pix_pos.X, jump_col_pix_pos.Y, pix_radius, RED);
 #endif
     // ================================
   }

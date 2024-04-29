@@ -5,11 +5,11 @@
 
 void Client::Init(int input_profile_id) noexcept {
   network_manager_.RegisterClient(this);
-  network_manager_.RegisterNetworkGameManager(&network_game_manager_);
+  network_manager_.RegisterOnlineGameManager(&online_game_manager_);
   network_manager_.Connect();
 
-  network_game_manager_.Init(input_profile_id);
-  network_game_manager_.RegisterNetworkInterface(&network_manager_);
+  online_game_manager_.Init(input_profile_id);
+  online_game_manager_.RegisterNetworkInterface(&network_manager_);
 
   game_renderer_.Init();
 }
@@ -21,7 +21,7 @@ void Client::Update() noexcept {
 
   while (fixed_timer_ >= game_constants::kFixedDeltaTime) {
     if (state_ == ClientState::kInGame) {
-      network_game_manager_.FixedUpdateCurrentFrame();
+      online_game_manager_.FixedUpdateCurrentFrame();
     }
 
     fixed_timer_ -= game_constants::kFixedDeltaTime;
@@ -42,7 +42,7 @@ void Client::DrawImGui() noexcept {
   ImGui::SetNextWindowSize(ImVec2(300, 200), ImGuiCond_Once);
 
   ImGui::Begin(("Game Client " + 
-      std::to_string(network_game_manager_.input_profile_id())).c_str());
+      std::to_string(online_game_manager_.input_profile_id())).c_str());
   {
     switch (state_) {
       case ClientState::kConnecting:
@@ -65,7 +65,7 @@ void Client::DrawImGui() noexcept {
 }
 
 void Client::Deinit() noexcept {
-  network_game_manager_.Deinit();
+  online_game_manager_.Deinit();
   game_renderer_.Deinit();
 
   network_manager_.Disconnect();
@@ -75,5 +75,5 @@ void Client::StartGame() noexcept {
   state_ = ClientState::kInGame;
 
   // PlayerId is in range 0-1 but ClientId is in range 1-2.
-  network_game_manager_.SetPlayerId(client_id_ - 1);
+  online_game_manager_.SetPlayerId(client_id_ - 1);
 }
