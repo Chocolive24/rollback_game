@@ -158,10 +158,10 @@ void GameRenderer::UpdateCamera(const RenderTexture2D& render_target, Vector2 re
 
 void GameRenderer::DrawPlatforms() const noexcept {
   for (std::size_t i = 0; i < game_constants::kArenaWallCount; i++) {
-    const auto pos = PlatformManager::wall_positions[i];
+    const auto pos = ArenaManager::wall_positions[i];
     const auto pixel_pos = Metrics::MetersToPixels(pos);
 
-    const auto col_size = PlatformManager::wall_shapes[i].Size();
+    const auto col_size = ArenaManager::wall_shapes[i].Size();
     const auto col_pix_size = Metrics::MetersToPixels(col_size);
 
     const auto centered_pix_pos = pixel_pos - col_pix_size * 0.5f;

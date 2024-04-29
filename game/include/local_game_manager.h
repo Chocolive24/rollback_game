@@ -1,7 +1,7 @@
 #pragma once
 
 #include "game_state.h"
-#include "platforms_manager.h"
+#include "arena_manager.h"
 
 /**
  * \brief LocalGameManager is a class that update the game logic.
@@ -40,7 +40,7 @@ public:
     return game_state_.player_manager;
   }
 
-  [[nodiscard]] const PlatformManager& platform_manager() const noexcept {
+  [[nodiscard]] const ArenaManager& platform_manager() const noexcept {
     return platform_manager_;
   }
 
@@ -58,20 +58,20 @@ public:
 
 protected:
   GameState game_state_{};
-  PlatformManager platform_manager_{};
+  ArenaManager platform_manager_{};
 
   int input_profile_id_ = -1;
   PlayerId player_id_ = -1;
 
-  float fixed_timer_ = game_constants::kFixedDeltaTime;
+  float fixed_frame_timer_ = game_constants::kFixedDeltaTime;
 
   void OnTriggerEnter(
       PhysicsEngine::ColliderRef colliderRefA,
-      PhysicsEngine::ColliderRef colliderRefB) noexcept override;
+      PhysicsEngine::ColliderRef colliderRefB) noexcept override{}
   void OnTriggerStay(PhysicsEngine::ColliderRef colliderRefA,
-                     PhysicsEngine::ColliderRef colliderRefB) noexcept override;
+                     PhysicsEngine::ColliderRef colliderRefB) noexcept override{}
   void OnTriggerExit(PhysicsEngine::ColliderRef colliderRefA,
-                     PhysicsEngine::ColliderRef colliderRefB) noexcept override;
+                     PhysicsEngine::ColliderRef colliderRefB) noexcept override{}
   void OnCollisionEnter(
       PhysicsEngine::ColliderRef colliderRefA,
       PhysicsEngine::ColliderRef colliderRefB) noexcept override;

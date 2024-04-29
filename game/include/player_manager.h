@@ -1,7 +1,7 @@
 #pragma once
 
 #include "game_constants.h"
-#include "inputs.h"
+#include "input.h"
 #include "projectile_manager.h"
 #include "World.h"
 
@@ -11,11 +11,13 @@
  * when a rollback is needed.
  */
 struct Player {
-  input::PlayerInput input{};
-  float shoot_timer_ = 0.f;
   PhysicsEngine::ColliderRef main_col_ref{};
   PhysicsEngine::ColliderRef jump_col_ref{};
   Math::Vec2F dir_to_mouse{};
+  float shoot_timer = 0.f;
+  float damage_timer = 0.f;
+  std::int8_t hp = 3;
+  input::PlayerInput input = 0;
 };
 
 /**
@@ -40,17 +42,19 @@ public:
 
   [[nodiscard]] Checksum ComputeChecksum() const noexcept;
 
-  void OnTriggerEnter(PhysicsEngine::ColliderRef colliderRefA,
+  void OnCollisionEnter(PhysicsEngine::ColliderRef colliderRefA,
                       PhysicsEngine::ColliderRef colliderRefB) noexcept;
 
   void SetPlayerInput(const input::FrameInput& input, PlayerId player_id);
 
+  void ApplyOneDamageToPlayer(std::size_t player_idx) noexcept;
+
   [[nodiscard]] Math::Vec2F GetPlayerPosition(std::size_t idx) const noexcept;
   [[nodiscard]] Math::Vec2F GetPlayerForces(std::size_t idx) const noexcept;
-  [[nodiscard]] Math::Vec2F GetJumpColliderPosition(
+  [[nodiscard]] PhysicsEngine::ColliderRef GetPlayerColRef(
       std::size_t idx) const noexcept;
-  [[nodiscard]] Math::CircleF GetJumpColliderShape(
-      std::size_t idx) const noexcept;
+  [[nodiscard]] Math::Vec2F GetJumpColliderPosition(std::size_t idx) const noexcept;
+  [[nodiscard]] Math::CircleF GetJumpColliderShape(std::size_t idx) const noexcept;
 
   static constexpr float kPlayerDamping = 0.3f;
   static constexpr float kPlayerMass = 1.f;
@@ -63,4 +67,5 @@ private:
  ProjectileManager* projectile_manager_ = nullptr;
 
   static constexpr float kShootCooldown = 0.5f;
+  static constexpr float kDamageCooldown = 2.f;
 };

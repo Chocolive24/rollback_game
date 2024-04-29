@@ -53,23 +53,26 @@ Checksum LocalGameManager::ComputeChecksum() const noexcept {
   return checksum;
 }
 
-void LocalGameManager::OnTriggerEnter(PhysicsEngine::ColliderRef colliderRefA,
-                                 PhysicsEngine::ColliderRef colliderRefB) noexcept {
-  game_state_.player_manager.OnTriggerEnter(colliderRefA, colliderRefB);
-}
-
-void LocalGameManager::OnTriggerStay(PhysicsEngine::ColliderRef colliderRefA,
-  PhysicsEngine::ColliderRef colliderRefB) noexcept {
-
-}
-
-void LocalGameManager::OnTriggerExit(PhysicsEngine::ColliderRef colliderRefA,
-  PhysicsEngine::ColliderRef colliderRefB) noexcept {
-}
-
 void LocalGameManager::OnCollisionEnter(
     PhysicsEngine::ColliderRef colliderRefA,
     PhysicsEngine::ColliderRef colliderRefB) noexcept {
 
+  for (std::size_t player_idx = 0; player_idx < game_constants::kMaxPlayerCount; player_idx++) {
+    const auto& player_col_ref = game_state_.player_manager.GetPlayerColRef(player_idx);
+
+    if (colliderRefA == player_col_ref || colliderRefB == player_col_ref)
+    {
+      for (std::size_t wall_idx = 0; wall_idx < game_constants::kArenaWallCount; wall_idx++)
+      {
+        const auto& wall_col_ref = platform_manager_.GetWallColRef(wall_idx);
+        if (colliderRefA == wall_col_ref || colliderRefB == wall_col_ref)
+        {
+          game_state_.player_manager.ApplyOneDamageToPlayer(player_idx);
+        }
+      }
+    }
+  }
+
+  //game_state_.player_manager.OnCollisionEnter(colliderRefA, colliderRefB);
   game_state_.projectile_manager.OnCollisionEnter(colliderRefA, colliderRefB);
 }

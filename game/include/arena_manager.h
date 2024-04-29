@@ -5,18 +5,16 @@
 
 #include <array>
 
-class PlatformManager {
+class ArenaManager {
 public:
   void Init(PhysicsEngine::World* world) noexcept;
 
-  //[[nodiscard]] Math::Vec2F GetPlatformPosition(
-  //    const std::size_t& idx)const noexcept;
-
-  //[[nodiscard]] Math::RectangleF GetPlatformShape(
-  //    const std::size_t& idx) const noexcept;
+  [[nodiscard]] PhysicsEngine::ColliderRef GetWallColRef(std::size_t idx) const noexcept {
+    return wall_col_refs[idx];
+  }
 
   static constexpr std::array<Math::Vec2F, game_constants::kArenaWallCount>
-      wall_positions{
+      wall_positions {
         Math::Vec2F(3.50, 3.50f), // left
         Math::Vec2F(7.00, 0.f), // up
         Math::Vec2F(10.50f, 3.50f), // right
@@ -24,7 +22,7 @@ public:
       };
 
   static constexpr std::array<Math::RectangleF, game_constants::kArenaWallCount>
-      wall_shapes{
+      wall_shapes {
           Math::RectangleF(-game_constants::kVerticalWallSize * 0.5f, 
           game_constants::kVerticalWallSize * 0.5f),  // left
 

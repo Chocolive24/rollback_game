@@ -1,4 +1,4 @@
-#include "inputs.h"
+#include "input.h"
 #include "Metrics.h"
 
 #include <Common-cpp/inc/Common.h>

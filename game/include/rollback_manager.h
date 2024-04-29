@@ -1,7 +1,7 @@
 #pragma once
 
 #include "local_game_manager.h"
-#include "inputs.h"
+#include "input.h"
 #include "types.h"
 
 /**

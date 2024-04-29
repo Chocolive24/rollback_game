@@ -46,12 +46,20 @@ void PlayerManager::FixedUpdate() noexcept {
   for (auto& player : players_) {
     Move(player);
 
-    if (player.shoot_timer_ > Math::Epsilon) {
-      player.shoot_timer_ -= game_constants::kFixedDeltaTime;
+    if (player.damage_timer > Math::Epsilon) {
+      player.damage_timer -= game_constants::kFixedDeltaTime;
 
-      if (player.shoot_timer_ <= Math::Epsilon)
+      if (player.damage_timer <= Math::Epsilon) {
+        player.damage_timer = 0.f;
+      }
+    }
+
+    if (player.shoot_timer > Math::Epsilon) {
+      player.shoot_timer -= game_constants::kFixedDeltaTime;
+
+      if (player.shoot_timer <= Math::Epsilon)
       {
-        player.shoot_timer_ = 0.f;
+        player.shoot_timer = 0.f;
       }
 
       return;
@@ -64,8 +72,8 @@ void PlayerManager::FixedUpdate() noexcept {
           world_->GetCollider(player.main_col_ref).GetBodyRef());
 
        projectile_manager_->CreateProjectile(
-          body.Position() + Math::Vec2F(0.5f, 0.f), player.dir_to_mouse);
-      player.shoot_timer_ = kShootCooldown;
+          body.Position() + player.dir_to_mouse * 0.75f, player.dir_to_mouse);
+      player.shoot_timer = kShootCooldown;
     }
   }
 }
@@ -152,16 +160,17 @@ Checksum PlayerManager::ComputeChecksum() const noexcept {
     checksum += player.input;
 
     // Add shoot_timer.
-    const auto* timer_ptr = reinterpret_cast<const Checksum*>(&player.shoot_timer_);
+    const auto* timer_ptr = reinterpret_cast<const Checksum*>(&player.shoot_timer);
     checksum += *timer_ptr;
   }
 
   return checksum;
 }
 
-void PlayerManager::OnTriggerEnter(
+void PlayerManager::OnCollisionEnter(
     PhysicsEngine::ColliderRef colliderRefA,
     PhysicsEngine::ColliderRef colliderRefB) noexcept {
+
   // if (colliderRefA == jump_col_ref_ || colliderRefB == jump_col_ref_) {
   //   if (colliderRefA == main_col_ref_ || colliderRefB == main_col_ref_) {
   //     return;
@@ -187,6 +196,16 @@ void PlayerManager::SetPlayerInput(const input::FrameInput& input, PlayerId play
   players_[player_id].dir_to_mouse = input.dir_to_mouse();
 }
 
+void PlayerManager::ApplyOneDamageToPlayer(std::size_t player_idx) noexcept {
+  auto& player = players_[player_idx];
+
+  if (player.damage_timer <= Math::Epsilon) {
+    player.hp--;
+    player.damage_timer = kDamageCooldown;
+    std::cout << (int)player.hp << '\n';
+  }
+}
+
 Math::Vec2F PlayerManager::GetPlayerPosition(std::size_t idx) const noexcept {
   const auto& body_ref =
       world_->GetCollider(players_[idx].main_col_ref).GetBodyRef();
@@ -199,6 +218,10 @@ Math::Vec2F PlayerManager::GetPlayerForces(std::size_t idx) const noexcept {
        world_->GetCollider(players_[idx].main_col_ref).GetBodyRef();
    const auto& body = world_->GetBody(body_ref);
    return body.Forces();
+}
+
+PhysicsEngine::ColliderRef PlayerManager::GetPlayerColRef(std::size_t idx) const noexcept {
+   return players_[idx].main_col_ref;
 }
 
 Math::Vec2F PlayerManager::GetJumpColliderPosition(

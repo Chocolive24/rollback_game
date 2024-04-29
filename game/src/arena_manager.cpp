@@ -1,6 +1,6 @@
-#include "platforms_manager.h"
+#include "arena_manager.h"
 
-void PlatformManager::Init(PhysicsEngine::World* world) noexcept {
+void ArenaManager::Init(PhysicsEngine::World* world) noexcept {
   world_ = world;
 
   for (int i = 0; i < game_constants::kArenaWallCount; i++)
@@ -10,8 +10,8 @@ void PlatformManager::Init(PhysicsEngine::World* world) noexcept {
     body.SetPosition(wall_positions[i]);
     body.SetBodyType(PhysicsEngine::BodyType::Static);
 
-    wall_col_refs[0] = world_->CreateCollider(body_ref);
-    auto& col = world_->GetCollider(wall_col_refs[0]);
+    wall_col_refs[i] = world_->CreateCollider(body_ref);
+    auto& col = world_->GetCollider(wall_col_refs[i]);
     col.SetShape(wall_shapes[i]);
     col.SetRestitution(0.f);
   }
