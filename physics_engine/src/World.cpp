@@ -55,17 +55,24 @@ namespace PhysicsEngine
                     // a = F / m
                     Math::Vec2F acceleration = body.Forces() * body.InverseMass();
                     
-                    // Change velocity according to delta time.
+                    // Change velocity according to the acceleration over the delta time.
                     body.SetVelocity(body.Velocity() + acceleration * deltaTime);
+
+                    // Change velocity according to the impulses.
+                    body.SetVelocity(body.Velocity() + body.Impulses());
+
+                    // Change position according to velocity and delta time.
+                    body.SetPosition(body.Position() + body.Velocity() * deltaTime);
+
+                    // Remove the impulses from the velocity.
+                    body.SetVelocity(body.Velocity() - body.Impulses());
 
                     // Apply damping to velocity according to delta time.
                     body.SetVelocity(body.Velocity() *
                                      (1.0f - body.Damping() * deltaTime));
 
-                    // Change position according to velocity and delta time.
-                    body.SetPosition(body.Position() + body.Velocity() * deltaTime);
-
                     body.ResetForces();
+                    body.ResetImpulses();
 
                     break;
                 }

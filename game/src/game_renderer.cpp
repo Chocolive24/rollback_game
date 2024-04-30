@@ -44,6 +44,22 @@ void GameRenderer::Draw(const RenderTexture2D& render_target,
     BeginMode2D(camera_); {
       ClearBackground(BLACK);
 
+      for (int y = 0; y < 720; y+=36) {
+        for (int x = 0; x < 1344; x+=64) {
+          texture_manager::ice_ground.Draw(Vector2{static_cast<float>(x), 
+            static_cast<float>(y)});
+        }
+      }
+
+      for (int x = 0; x < 1344; x+=64)
+      {
+        texture_manager::fire.Draw(
+            Vector2{static_cast<float>(x), static_cast<float>(-32)});
+
+        texture_manager::fire.Draw(
+            Vector2{static_cast<float>(x), static_cast<float>(720-32)});
+      }
+
       DrawPlatforms();
       DrawProjectiles();
       DrawPlayer();
@@ -172,8 +188,8 @@ void GameRenderer::UpdateCamera(const RenderTexture2D& render_target, Vector2 re
 }
 
 void GameRenderer::DrawPlatforms() const noexcept {
-  for (std::size_t i = 0; i < game_constants::kArenaWallCount; i++) {
-    const auto pos = ArenaManager::wall_positions[i];
+  for (std::size_t i = 0; i < game_constants::kArenaBorderWallCount; i++) {
+    const auto pos = ArenaManager::border_wall_positions[i];
     const auto pixel_pos = Metrics::MetersToPixels(pos);
 
     const auto col_size = ArenaManager::wall_shapes[i].Size();
@@ -182,7 +198,7 @@ void GameRenderer::DrawPlatforms() const noexcept {
     const auto centered_pix_pos = pixel_pos - col_pix_size * 0.5f;
 
     DrawRectangle(centered_pix_pos.X, centered_pix_pos.Y, col_pix_size.X,
-                  col_pix_size.Y, BLUE);
+                  col_pix_size.Y, PURPLE);
 
     // Draw collider if in debug mode.
     // ===============================
@@ -191,6 +207,24 @@ void GameRenderer::DrawPlatforms() const noexcept {
                        col_pix_size.Y, RED);
 #endif
     // ===============================
+  }
+
+  for (std::size_t i = 0; i < game_constants::kArenaSquareWallCount; i++) {
+    const auto pos = ArenaManager::square_wall_positions[i];
+    const auto pixel_pos = Metrics::MetersToPixels(pos);
+
+    constexpr auto col_size = game_constants::kSquareWallRect.Size();
+    constexpr auto col_pix_size = Metrics::MetersToPixels(col_size);
+
+    const auto centered_pix_pos = pixel_pos - col_pix_size * 0.5f;
+
+    
+     //DrawRectangle(centered_pix_pos.X, centered_pix_pos.Y, col_pix_size.X,
+     //              col_pix_size.Y, GRAY);
+
+    texture_manager::log.Draw({pixel_pos.X - 18.f, pixel_pos.Y});
+    texture_manager::log.Draw({pixel_pos.X + 23.f, pixel_pos.Y});
+
   }
 }
 

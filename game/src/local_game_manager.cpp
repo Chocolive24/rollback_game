@@ -77,7 +77,7 @@ void LocalGameManager::OnCollisionEnter(
 
     if (colliderRefA == player_col_ref || colliderRefB == player_col_ref)
     {
-      for (std::size_t wall_idx = 0; wall_idx < game_constants::kArenaWallCount; wall_idx++)
+      for (std::size_t wall_idx = 0; wall_idx < game_constants::kArenaBorderWallCount; wall_idx++)
       {
         const auto& wall_col_ref = arena_manager_.GetWallColRef(wall_idx);
         if (colliderRefA == wall_col_ref || colliderRefB == wall_col_ref)

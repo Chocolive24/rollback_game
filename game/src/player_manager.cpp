@@ -98,15 +98,19 @@ void PlayerManager::Move(const Player& player) const noexcept {
     move_direction += Math::Vec2F::Right();
   }
 
+
   if (move_direction.Length() >= Math::Epsilon) {
-    const auto& body_ref =
+    
+        const auto& body_ref =
         world_->GetCollider(player.main_col_ref).GetBodyRef();
     auto& body = world_->GetBody(body_ref);
 
-   /* if (body.Velocity().Length() >= 10.f)
+    //std::cout << body.Velocity().Length() << '\n';
+ 
+    if (body.Velocity().Length() >= 8.f)
     {
       return;
-    }*/
+    }
 
     const auto dir = move_direction.Length() >= Math::Epsilon
                          ? move_direction.Normalized()

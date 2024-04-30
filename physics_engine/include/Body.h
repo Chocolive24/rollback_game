@@ -34,6 +34,7 @@ namespace PhysicsEngine
         Math::Vec2F _position = Math::Vec2F::Zero();
         Math::Vec2F _velocity = Math::Vec2F::Zero();
         Math::Vec2F _forces = Math::Vec2F::Zero();
+        Math::Vec2F _impulses = Math::Vec2F::Zero();
         float _mass = -1.f;
         float _inverseMass = -1.f;
         float _damping = 0.f;
@@ -122,7 +123,7 @@ namespace PhysicsEngine
          * @brief ApplyForce is a method that applies a force to the body and adds it to the sum of the body's forces
          * @param force The force to be applied to the body.
          */
-        constexpr void ApplyForce(const Math::Vec2F force) noexcept { _forces += force; };
+        constexpr void ApplyForce(const Math::Vec2F force) noexcept { _forces += force; }
 
         /**
          * @brief Forces is a method that gives the sum of the body's forces.
@@ -134,6 +135,29 @@ namespace PhysicsEngine
          * @brief ResetForces is a method that sets the sum of the body's forces to zero.
          */
         constexpr void ResetForces() noexcept { _forces = Math::Vec2F::Zero(); }
+
+        /**
+         * @brief ApplyImpulse is a method that applies an impulse to the body and
+         * adds it to the sum of the body's impulses.
+         * @param impulse The impulse to be applied to the body.
+         */
+        constexpr void ApplyImpulse(const Math::Vec2F impulse) noexcept {
+            _impulses += impulse;
+        }
+
+        /**
+         * @brief Forces is a method that gives the sum of the body's forces.
+         * @return The sum of the body's forces.
+         */
+        [[nodiscard]] constexpr Math::Vec2F Impulses() const noexcept {
+            return _impulses;
+        }
+
+        /**
+         * @brief ResetForces is a method that sets the sum of the body's forces
+         * to zero.
+         */
+        constexpr void ResetImpulses() noexcept { _impulses = Math::Vec2F::Zero(); }
 
         /**
          * @brief Enabled is a method that checks if the body is valid (aka if it has a mass greater than 0).

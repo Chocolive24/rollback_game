@@ -30,4 +30,7 @@ void CreateAllSprites() noexcept;
 void DestroyAllSprites() noexcept;
 
 extern Sprite penguin;
+extern Sprite ice_ground;
+extern Sprite log;
+extern Sprite fire;
 }
