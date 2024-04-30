@@ -38,7 +38,7 @@ class RollbackManager {
   void SimulateUntilCurrentFrame() const noexcept;
   Checksum ConfirmFrame() noexcept;
 
-  [[nodiscard]] const input::FrameInput& GetLastPlayerConfirmedInput(
+  [[nodiscard]] const input::FrameInput& GetLastPlayerInput(
     PlayerId player_id) const noexcept;
 
   [[nodiscard]] FrameNbr current_frame() const noexcept {

@@ -49,6 +49,7 @@ public:
 
   void ApplyOneDamageToPlayer(std::size_t player_idx) noexcept;
 
+  [[nodiscard]] std::int8_t GetPlayerHp(std::size_t idx) const noexcept;
   [[nodiscard]] Math::Vec2F GetPlayerPosition(std::size_t idx) const noexcept;
   [[nodiscard]] Math::Vec2F GetPlayerForces(std::size_t idx) const noexcept;
   [[nodiscard]] PhysicsEngine::ColliderRef GetPlayerColRef(

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "game_gui.h"
 #include "local_game_manager.h"
 #include "raylib_wrapper.h"
 
@@ -26,6 +27,7 @@ private:
   void DrawPlayer() const noexcept;
 
   LocalGameManager* game_manager_ = nullptr;
+  GameGui game_gui_{};
   raylib::Camera2D camera_{};
 
   std::array<PhysicsEngine::Body, game_constants::kGameBodyCount>

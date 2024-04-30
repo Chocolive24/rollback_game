@@ -13,7 +13,7 @@ void LocalGameManager::Init(int input_profile_id) noexcept {
   game_state_.player_manager.Init();
 
   game_state_.projectile_manager.Init(&game_state_.world);
-  platform_manager_.Init(&game_state_.world);
+  arena_manager_.Init(&game_state_.world);
 
   input_profile_id_ = input_profile_id;
 }
@@ -22,6 +22,13 @@ void LocalGameManager::FixedUpdate() noexcept {
 #ifdef TRACY_ENABLE
     ZoneScoped;
 #endif  // TRACY_ENABLE
+
+  for (std::size_t i = 0; i < game_constants::kMaxPlayerCount; i++) {
+    if (game_state_.player_manager.GetPlayerHp(i) <= 0) {
+      is_finished_ = true;
+      return;
+    }
+  }
 
   game_state_.world.Update(game_constants::kFixedDeltaTime);
 
@@ -38,6 +45,10 @@ void LocalGameManager::SetPlayerInput(const input::FrameInput& input, PlayerId p
 }
 
 void LocalGameManager::Rollback(const LocalGameManager& game_manager) noexcept {
+#ifdef TRACY_ENABLE
+  ZoneScoped;
+#endif  // TRACY_ENABLE
+
   game_state_.world = game_manager.game_state_.world;
   game_state_.world.SetContactListener(this);
   game_state_.player_manager.Rollback(game_manager.game_state_.player_manager);
@@ -45,6 +56,10 @@ void LocalGameManager::Rollback(const LocalGameManager& game_manager) noexcept {
 }
 
 Checksum LocalGameManager::ComputeChecksum() const noexcept {
+#ifdef TRACY_ENABLE
+  ZoneScoped;
+#endif  // TRACY_ENABLE
+
   Checksum checksum = 0;
 
   checksum += game_state_.player_manager.ComputeChecksum();
@@ -64,15 +79,15 @@ void LocalGameManager::OnCollisionEnter(
     {
       for (std::size_t wall_idx = 0; wall_idx < game_constants::kArenaWallCount; wall_idx++)
       {
-        const auto& wall_col_ref = platform_manager_.GetWallColRef(wall_idx);
+        const auto& wall_col_ref = arena_manager_.GetWallColRef(wall_idx);
         if (colliderRefA == wall_col_ref || colliderRefB == wall_col_ref)
         {
           game_state_.player_manager.ApplyOneDamageToPlayer(player_idx);
+          return;
         }
       }
     }
   }
 
-  //game_state_.player_manager.OnCollisionEnter(colliderRefA, colliderRefB);
   game_state_.projectile_manager.OnCollisionEnter(colliderRefA, colliderRefB);
 }

@@ -26,16 +26,16 @@ namespace game_constants {
    */
   constexpr std::int8_t kGameBodyCount = 106;
 
-  constexpr float kPlayerMainColLength = 0.65f;
+  constexpr float kPlayerMainColLength = 0.65f * 0.75f;
   constexpr float kPlayerJumpColRadius = 0.1f;
   constexpr Math::Vec2F kPlayerJumpColOffset(0.f, kPlayerMainColLength * 0.5f);
-  constexpr float kPlayerSpeedMoveFactor = 5.f;
+  constexpr float kPlayerSpeedMoveFactor = 10.f;
   constexpr float kPlayerJumpMagnitude = 200.f;
   constexpr Math::Vec2F kPlayer1StartPos = Math::Vec2F(5.40f, 1.60f);
   constexpr Math::Vec2F kPlayer2StartPos = Math::Vec2F(7.40f, 1.60f);
 
   constexpr std::uint8_t kArenaWallCount = 4;
-  constexpr Math::Vec2I kArenaSize = Math::Vec2I(7, 7);
+  constexpr Math::Vec2F kArenaSize = Math::Vec2F(12.80f, 7);
   constexpr Math::Vec2F kHorizontalWallSize = Math::Vec2F(kArenaSize.X, 0.25f);
   constexpr Math::Vec2F kVerticalWallSize = Math::Vec2F(0.25f, kArenaSize.Y);
   constexpr Math::Vec2F kMainPlatformPos = Math::Vec2F(6.40f, 5.f);

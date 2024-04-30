@@ -78,10 +78,11 @@ void Engine::Setup() noexcept {
 
 #ifndef __EMSCRIPTEN__
   config_flags |= FLAG_VSYNC_HINT;
+
 #endif
   //SetTargetFPS(50);
   SetConfigFlags(config_flags);
-  InitWindow(window_size_.X, window_size_.Y, "Rollback Game");
+  InitWindow(window_size_.X, window_size_.Y, "Penguin Battle !");
 
   // Setup Dear ImGui context
   ImGui::CreateContext();

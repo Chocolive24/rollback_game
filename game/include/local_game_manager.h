@@ -41,7 +41,7 @@ public:
   }
 
   [[nodiscard]] const ArenaManager& platform_manager() const noexcept {
-    return platform_manager_;
+    return arena_manager_;
   }
 
   [[nodiscard]] const ProjectileManager& projectile_manager() const noexcept {
@@ -56,14 +56,18 @@ public:
     return input_profile_id_;
   }
 
+  [[nodiscard]] bool is_finished() const noexcept { return is_finished_;}
+
 protected:
   GameState game_state_{};
-  ArenaManager platform_manager_{};
+  ArenaManager arena_manager_{};
 
   int input_profile_id_ = -1;
   PlayerId player_id_ = -1;
 
   float fixed_frame_timer_ = game_constants::kFixedDeltaTime;
+
+  bool is_finished_ = false;
 
   void OnTriggerEnter(
       PhysicsEngine::ColliderRef colliderRefA,

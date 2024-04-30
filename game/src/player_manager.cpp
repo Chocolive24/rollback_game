@@ -3,7 +3,7 @@
 
 void PlayerManager::Init() noexcept {
   for (std::size_t i = 0; i < game_constants::kMaxPlayerCount; i++) {
-    Math::Vec2F start_pos{};
+    Math::Vec2F start_pos;
     switch (i) {
       case 0:
         start_pos = game_constants::kPlayer1StartPos;
@@ -62,17 +62,17 @@ void PlayerManager::FixedUpdate() noexcept {
         player.shoot_timer = 0.f;
       }
 
-      return;
+      continue;
     }
 
-    // TODO: pas de creation de proj si le click s'est fait dans le joueur.
     if (player.input &
         static_cast<input::PlayerInput>(input::PlayerInputType::kShoot)) {
       const auto& body = world_->GetBody(
           world_->GetCollider(player.main_col_ref).GetBodyRef());
 
-       projectile_manager_->CreateProjectile(
-          body.Position() + player.dir_to_mouse * 0.75f, player.dir_to_mouse);
+      const auto proj_pos = body.Position() + player.dir_to_mouse * 0.75f;
+      projectile_manager_->CreateProjectile(proj_pos, player.dir_to_mouse);
+
       player.shoot_timer = kShootCooldown;
     }
   }
@@ -102,6 +102,12 @@ void PlayerManager::Move(const Player& player) const noexcept {
     const auto& body_ref =
         world_->GetCollider(player.main_col_ref).GetBodyRef();
     auto& body = world_->GetBody(body_ref);
+
+   /* if (body.Velocity().Length() >= 10.f)
+    {
+      return;
+    }*/
+
     const auto dir = move_direction.Length() >= Math::Epsilon
                          ? move_direction.Normalized()
                          : move_direction;
@@ -160,8 +166,15 @@ Checksum PlayerManager::ComputeChecksum() const noexcept {
     checksum += player.input;
 
     // Add shoot_timer.
-    const auto* timer_ptr = reinterpret_cast<const Checksum*>(&player.shoot_timer);
-    checksum += *timer_ptr;
+    const auto* shoot_timer_ptr = reinterpret_cast<const Checksum*>(&player.shoot_timer);
+    checksum += *shoot_timer_ptr;
+
+    // Add hp.
+    checksum += player.hp;
+
+    // Add damage_timer.
+    const auto* damage_timer_ptr = reinterpret_cast<const Checksum*>(&player.damage_timer);
+    checksum += *damage_timer_ptr;
   }
 
   return checksum;
@@ -202,8 +215,11 @@ void PlayerManager::ApplyOneDamageToPlayer(std::size_t player_idx) noexcept {
   if (player.damage_timer <= Math::Epsilon) {
     player.hp--;
     player.damage_timer = kDamageCooldown;
-    std::cout << (int)player.hp << '\n';
   }
+}
+
+std::int8_t PlayerManager::GetPlayerHp(std::size_t idx) const noexcept {
+  return players_[idx].hp;
 }
 
 Math::Vec2F PlayerManager::GetPlayerPosition(std::size_t idx) const noexcept {

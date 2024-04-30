@@ -49,7 +49,7 @@ Sprite CreateSprite(std::string_view path, float scale,
 }
 
 void CreateAllSprites() noexcept {
-  penguin = CreateSprite("data/images/Turn.png", 5.f);
+  penguin = CreateSprite("data/images/Turn.png", 5.f * 0.75f);
 }
 
 void DestroyAllSprites() noexcept { UnloadTexture(penguin.tex); }

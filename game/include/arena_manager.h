@@ -15,10 +15,10 @@ public:
 
   static constexpr std::array<Math::Vec2F, game_constants::kArenaWallCount>
       wall_positions {
-        Math::Vec2F(3.50, 3.50f), // left
-        Math::Vec2F(7.00, 0.f), // up
-        Math::Vec2F(10.50f, 3.50f), // right
-        Math::Vec2F(7.0, 7.0f), // down
+        Math::Vec2F(0.f, 3.50f), // left
+        Math::Vec2F(6.40f, 0.f), // up
+        Math::Vec2F(12.80f, 3.50f), // right
+        Math::Vec2F(6.40f, 7.0f), // down
       };
 
   static constexpr std::array<Math::RectangleF, game_constants::kArenaWallCount>

@@ -15,7 +15,8 @@ void Client::Init(int input_profile_id) noexcept {
 }
 
 void Client::Update() noexcept {
-  fixed_timer_ += raylib::GetFrameTime();
+  const auto delta_time = raylib::GetFrameTime();
+  fixed_timer_ += delta_time;
   
   network_manager_.Service();
 
@@ -26,6 +27,8 @@ void Client::Update() noexcept {
 
     fixed_timer_ -= game_constants::kFixedDeltaTime;
   }
+
+  game_renderer_.Update(delta_time);
 }
 
 void Client::Draw(const raylib::RenderTexture2D& render_texture, 

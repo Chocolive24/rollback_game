@@ -9,7 +9,9 @@ using namespace raylib;
 #include <iostream>
 
 GameRenderer::GameRenderer(LocalGameManager* game_manager) noexcept
-    : game_manager_(game_manager) {}
+    : game_manager_(game_manager) {
+  game_gui_.Init(game_manager);
+}
 
 void GameRenderer::Init() noexcept {
   texture_manager::CreateAllSprites();
@@ -42,13 +44,27 @@ void GameRenderer::Draw(const RenderTexture2D& render_target,
     BeginMode2D(camera_); {
       ClearBackground(BLACK);
 
-      DrawRectangle(350, 0, game_constants::kArenaSize.X,
-                    game_constants::kArenaSize.Y, RED);
       DrawPlatforms();
       DrawProjectiles();
       DrawPlayer();
     }
     EndMode2D();
+
+    game_gui_.Draw(render_target);
+
+    if (game_manager_->is_finished()) {
+      const auto local_player_hp = 
+          game_manager_->player_manager().GetPlayerHp(game_manager_->player_id());
+      const std::string end_txt = local_player_hp <= 0 ? "You lost !" : "You won !";
+
+const auto render_target_center_x = render_target.texture.width / 2 -
+                                          MeasureText(end_txt.c_str(), 40) / 2;
+      const auto render_target_center_y =
+          render_target.texture.height / 2 - 40 / 2;
+      raylib::DrawRaylibText(end_txt.c_str(), render_target_center_x,
+                             render_target_center_y, 40, raylib::WHITE);
+
+    }
   }
   EndTextureMode();
 }
@@ -127,8 +143,7 @@ void GameRenderer::UpdateCamera(const RenderTexture2D& render_target, Vector2 re
             game_constants::kGameScreenSize.Y;
     offset = {(render_target.texture.width -
                game_constants::kGameScreenSize.X * scale) *
-                  0.5f,
-              0};
+                  0.5f,0};
   }
 
   // Adjust zoom level based on screen size
@@ -213,7 +228,8 @@ void GameRenderer::DrawPlayer() const noexcept {
 
     const auto player_pix_pos = Metrics::MetersToPixels(player_pos);
     
-    texture_manager::penguin.Draw(Vector2{player_pix_pos.X, player_pix_pos.Y});
+    texture_manager::penguin.Draw(Vector2{player_pix_pos.X, player_pix_pos.Y}, 0.f,
+        i == 0 ? raylib::BLUE : raylib::RED);
     
     // Draw colliders if in debug mode.
     // ================================

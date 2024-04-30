@@ -13,11 +13,11 @@ void ProjectileManager::Init(PhysicsEngine::World* world) noexcept {
     const auto& body_ref = world_->CreateBody();
     auto& body = world_->GetBody(body_ref);
     body.SetBodyType(PhysicsEngine::BodyType::Kinematic);
-    body.SetMass(5.f);
+    body.SetMass(kProjectileMass);
 
     projectiles_[i].collider_ref = world_->CreateCollider(body_ref);
     auto& collider = world_->GetCollider(projectiles_[i].collider_ref);
-    collider.SetShape(Math::CircleF(Math::Vec2F::Zero(), 0.2f));
+    collider.SetShape(Math::CircleF(Math::Vec2F::Zero(), kProjectileRadius));
     collider.SetRestitution(1.f);
     collider.SetEnabled(false);
   }
@@ -25,12 +25,6 @@ void ProjectileManager::Init(PhysicsEngine::World* world) noexcept {
 
 void ProjectileManager::CreateProjectile(Math::Vec2F position,
                                          Math::Vec2F mov_dir) noexcept {
-  //if (projectile_count_ >= kMaxProjectileCount)
-  //{
-  //  std::cerr << "No more space to create a projectile. \n";
-  //  return;
-  //}
-
   // Find the first projectile not enabled.
   const auto& proj_it = std::find_if(
       projectiles_.begin(), projectiles_.end(),
@@ -47,7 +41,6 @@ void ProjectileManager::CreateProjectile(Math::Vec2F position,
   // Reset the projectile state and set its position and velocity.
   auto& proj = *proj_it;
   proj.collision_count = 0;
-  proj.life_time_ = 2.f;
 
   auto& collider = world_->GetCollider(proj.collider_ref);
   collider.SetEnabled(true);
@@ -55,9 +48,7 @@ void ProjectileManager::CreateProjectile(Math::Vec2F position,
   auto& body = world_->GetBody(collider.GetBodyRef());
   body.SetPosition(position);
   body.SetVelocity(mov_dir * kProjectileMoveAmplitude);
-  body.SetMass(5.f);
-
-  //projectile_count_++;
+  body.SetMass(kProjectileMass);
 }
 
 void ProjectileManager::FixedUpdate() noexcept {
@@ -66,16 +57,6 @@ void ProjectileManager::FixedUpdate() noexcept {
     if (!collider.Enabled()) 
         continue;
 
-    /*if (proj.life_time_ > Math::Epsilon) {
-      proj.life_time_ -= game_constants::kFixedDeltaTime;
-
-      if (proj.life_time_ <= Math::Epsilon) {
-        collider.SetEnabled(false);
-      }
-    }*/
-
-
-    //proj.life_time_ -= game_constants::kFixedDeltaTime;
     if (proj.collision_count >= kMaxCollisionCount)
     {
         collider.SetEnabled(false);
@@ -134,7 +115,6 @@ Checksum ProjectileManager::ComputeChecksum() const noexcept {
 
 void ProjectileManager::Rollback(const ProjectileManager& projectile_manager) noexcept {
   projectiles_ = projectile_manager.projectiles_;
-  //projectile_count_ = projectile_manager.projectile_count_;
 }
 
 Math::Vec2F ProjectileManager::GetProjectilePosition(std::size_t idx) const noexcept {

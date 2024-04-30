@@ -11,7 +11,6 @@
 struct Projectile {
   PhysicsEngine::ColliderRef collider_ref{};
   std::int16_t collision_count = 0;
-  float life_time_ = 2.f;
 };
 
 /**
@@ -29,12 +28,8 @@ public:
                       PhysicsEngine::ColliderRef colliderRefB) noexcept;
 
   Checksum ComputeChecksum() const noexcept;
-
   void Rollback(const ProjectileManager& projectile_manager) noexcept;
 
-  //[[nodiscard]] std::size_t projectile_count() const noexcept {
-  //  return projectile_count_;
-  //}
 
   [[nodiscard]] const Projectile& GetProjectile(std::size_t idx) const noexcept {
     return projectiles_[idx];
@@ -47,16 +42,14 @@ public:
     return world_->GetCollider(projectiles_[idx].collider_ref).Enabled();
   }
 
-  //[[nodiscard]] PhysicsEngine::ColliderRef GetProjectileColRef(std::size_t idx) const noexcept;
-
   static constexpr std::int16_t kMaxProjectileCount = 100;
 
  private:
   static constexpr float kProjectileMoveAmplitude = 7.f;
-  static constexpr std::int8_t kMaxCollisionCount = 2;
+  static constexpr std::int8_t kMaxCollisionCount = 4;
+  static constexpr float kProjectileMass = 2.5f;
+  static constexpr float kProjectileRadius = 0.125f;
 
   std::array<Projectile, kMaxProjectileCount> projectiles_{};
   PhysicsEngine::World* world_ = nullptr;
-
-  //std::size_t projectile_count_ = 0;
 };

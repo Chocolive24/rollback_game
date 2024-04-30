@@ -23,7 +23,7 @@ void OnlineGameManager::FixedUpdateCurrentFrame() noexcept {
 
   for (PlayerId player_id = 0; player_id < game_constants::kMaxPlayerCount;
        player_id++) {
-    const auto input = rollback_manager_.GetLastPlayerConfirmedInput(player_id);
+    const auto input = rollback_manager_.GetLastPlayerInput(player_id);
     SetPlayerInput(input, player_id);
   }
 

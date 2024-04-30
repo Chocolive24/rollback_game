@@ -116,7 +116,7 @@ Checksum RollbackManager::ConfirmFrame() noexcept {
   return checksum;
 }
 
-const input::FrameInput& RollbackManager::GetLastPlayerConfirmedInput(
+const input::FrameInput& RollbackManager::GetLastPlayerInput(
     const PlayerId player_id) const noexcept {
   return last_inputs_[player_id];
 }
