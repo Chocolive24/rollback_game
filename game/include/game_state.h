@@ -13,4 +13,5 @@ struct GameState {
   PhysicsEngine::World world{};
   PlayerManager player_manager{};
   ProjectileManager projectile_manager{};
+  bool is_game_finished = false;
 };

@@ -145,6 +145,12 @@ void OnlineGameManager::OnInputReceived(
       *ExitGames::Common::ValueObject<input::FrameInput*>(input_value)
            .getSizes();
 
+  if (inputs_count <= 0)
+  {
+    std::cerr << "remote input event is empty.\n";
+    return;
+  }
+
   remote_frame_inputs.reserve(inputs_count);
   for (int i = 0; i < inputs_count; i++) {
     input::FrameInput frame_input{inputs[i]};
@@ -191,6 +197,12 @@ void OnlineGameManager::OnFrameConfirmationReceived(
 
   const int inputs_count =
       *ExitGames::Common::ValueObject<input::FrameInput*>(input_value).getSizes();
+
+  if (inputs_count <= 0)
+  {
+    std::cerr << "remote input event is empty.\n";
+    return;
+  }
 
   frame_inputs.reserve(inputs_count);
   for (int i = 0; i < inputs_count; i++) {

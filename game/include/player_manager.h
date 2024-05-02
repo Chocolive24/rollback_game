@@ -51,7 +51,7 @@ public:
 
   [[nodiscard]] std::int8_t GetPlayerHp(std::size_t idx) const noexcept;
   [[nodiscard]] Math::Vec2F GetPlayerPosition(std::size_t idx) const noexcept;
-  [[nodiscard]] Math::Vec2F GetPlayerForces(std::size_t idx) const noexcept;
+  [[nodiscard]] Math::Vec2F GetPlayerVelocity(std::size_t idx) const noexcept;
   [[nodiscard]] PhysicsEngine::ColliderRef GetPlayerColRef(
       std::size_t idx) const noexcept;
   [[nodiscard]] Math::Vec2F GetJumpColliderPosition(std::size_t idx) const noexcept;

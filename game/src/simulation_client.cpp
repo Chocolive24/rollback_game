@@ -26,11 +26,13 @@ void SimulationClient::Update() noexcept {
 
   const auto delta_time = raylib::GetFrameTime();
   fixed_timer_ += delta_time;
+  time_since_last_fixed_update_ += delta_time;
 
   while (fixed_timer_ >= game_constants::kFixedDeltaTime) {
     online_game_manager_.FixedUpdateCurrentFrame();
     game_renderer_.FixedUpdate();
     fixed_timer_ -= game_constants::kFixedDeltaTime;
+    time_since_last_fixed_update_ = 0.f;
   }
 
   game_renderer_.Update(delta_time);
@@ -38,7 +40,7 @@ void SimulationClient::Update() noexcept {
 
 void SimulationClient::Draw(
   const raylib::RenderTexture2D& render_target, raylib::Vector2 render_target_pos) noexcept {
-  game_renderer_.Draw(render_target, render_target_pos);
+  game_renderer_.Draw(render_target, render_target_pos, time_since_last_fixed_update_);
 }
 
 void SimulationClient::Deinit() noexcept {

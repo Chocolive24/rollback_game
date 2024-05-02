@@ -25,7 +25,7 @@ void LocalGameManager::FixedUpdate() noexcept {
 
   for (std::size_t i = 0; i < game_constants::kMaxPlayerCount; i++) {
     if (game_state_.player_manager.GetPlayerHp(i) <= 0) {
-      is_finished_ = true;
+      game_state_.is_game_finished = true;
       return;
     }
   }

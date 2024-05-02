@@ -61,7 +61,7 @@ void PhotonSampleApp::Draw() noexcept {
   raylib::DrawRaylibText("Raylib drawing text with photon in the same app.", 
       400, 350, 30, raylib::kWhite);
 
-  texture_manager::penguin.Draw({600, 600});
+  texture_manager::penguin_blue.Draw({600, 600});
 }
 
 void PhotonSampleApp::DrawImGui() noexcept {

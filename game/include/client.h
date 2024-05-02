@@ -42,6 +42,7 @@ private:
   GameRenderer game_renderer_{&online_game_manager_};
 
   float fixed_timer_ = game_constants::kFixedDeltaTime;
+  float time_since_last_fixed_update_ = 0.f;
   ClientState state_ = ClientState::kConnecting;
 
   ClientId client_id_ = game_constants::kInvalidClientId;

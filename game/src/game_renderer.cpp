@@ -36,8 +36,8 @@ void GameRenderer::FixedUpdate() noexcept {
   //    game_manager_->player_manager().GetPlayerForces(0));
 }
 
-void GameRenderer::Draw(const RenderTexture2D& render_target, 
-                        Vector2 render_target_pos) noexcept {
+void GameRenderer::Draw(const RenderTexture2D& render_target,
+                        Vector2 render_target_pos, float time_since_last_fixed_update) noexcept {
   UpdateCamera(render_target, render_target_pos);
 
   BeginTextureMode(render_target); {
@@ -51,18 +51,26 @@ void GameRenderer::Draw(const RenderTexture2D& render_target,
         }
       }
 
-      for (int x = 0; x < 1344; x+=64)
+      for (int x = 0; x < 1344; x+=188)
       {
         texture_manager::fire.Draw(
-            Vector2{static_cast<float>(x), static_cast<float>(-32)});
+            Vector2{static_cast<float>(x), static_cast<float>(24)});
 
         texture_manager::fire.Draw(
-            Vector2{static_cast<float>(x), static_cast<float>(720-32)});
+            Vector2{static_cast<float>(x), static_cast<float>(720 - 24)}, 180.f);
+      }
+
+      for (int y = 94; y < 720; y += 188) {
+        texture_manager::fire.Draw(
+            Vector2{static_cast<float>(24), static_cast<float>(y)}, -90);
+
+        texture_manager::fire.Draw(
+            Vector2{static_cast<float>(1280 - 24), static_cast<float>(y)}, 90);
       }
 
       DrawPlatforms();
       DrawProjectiles();
-      DrawPlayer();
+      DrawPlayer(time_since_last_fixed_update);
     }
     EndMode2D();
 
@@ -73,13 +81,15 @@ void GameRenderer::Draw(const RenderTexture2D& render_target,
           game_manager_->player_manager().GetPlayerHp(game_manager_->player_id());
       const std::string end_txt = local_player_hp <= 0 ? "You lost !" : "You won !";
 
-const auto render_target_center_x = render_target.texture.width / 2 -
-                                          MeasureText(end_txt.c_str(), 40) / 2;
-      const auto render_target_center_y =
-          render_target.texture.height / 2 - 40 / 2;
-      raylib::DrawRaylibText(end_txt.c_str(), render_target_center_x,
-                             render_target_center_y, 40, raylib::WHITE);
+      constexpr int txt_size = 60;
 
+      const auto render_target_center_x = render_target.texture.width / 2 -
+          MeasureText(end_txt.c_str(), txt_size) / 2;
+      const auto render_target_center_y =
+        render_target.texture.height / 2 - txt_size / 2;
+
+      raylib::DrawRaylibText(end_txt.c_str(), render_target_center_x,
+                             render_target_center_y, txt_size, raylib::GRAY);
     }
   }
   EndTextureMode();
@@ -90,7 +100,7 @@ void GameRenderer::Deinit() noexcept { texture_manager::DestroyAllSprites(); }
 void GameRenderer::UpdateObjectsGraphicPositions(float delta_time) noexcept {
   return;
   graphic_bodies_[0].ApplyForce(
-      game_manager_->player_manager().GetPlayerForces(0));
+      game_manager_->player_manager().GetPlayerVelocity(0));
 
   for (auto& body : graphic_bodies_)
   {
@@ -197,8 +207,8 @@ void GameRenderer::DrawPlatforms() const noexcept {
 
     const auto centered_pix_pos = pixel_pos - col_pix_size * 0.5f;
 
-    DrawRectangle(centered_pix_pos.X, centered_pix_pos.Y, col_pix_size.X,
-                  col_pix_size.Y, PURPLE);
+    //DrawRectangle(centered_pix_pos.X, centered_pix_pos.Y, col_pix_size.X,
+    //              col_pix_size.Y, PURPLE);
 
     // Draw collider if in debug mode.
     // ===============================
@@ -250,20 +260,28 @@ void GameRenderer::DrawProjectiles() const noexcept {
   }
 }
 
-void GameRenderer::DrawPlayer() const noexcept {
+void GameRenderer::DrawPlayer(float time_since_last_fixed_update) const noexcept {
   for (std::size_t i = 0; i < game_constants::kMaxPlayerCount; i++) {
-    const auto player_pos =
+    auto player_pos =
       game_manager_->player_manager().GetPlayerPosition(i);
 
-    //if (i == 0)
-    //{
-    //  player_pos = graphic_bodies_[0].Position();
-    //}
+    // Calculate the position that the player must have based on the time since the
+    // last fixed update.
+    player_pos += game_manager_->player_manager().GetPlayerVelocity(i) *
+                    time_since_last_fixed_update;
 
     const auto player_pix_pos = Metrics::MetersToPixels(player_pos);
-    
-    texture_manager::penguin.Draw(Vector2{player_pix_pos.X, player_pix_pos.Y}, 0.f,
-        i == 0 ? raylib::BLUE : raylib::RED);
+
+    if (i == 0)
+    {
+      texture_manager::penguin_blue.Draw(
+          Vector2{player_pix_pos.X, player_pix_pos.Y});
+    }
+    else
+    {
+      texture_manager::penguin_red.Draw(
+          Vector2{player_pix_pos.X, player_pix_pos.Y});
+    }
     
     // Draw colliders if in debug mode.
     // ================================

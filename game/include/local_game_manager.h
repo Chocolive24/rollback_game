@@ -56,7 +56,7 @@ public:
     return input_profile_id_;
   }
 
-  [[nodiscard]] bool is_finished() const noexcept { return is_finished_;}
+  [[nodiscard]] bool is_finished() const noexcept { return game_state_.is_game_finished;}
 
 protected:
   GameState game_state_{};
@@ -66,8 +66,6 @@ protected:
   PlayerId player_id_ = -1;
 
   float fixed_frame_timer_ = game_constants::kFixedDeltaTime;
-
-  bool is_finished_ = false;
 
   void OnTriggerEnter(
       PhysicsEngine::ColliderRef colliderRefA,

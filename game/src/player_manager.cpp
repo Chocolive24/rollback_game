@@ -233,11 +233,11 @@ Math::Vec2F PlayerManager::GetPlayerPosition(std::size_t idx) const noexcept {
    return body.Position();
 }
 
-Math::Vec2F PlayerManager::GetPlayerForces(std::size_t idx) const noexcept {
+Math::Vec2F PlayerManager::GetPlayerVelocity(std::size_t idx) const noexcept {
    const auto& body_ref =
        world_->GetCollider(players_[idx].main_col_ref).GetBodyRef();
    const auto& body = world_->GetBody(body_ref);
-   return body.Forces();
+   return body.Velocity();
 }
 
 PhysicsEngine::ColliderRef PlayerManager::GetPlayerColRef(std::size_t idx) const noexcept {

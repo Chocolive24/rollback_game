@@ -7,17 +7,17 @@ void Client::Init(int input_profile_id) noexcept {
   network_manager_.RegisterClient(this);
   network_manager_.RegisterOnlineGameManager(&online_game_manager_);
   network_manager_.Connect();
-
+ 
   online_game_manager_.Init(input_profile_id);
   online_game_manager_.RegisterNetworkInterface(&network_manager_);
-
+ 
   game_renderer_.Init();
 }
 
 void Client::Update() noexcept {
   const auto delta_time = raylib::GetFrameTime();
   fixed_timer_ += delta_time;
-  
+  time_since_last_fixed_update_ += delta_time;
   network_manager_.Service();
 
   while (fixed_timer_ >= game_constants::kFixedDeltaTime) {
@@ -26,6 +26,7 @@ void Client::Update() noexcept {
     }
 
     fixed_timer_ -= game_constants::kFixedDeltaTime;
+    time_since_last_fixed_update_ = 0.f;
   }
 
   game_renderer_.Update(delta_time);
@@ -35,8 +36,7 @@ void Client::Draw(const raylib::RenderTexture2D& render_texture,
     raylib::Vector2 render_target_pos) noexcept {
   if (state_ != ClientState::kInGame) 
       return;
-
-  game_renderer_.Draw(render_texture, render_target_pos);
+  game_renderer_.Draw(render_texture, render_target_pos, time_since_last_fixed_update_);
 }
 
 void Client::DrawImGui() noexcept {

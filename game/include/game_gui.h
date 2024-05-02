@@ -16,5 +16,5 @@ public:
 
   static constexpr float kPlayer1LifeUiPercentageX = 0.10f;
   static constexpr float kPlayer2LifeUiPercentageX = 1 - kPlayer1LifeUiPercentageX;
-  static constexpr float kPlayersLivesUiPercentageY = 0.05f;
+  static constexpr float kPlayersLivesUiPercentageY = 0.075f;
 };

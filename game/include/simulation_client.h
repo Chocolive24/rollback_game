@@ -57,7 +57,7 @@ private:
   std::vector<SimulationFrameToConfirm> waiting_frame_queue_{};
 
   float fixed_timer_ = game_constants::kFixedDeltaTime;
-
+  float time_since_last_fixed_update_ = 0.f;
   static constexpr PlayerId kMasterClientId = 0;
   static constexpr int kBaseInputSize = 100;
 };

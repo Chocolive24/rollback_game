@@ -111,7 +111,6 @@ void NetworkManager::joinRoomEventAction(
   std::cout << "Room state: player nr: " << playerNr
             << " player nrs size: " << playernrs.getSize() << " player userID: "
             << player.getUserID().UTF8Representation().cstr() << '\n';
-
   if (client_ == nullptr) return;
 
   if (client_->client_id() == game_constants::kInvalidClientId)

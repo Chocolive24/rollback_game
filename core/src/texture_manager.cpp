@@ -6,7 +6,8 @@ using namespace raylib;
 
 namespace texture_manager {
 
- Sprite penguin{};
+ Sprite penguin_blue{};
+ Sprite penguin_red{};
  Sprite ice_ground{};
  Sprite log{};
  Sprite fire{};
@@ -53,14 +54,16 @@ Sprite CreateSprite(std::string_view path, Vector2 scale,
 
 void CreateAllSprites() noexcept {
   ice_ground = CreateSprite("data/images/ice.png", Vector2{2.f, 2.f});
-  fire = CreateSprite("data/images/fire.png", Vector2{4.f, 4.f});
+  fire = CreateSprite("data/images/spkies.png", Vector2{2.f, 2.f});
   log = CreateSprite("data/images/Log.png", Vector2{3.25f, 3.f});
-  penguin =
-      CreateSprite("data/images/Turn.png", Vector2{5.f * 0.75f, 5.f * 0.75f});
+  penguin_blue =
+      CreateSprite("data/images/penguin_blue.png", Vector2{5.f * 0.75f, 5.f * 0.75f});
+  penguin_red = CreateSprite("data/images/penguin_red.png",
+                              Vector2{5.f * 0.75f, 5.f * 0.75f});
 
 }
 
-void DestroyAllSprites() noexcept { UnloadTexture(penguin.tex); }
+void DestroyAllSprites() noexcept { UnloadTexture(penguin_blue.tex); }
 
 }  // namespace texture_manager
 

@@ -80,7 +80,6 @@ void Engine::Setup() noexcept {
   config_flags |= FLAG_VSYNC_HINT;
 
 #endif
-  //SetTargetFPS(50);
   SetConfigFlags(config_flags);
   InitWindow(window_size_.X, window_size_.Y, "Penguin Battle !");
 

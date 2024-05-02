@@ -9,7 +9,7 @@ void RollbackManager::SetLocalPlayerInput(const input::FrameInput& local_input,
 
 void RollbackManager::SetRemotePlayerInput(
     const std::vector<input::FrameInput>& new_remote_inputs, PlayerId player_id) {
-  // Retrieve the last remote frame input
+  // Retrieve the last new remote frame input.
   auto last_new_remote_input = new_remote_inputs.back();
 
   // Calculate the difference between the last new remote frame and the last remote
@@ -22,7 +22,7 @@ void RollbackManager::SetRemotePlayerInput(
   }
 
   // If the last remote input frame is greater than the current frame, adjust
-  // last_new_remote_input
+  // last_new_remote_input.
   if (last_new_remote_input.frame_nbr() > current_frame_) {
     const auto& current_frame_it =
         std::find_if(new_remote_inputs.begin(), new_remote_inputs.end(),

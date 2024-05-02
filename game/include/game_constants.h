@@ -38,10 +38,11 @@ namespace game_constants {
   constexpr std::uint8_t kArenaBorderWallCount = 4;
   constexpr std::uint8_t kArenaSquareWallCount = 4;
   constexpr Math::Vec2F kArenaSize = Math::Vec2F(12.80f, 7.20f);
-  constexpr Math::Vec2F kHorizontalWallSize = Math::Vec2F(kArenaSize.X, 0.25f);
+  constexpr Math::Vec2F kHorizontalWallSize = Math::Vec2F(kArenaSize.X, 0.5f);
+  constexpr Math::Vec2F kVerticalWallSize = Math::Vec2F(0.5f, kArenaSize.Y);
   constexpr Math::RectangleF kSquareWallRect =
       Math::RectangleF(Math::Vec2F(-0.45f, -0.45f), Math::Vec2F(0.45f, 0.45f));
-  constexpr Math::Vec2F kVerticalWallSize = Math::Vec2F(0.25f, kArenaSize.Y);
+
   constexpr Math::Vec2F kMainPlatformPos = Math::Vec2F(6.40f, 5.f);
 
 }

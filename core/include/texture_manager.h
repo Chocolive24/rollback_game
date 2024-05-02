@@ -29,7 +29,8 @@ namespace texture_manager {
 void CreateAllSprites() noexcept;
 void DestroyAllSprites() noexcept;
 
-extern Sprite penguin;
+extern Sprite penguin_blue;
+extern Sprite penguin_red;
 extern Sprite ice_ground;
 extern Sprite log;
 extern Sprite fire;
