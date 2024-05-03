@@ -2,7 +2,7 @@
 
 #include "Metrics.h"
 #include "engine.h"
-#include "texture_manager.h"
+#include "TextureManager.h"
 
 using namespace raylib;
 
@@ -14,7 +14,7 @@ GameRenderer::GameRenderer(LocalGameManager* game_manager) noexcept
 }
 
 void GameRenderer::Init() noexcept {
-  texture_manager::CreateAllSprites();
+  texture_manager_.CreateAllSprites();
 
   camera_.target = Vector2{0.f, 0.f};
   camera_.offset = Vector2{0.f, 0.f};
@@ -35,25 +35,25 @@ void GameRenderer::Draw(const RenderTexture2D& render_target,
 
       for (int y = 0; y < 720; y += 36) {
         for (int x = 0; x < 1344; x += 64) {
-          texture_manager::ice_ground.Draw(
+          texture_manager_.ice_ground.Draw(
               Vector2{static_cast<float>(x), static_cast<float>(y)});
         }
       }
 
       for (int x = 0; x < 1344; x += 188) {
-        texture_manager::spikes.Draw(
+        texture_manager_.spikes.Draw(
             Vector2{static_cast<float>(x), static_cast<float>(24)});
 
-        texture_manager::spikes.Draw(
+        texture_manager_.spikes.Draw(
             Vector2{static_cast<float>(x), static_cast<float>(720 - 24)},
             180.f);
       }
 
       for (int y = 94; y < 720; y += 188) {
-        texture_manager::spikes.Draw(
+        texture_manager_.spikes.Draw(
             Vector2{static_cast<float>(24), static_cast<float>(y)}, -90);
 
-        texture_manager::spikes.Draw(
+        texture_manager_.spikes.Draw(
             Vector2{static_cast<float>(1280 - 24), static_cast<float>(y)}, 90);
       }
 
@@ -90,7 +90,7 @@ void GameRenderer::Draw(const RenderTexture2D& render_target,
   EndTextureMode();
 }
 
-void GameRenderer::Deinit() noexcept { texture_manager::DestroyAllSprites(); }
+void GameRenderer::Deinit() noexcept { texture_manager_.DestroyAllSprites(); }
 
 void GameRenderer::UpdateCamera(const RenderTexture2D& render_target,
                                 Vector2 render_target_pos) {
@@ -148,7 +148,7 @@ void GameRenderer::UpdateCamera(const RenderTexture2D& render_target,
       Metrics::PixelsToMeters(Math::Vec2F(mouse_position.x, mouse_position.y));
 }
 
-void GameRenderer::DrawWalls() const noexcept {
+void GameRenderer::DrawWalls() noexcept {
   for (std::size_t i = 0; i < game_constants::kArenaBorderWallCount; i++) {
     const auto pos = ArenaManager::border_wall_positions[i];
     const auto pixel_pos = Metrics::MetersToPixels(pos);
@@ -176,8 +176,8 @@ void GameRenderer::DrawWalls() const noexcept {
 
     const auto centered_pix_pos = pixel_pos - col_pix_size * 0.5f;
 
-    texture_manager::log.Draw({pixel_pos.X - 18.f, pixel_pos.Y});
-    texture_manager::log.Draw({pixel_pos.X + 23.f, pixel_pos.Y});
+    texture_manager_.log.Draw({pixel_pos.X - 18.f, pixel_pos.Y});
+    texture_manager_.log.Draw({pixel_pos.X + 23.f, pixel_pos.Y});
   }
 }
 
@@ -220,174 +220,166 @@ void GameRenderer::DrawPlayers(float time_since_last_fixed_update) noexcept {
     const auto player_pix_pos = Metrics::MetersToPixels(player_pos);
 
     const auto is_player_1 = i == 0;
-    const auto& idle_anim = is_player_1 ? texture_manager::blue_idle_animation
-                                        : texture_manager::red_idle_animation;
 
-    const auto& spin_anim = is_player_1 ? texture_manager::blue_spin_animation
-                                        : texture_manager::red_spin_animation;
-
-    const auto& walk_anim = is_player_1 ? texture_manager::blue_walk_animation
-                                        : texture_manager::red_walk_animation;
-
-    const auto& hurt_anim = is_player_1 ? texture_manager::blue_hurt_animation
-                                        : texture_manager::red_hurt_animation;
+    auto& player_anim = is_player_1 ? texture_manager_.player1_animations
+                                    : texture_manager_.player2_animations;
 
     const auto is_player_facing_right = 
         game_manager_->player_manager().IsPlayerFacingRight(i);
 
     if (game_manager_->player_manager().IsPlayerHurt(i)) {
       // Update animation frame counter
-      texture_manager::hurt_anim_frame_counter +=
-          raylib::GetFrameTime() * texture_manager::kHurtAnimFrameRate;
+      player_anim.hurt_anim_frame_counter +=
+          raylib::GetFrameTime() * player_anim.kHurtAnimFrameRate;
 
       // Check if it's time to advance to the next frame
-      if (texture_manager::hurt_anim_frame_counter >
-          texture_manager::kHurtAnimFrameCount) {
-        texture_manager::hurt_anim_frame_counter -=
-            texture_manager::kHurtAnimFrameCount;
+      if (player_anim.hurt_anim_frame_counter >
+          player_anim.kHurtAnimFrameCount) {
+        player_anim.hurt_anim_frame_counter -=
+            player_anim.kHurtAnimFrameCount;
       }
 
       // Calculate the current frame based on the animation frame counter
       const int current_frame =
-          static_cast<int>(texture_manager::hurt_anim_frame_counter);
+          static_cast<int>(player_anim.hurt_anim_frame_counter);
 
       // Update the x position of the source rectangle for the current frame
-      texture_manager::hurt_anim_rec.x = static_cast<float>(current_frame) *
-                                         static_cast<float>(hurt_anim.width) /
-                                         texture_manager::kHurtAnimFrameCount;
+      player_anim.hurt_anim_rec.x = static_cast<float>(current_frame) *
+                                         static_cast<float>(player_anim.hurt_animation.width) /
+                                         player_anim.kHurtAnimFrameCount;
 
       const auto width = is_player_facing_right
-                             ? -texture_manager::hurt_anim_rec.width
-                             : texture_manager::hurt_anim_rec.width;
+                             ? -player_anim.hurt_anim_rec.width
+                             : player_anim.hurt_anim_rec.width;
 
-      const raylib::Rectangle source = {texture_manager::hurt_anim_rec.x,
-                                        texture_manager::hurt_anim_rec.y,
+      const raylib::Rectangle source = {player_anim.hurt_anim_rec.x,
+                                        player_anim.hurt_anim_rec.y,
                                         width,
-                                        texture_manager::hurt_anim_rec.height};
+                                        player_anim.hurt_anim_rec.height};
 
       // Draw the current frame of the animation
       DrawTextureRec(
-          hurt_anim, source,
+          player_anim.hurt_animation, source,
           Vector2{
-              player_pix_pos.X - texture_manager::hurt_anim_rec.width / 2,
-              player_pix_pos.Y - texture_manager::hurt_anim_rec.height / 2.5f},
+              player_pix_pos.X - player_anim.hurt_anim_rec.width / 2,
+              player_pix_pos.Y - player_anim.hurt_anim_rec.height / 2.5f},
           WHITE);
 
     }
     else if (game_manager_->player_manager().IsPlayerSpinning(i)) {
       // Update animation frame counter
-      texture_manager::spin_anim_frame_counter +=
-          raylib::GetFrameTime() * texture_manager::kSpinAnimFrameRate;
+      player_anim.spin_anim_frame_counter +=
+          raylib::GetFrameTime() * player_anim.kSpinAnimFrameRate;
 
       // Check if it's time to advance to the next frame
-      if (texture_manager::spin_anim_frame_counter >
-          texture_manager::kSpinAnimFrameCount) {
-        texture_manager::spin_anim_frame_counter -=
-            texture_manager::kSpinAnimFrameCount;
+      if (player_anim.spin_anim_frame_counter >
+          player_anim.kSpinAnimFrameCount) {
+        player_anim.spin_anim_frame_counter -=
+            player_anim.kSpinAnimFrameCount;
       }
 
       // Calculate the current frame based on the animation frame counter
       const int current_frame =
-          static_cast<int>(texture_manager::spin_anim_frame_counter);
+          static_cast<int>(player_anim.spin_anim_frame_counter);
 
       // Update the x position of the source rectangle for the current frame
-      texture_manager::spin_anim_rec.x = static_cast<float>(current_frame) *
-                                         static_cast<float>(spin_anim.width) /
-                                         texture_manager::kSpinAnimFrameCount;
+      player_anim.spin_anim_rec.x = static_cast<float>(current_frame) *
+                                         static_cast<float>(player_anim.spin_animation.width) /
+                                         player_anim.kSpinAnimFrameCount;
 
       const auto width = is_player_facing_right
-                             ? -texture_manager::spin_anim_rec.width
-                             : texture_manager::spin_anim_rec.width;
+                             ? -player_anim.spin_anim_rec.width
+                             : player_anim.spin_anim_rec.width;
 
-      const raylib::Rectangle source = {texture_manager::spin_anim_rec.x,
-                                        texture_manager::spin_anim_rec.y,
+      const raylib::Rectangle source = {player_anim.spin_anim_rec.x,
+                                        player_anim.spin_anim_rec.y,
                                         width,
-                                        texture_manager::spin_anim_rec.height};
+                                        player_anim.spin_anim_rec.height};
 
       // Draw the current frame of the animation
       DrawTextureRec(
-          spin_anim, source,
+          player_anim.spin_animation, source,
           Vector2{
-              player_pix_pos.X - texture_manager::spin_anim_rec.width / 2,
-              player_pix_pos.Y - texture_manager::spin_anim_rec.height / 2.5f},
+              player_pix_pos.X - player_anim.spin_anim_rec.width / 2,
+              player_pix_pos.Y - player_anim.spin_anim_rec.height / 2.5f},
           WHITE);
     }
 
     else if (game_manager_->player_manager().IsPlayerWalking(i)) {
       // Update animation frame counter
-      texture_manager::walk_anim_frame_counter +=
-          raylib::GetFrameTime() * texture_manager::kWalkAnimFrameRate;
+      player_anim.walk_anim_frame_counter +=
+          raylib::GetFrameTime() * player_anim.kWalkAnimFrameRate;
 
       // Check if it's time to advance to the next frame
-      if (texture_manager::walk_anim_frame_counter >
-          texture_manager::kWalkAnimFrameCount) {
-        texture_manager::walk_anim_frame_counter -=
-            texture_manager::kWalkAnimFrameCount;
+      if (player_anim.walk_anim_frame_counter >
+          player_anim.kWalkAnimFrameCount) {
+        player_anim.walk_anim_frame_counter -=
+            player_anim.kWalkAnimFrameCount;
       }
 
       // Calculate the current frame based on the animation frame counter
       const int current_frame =
-          static_cast<int>(texture_manager::walk_anim_frame_counter);
+          static_cast<int>(player_anim.walk_anim_frame_counter);
 
       // Update the x position of the source rectangle for the current frame
-      texture_manager::walk_anim_rec.x = static_cast<float>(current_frame) *
-                                         static_cast<float>(walk_anim.width) /
-                                         texture_manager::kWalkAnimFrameCount;
+      player_anim.walk_anim_rec.x = static_cast<float>(current_frame) *
+                                         static_cast<float>(player_anim.walk_animation.width) /
+                                         player_anim.kWalkAnimFrameCount;
 
       const auto width = is_player_facing_right
-                             ? -texture_manager::walk_anim_rec.width
-                             : texture_manager::walk_anim_rec.width;
+                             ? -player_anim.walk_anim_rec.width
+                             : player_anim.walk_anim_rec.width;
 
-      const raylib::Rectangle source = {texture_manager::walk_anim_rec.x,
-                                        texture_manager::walk_anim_rec.y,
+      const raylib::Rectangle source = {player_anim.walk_anim_rec.x,
+                                        player_anim.walk_anim_rec.y,
                                         width,
-                                        texture_manager::walk_anim_rec.height};
+                                        player_anim.walk_anim_rec.height};
 
       // Draw the current frame of the animation
       DrawTextureRec(
-          walk_anim, source,
+          player_anim.walk_animation, source,
           Vector2{
-              player_pix_pos.X - texture_manager::walk_anim_rec.width / 2,
-              player_pix_pos.Y - texture_manager::walk_anim_rec.height / 2.5f},
+              player_pix_pos.X - player_anim.walk_anim_rec.width / 2,
+              player_pix_pos.Y - player_anim.walk_anim_rec.height / 2.5f},
           WHITE);
     }
 
     else {
       // Update animation frame counter
-      texture_manager::idle_anim_frame_counter +=
-          raylib::GetFrameTime() * texture_manager::kIdleAnimFrameRate;
+      player_anim.idle_anim_frame_counter +=
+          raylib::GetFrameTime() * player_anim.kIdleAnimFrameRate;
 
       // Check if it's time to advance to the next frame
-      if (texture_manager::idle_anim_frame_counter >
-          texture_manager::kIdleAnimFrameCount) {
-        texture_manager::idle_anim_frame_counter -=
-            texture_manager::kIdleAnimFrameCount;
+      if (player_anim.idle_anim_frame_counter >
+          player_anim.kIdleAnimFrameCount) {
+        player_anim.idle_anim_frame_counter -=
+            player_anim.kIdleAnimFrameCount;
       }
 
       // Calculate the current frame based on the animation frame counter
       const int current_frame =
-          static_cast<int>(texture_manager::idle_anim_frame_counter);
+          static_cast<int>(player_anim.idle_anim_frame_counter);
 
       // Update the x position of the source rectangle for the current frame
-      texture_manager::idle_anim_rec.x = static_cast<float>(current_frame) *
-                                         static_cast<float>(idle_anim.width) /
-                                         texture_manager::kIdleAnimFrameCount;
+      player_anim.idle_anim_rec.x = static_cast<float>(current_frame) *
+                                         static_cast<float>(player_anim.idle_animation.width) /
+                                         player_anim.kIdleAnimFrameCount;
 
       const auto width = is_player_facing_right 
-              ? -texture_manager::idle_anim_rec.width
-              : texture_manager::idle_anim_rec.width;
+              ? -player_anim.idle_anim_rec.width
+              : player_anim.idle_anim_rec.width;
 
-      const raylib::Rectangle source = {texture_manager::idle_anim_rec.x,
-                                        texture_manager::idle_anim_rec.y,
+      const raylib::Rectangle source = {player_anim.idle_anim_rec.x,
+                                        player_anim.idle_anim_rec.y,
                                         width,
-                                  texture_manager::idle_anim_rec.height};
+                                  player_anim.idle_anim_rec.height};
 
        // Draw the current frame of the animation
       DrawTextureRec(
-          idle_anim, source,
+          player_anim.idle_animation, source,
           Vector2{
-              player_pix_pos.X - texture_manager::idle_anim_rec.width / 2,
-              player_pix_pos.Y - texture_manager::idle_anim_rec.height / 2.5f},
+              player_pix_pos.X - player_anim.idle_anim_rec.width / 2,
+              player_pix_pos.Y - player_anim.idle_anim_rec.height / 2.5f},
           WHITE);
     }
 
@@ -396,9 +388,12 @@ void GameRenderer::DrawPlayers(float time_since_last_fixed_update) noexcept {
 #ifdef DEBUG
     constexpr auto main_col_pix_length =
         Metrics::MetersToPixels(game_constants::kPlayerMainColLength);
-    DrawRectangleLines(player_pix_pos.X - main_col_pix_length * 0.5f,
-                       player_pix_pos.Y - main_col_pix_length * 0.5f,
-                       main_col_pix_length, main_col_pix_length, RED);
+
+    DrawCircleLines(player_pix_pos.X, player_pix_pos.Y, main_col_pix_length * 0.5f, RED);
+
+    //DrawRectangleLines(player_pix_pos.X - main_col_pix_length * 0.5f,
+    //                   player_pix_pos.Y - main_col_pix_length * 0.5f,
+    //                   main_col_pix_length, main_col_pix_length, RED);
 
     // const auto jump_col_pos =
     //     game_manager_->player_manager().GetJumpColliderPosition(i);

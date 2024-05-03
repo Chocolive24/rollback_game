@@ -127,13 +127,6 @@ set_target_properties(core PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories(core PUBLIC core/include/)
 target_link_libraries(core PUBLIC raylib imgui::imgui rl_imgui math common)
 
-## Create the Common library with Math as a dependency
-#file(GLOB_RECURSE NETWORK_SRC_FILES network/include/*.h network/src/*.cpp)
-#add_library(network ${NETWORK_SRC_FILES})
-#set_target_properties(network PROPERTIES LINKER_LANGUAGE CXX)
-#target_include_directories(network PUBLIC network/include/)
-#target_link_libraries(network PUBLIC photon)
-
 # Create the game library.
 file(GLOB_RECURSE GAME_SRC_FILES game/include/*.h game/src/*.cpp)
 add_library(game ${GAME_SRC_FILES})
@@ -154,9 +147,6 @@ if (EMSCRIPTEN)
 endif ()
 
 if (NOT EMSCRIPTEN)
-    add_executable(photon_sample main/photon_sample.cpp)
-    target_link_libraries(photon_sample PRIVATE game)
-
     add_executable(simulation_app main/simulation_app_entry_point.cpp)
     target_link_libraries(simulation_app PRIVATE game)
 

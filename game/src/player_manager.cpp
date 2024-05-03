@@ -27,18 +27,10 @@ void PlayerManager::Init() noexcept {
     constexpr auto half_size =
         Math::Vec2F(game_constants::kPlayerMainColLength * 0.5f,
                     game_constants::kPlayerMainColLength * 0.5f);
-    collider.SetShape(Math::RectangleF(-half_size, half_size));
+    collider.SetShape(Math::CircleF(Math::Vec2F::Zero(), half_size.X));
     collider.SetRestitution(0.3f);
 
-    //const auto jump_col_ref = world_->CreateCollider(body_ref);
-    //auto& can_jump_col = world_->GetCollider(jump_col_ref);
-
-    //can_jump_col.SetShape(Math::CircleF(Math::Vec2F(0.f, 0.f), 0.1f));
-    //can_jump_col.SetOffset(game_constants::kPlayerJumpColOffset);
-    //can_jump_col.SetIsTrigger(true);
-
     players_[i].main_col_ref = main_col_ref;
-   // players_[i].jump_col_ref = jump_col_ref;
   }
 }
 
@@ -127,25 +119,6 @@ void PlayerManager::Move(const Player& player) const noexcept {
     body.ApplyForce(val);
   }
 }
-
-
-//void PlayerManager::Shoot(const Player& player) const noexcept {
-//  assert(projectile_manager_ != nullptr,
-//         "No projectiles manager pointer given to player manager.\n");
-//
-//    // TODO: pas de creation de proj si le click s'est fait dans le joueur.
-//   if (player.input &
-//      static_cast<input::PlayerInput>(input::PlayerInputType::kShoot)) {
-//    
-//     const auto& body =
-//         world_->GetBody(world_->GetCollider(player.main_col_ref).GetBodyRef());
-//     //const auto proj_v = mouse_pos - body.Position();
-//     //const auto proj_dir = proj_v.Normalized();
-//
-//     projectile_manager_->CreateProjectile(body.Position() + Math::Vec2F(0.5f, 0.f),
-//                                           player.dir_to_mouse);
-//   }
-//}
 
 void PlayerManager::Rollback(const PlayerManager& player_manager) noexcept {
   players_ = player_manager.players_;

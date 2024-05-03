@@ -53,6 +53,8 @@ void LocalGameManager::Rollback(const LocalGameManager& game_manager) noexcept {
   game_state_.world.SetContactListener(this);
   game_state_.player_manager.Rollback(game_manager.game_state_.player_manager);
   game_state_.projectile_manager.Rollback(game_manager.game_state_.projectile_manager);
+
+  game_state_.is_game_finished = game_manager.game_state_.is_game_finished;
 }
 
 Checksum LocalGameManager::ComputeChecksum() const noexcept {
