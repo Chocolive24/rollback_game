@@ -27,7 +27,7 @@ namespace game_constants {
    */
   constexpr std::int8_t kGameBodyCount = 106;
 
-  constexpr float kPlayerMainColLength = 0.65f * 0.75f;
+  constexpr float kPlayerMainColLength = 0.65f * 0.8f;
   constexpr float kPlayerJumpColRadius = 0.1f;
   constexpr Math::Vec2F kPlayerJumpColOffset(0.f, kPlayerMainColLength * 0.5f);
   constexpr float kPlayerSpeedMoveFactor = 15.f;

@@ -36,6 +36,7 @@ public:
   }
 
   [[nodiscard]] Math::Vec2F GetProjectilePosition(std::size_t idx) const noexcept;
+  [[nodiscard]] Math::Vec2F GetProjectileVelocity(std::size_t idx) const noexcept;
   [[nodiscard]] Math::CircleF GetProjectileCircle(std::size_t idx) const noexcept;
 
   [[nodiscard]] bool IsProjectileEnabled(std::size_t idx) const noexcept {

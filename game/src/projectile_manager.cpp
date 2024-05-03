@@ -125,6 +125,15 @@ Math::Vec2F ProjectileManager::GetProjectilePosition(std::size_t idx) const noex
   return body.Position();
 }
 
+Math::Vec2F ProjectileManager::GetProjectileVelocity(
+    std::size_t idx) const noexcept {
+  const auto& body_ref =
+      world_->GetCollider(projectiles_[idx].collider_ref).GetBodyRef();
+  const auto& body = world_->GetBody(body_ref);
+
+  return body.Velocity();
+}
+
 Math::CircleF ProjectileManager::GetProjectileCircle(std::size_t idx) const noexcept {
   const auto& collider = world_->GetCollider(projectiles_[idx].collider_ref);
 

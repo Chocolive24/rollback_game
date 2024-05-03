@@ -20,20 +20,6 @@ void GameRenderer::Init() noexcept {
   camera_.offset = Vector2{0.f, 0.f};
   camera_.zoom = 1.f;
   camera_.rotation = 0.f;
-
-  auto& body = graphic_bodies_[0];
-  body.SetPosition(game_constants::kPlayer1StartPos);
-  body.SetDamping(PlayerManager::kPlayerDamping);
-  body.SetMass(PlayerManager::kPlayerMass);
-}
-
-void GameRenderer::Update(float delta_time) noexcept {
-  UpdateObjectsGraphicPositions(delta_time);
-}
-
-void GameRenderer::FixedUpdate() noexcept {
-  //graphic_bodies_[0].ApplyForce(
-  //    game_manager_->player_manager().GetPlayerForces(0));
 }
 
 void GameRenderer::Draw(const RenderTexture2D& render_target,
@@ -53,28 +39,29 @@ void GameRenderer::Draw(const RenderTexture2D& render_target,
 
       for (int x = 0; x < 1344; x+=188)
       {
-        texture_manager::fire.Draw(
+        texture_manager::spikes.Draw(
             Vector2{static_cast<float>(x), static_cast<float>(24)});
 
-        texture_manager::fire.Draw(
+        texture_manager::spikes.Draw(
             Vector2{static_cast<float>(x), static_cast<float>(720 - 24)}, 180.f);
       }
 
       for (int y = 94; y < 720; y += 188) {
-        texture_manager::fire.Draw(
+        texture_manager::spikes.Draw(
             Vector2{static_cast<float>(24), static_cast<float>(y)}, -90);
 
-        texture_manager::fire.Draw(
+        texture_manager::spikes.Draw(
             Vector2{static_cast<float>(1280 - 24), static_cast<float>(y)}, 90);
       }
 
-      DrawPlatforms();
-      DrawProjectiles();
-      DrawPlayer(time_since_last_fixed_update);
+      DrawWalls();
+      DrawProjectiles(time_since_last_fixed_update);
+      DrawPlayers(time_since_last_fixed_update);
     }
     EndMode2D();
 
     game_gui_.Draw(render_target);
+    raylib::DrawFPS(80, 80);
 
     if (game_manager_->is_finished()) {
       const auto local_player_hp = 
@@ -96,52 +83,6 @@ void GameRenderer::Draw(const RenderTexture2D& render_target,
 }
 
 void GameRenderer::Deinit() noexcept { texture_manager::DestroyAllSprites(); }
-
-void GameRenderer::UpdateObjectsGraphicPositions(float delta_time) noexcept {
-  return;
-  graphic_bodies_[0].ApplyForce(
-      game_manager_->player_manager().GetPlayerVelocity(0));
-
-  for (auto& body : graphic_bodies_)
-  {
-    if (!body.IsValid()) continue;
-
-    switch (body.GetBodyType()) {
-    case PhysicsEngine::BodyType::Dynamic: {
-
-      // a = F / m
-      Math::Vec2F acceleration = body.Forces() * body.InverseMass();
-
-      // Change velocity according to delta time.
-      body.SetVelocity(body.Velocity() + acceleration * delta_time);
-
-      // Apply damping to velocity according to delta time.
-      body.SetVelocity(body.Velocity() * (1.0f - body.Damping() * delta_time));
-
-      // Change position according to velocity and delta time.
-      body.SetPosition(body.Position() + body.Velocity() * delta_time);
-
-      body.ResetForces();
-
-      break;
-    }
-
-    case PhysicsEngine::BodyType::Kinematic: {
-      // Kinematic bodies are not impacted by forces.
-
-      // Change position according to velocity and delta time.
-      body.SetPosition(body.Position() + body.Velocity() * delta_time);
-
-      break;
-    }
-
-    case PhysicsEngine::BodyType::Static:
-    case PhysicsEngine::BodyType::None:
-      break;
-    }
-  }
-}
-
 
 void GameRenderer::UpdateCamera(const RenderTexture2D& render_target, Vector2 render_target_pos) {
   // Calculate aspect ratios
@@ -197,7 +138,7 @@ void GameRenderer::UpdateCamera(const RenderTexture2D& render_target, Vector2 re
       Metrics::PixelsToMeters(Math::Vec2F(mouse_position.x, mouse_position.y));
 }
 
-void GameRenderer::DrawPlatforms() const noexcept {
+void GameRenderer::DrawWalls() const noexcept {
   for (std::size_t i = 0; i < game_constants::kArenaBorderWallCount; i++) {
     const auto pos = ArenaManager::border_wall_positions[i];
     const auto pixel_pos = Metrics::MetersToPixels(pos);
@@ -206,9 +147,6 @@ void GameRenderer::DrawPlatforms() const noexcept {
     const auto col_pix_size = Metrics::MetersToPixels(col_size);
 
     const auto centered_pix_pos = pixel_pos - col_pix_size * 0.5f;
-
-    //DrawRectangle(centered_pix_pos.X, centered_pix_pos.Y, col_pix_size.X,
-    //              col_pix_size.Y, PURPLE);
 
     // Draw collider if in debug mode.
     // ===============================
@@ -228,17 +166,13 @@ void GameRenderer::DrawPlatforms() const noexcept {
 
     const auto centered_pix_pos = pixel_pos - col_pix_size * 0.5f;
 
-    
-     //DrawRectangle(centered_pix_pos.X, centered_pix_pos.Y, col_pix_size.X,
-     //              col_pix_size.Y, GRAY);
-
     texture_manager::log.Draw({pixel_pos.X - 18.f, pixel_pos.Y});
     texture_manager::log.Draw({pixel_pos.X + 23.f, pixel_pos.Y});
 
   }
 }
 
-void GameRenderer::DrawProjectiles() const noexcept {
+void GameRenderer::DrawProjectiles(float time_since_last_fixed_update) const noexcept {
   for (std::size_t i = 0; i < ProjectileManager::kMaxProjectileCount; i++) {
 
     if (!game_manager_->projectile_manager().IsProjectileEnabled(i)) {
@@ -246,8 +180,14 @@ void GameRenderer::DrawProjectiles() const noexcept {
       continue;
     }
 
-    const auto proj_pos =
+    auto proj_pos =
         game_manager_->projectile_manager().GetProjectilePosition(i);
+
+    const auto proj_vel =
+        game_manager_->projectile_manager().GetProjectileVelocity(i);
+
+    proj_pos += proj_vel * time_since_last_fixed_update;
+
     const auto proj_pix_pos = Metrics::MetersToPixels(proj_pos);
     const auto proj_pix_pos_int = static_cast<Math::Vec2I>(proj_pix_pos);
 
@@ -260,7 +200,7 @@ void GameRenderer::DrawProjectiles() const noexcept {
   }
 }
 
-void GameRenderer::DrawPlayer(float time_since_last_fixed_update) const noexcept {
+void GameRenderer::DrawPlayers(float time_since_last_fixed_update) noexcept {
   for (std::size_t i = 0; i < game_constants::kMaxPlayerCount; i++) {
     auto player_pos =
       game_manager_->player_manager().GetPlayerPosition(i);
@@ -274,13 +214,75 @@ void GameRenderer::DrawPlayer(float time_since_last_fixed_update) const noexcept
 
     if (i == 0)
     {
-      texture_manager::penguin_blue.Draw(
-          Vector2{player_pix_pos.X, player_pix_pos.Y});
+      // Define frame rate (frames per second)
+      constexpr float frame_rate = 8.0f;  // Adjust as needed
+
+      // Update animation frame counter
+      texture_manager::spin_anim_frame_counter += raylib::GetFrameTime() * frame_rate;
+
+      // Check if it's time to advance to the next frame
+      if (texture_manager::spin_anim_frame_counter >
+          texture_manager::kSpinAnimFrameCount) {
+        texture_manager::spin_anim_frame_counter -=
+            texture_manager::kSpinAnimFrameCount;
+      }
+
+      // Calculate the current frame based on the animation frame counter
+      const int current_frame =
+          static_cast<int>(texture_manager::spin_anim_frame_counter);
+
+      // Update the x position of the source rectangle for the current frame
+      texture_manager::spin_anim_rec.x =
+          static_cast<float>(current_frame) *
+          static_cast<float>(texture_manager::spin_animation.width) /
+          texture_manager::kSpinAnimFrameCount;
+
+      // Draw the current frame of the animation
+      DrawTextureRec(
+          texture_manager::spin_animation, texture_manager::spin_anim_rec,
+          Vector2{
+              player_pix_pos.X - texture_manager::spin_anim_rec.width / 2,
+              player_pix_pos.Y - texture_manager::spin_anim_rec.height / 2.5f},
+          WHITE);
+
+  /*     texture_manager::penguin_blue.Draw(
+          Vector2{player_pix_pos.X, player_pix_pos.Y});*/
     }
     else
     {
-      texture_manager::penguin_red.Draw(
-          Vector2{player_pix_pos.X, player_pix_pos.Y});
+      // Define frame rate (frames per second)
+      constexpr float frame_rate = 7.f;  // Adjust as needed
+
+      // Update animation frame counter
+      texture_manager::walk_anim_frame_counter +=
+          raylib::GetFrameTime() * frame_rate;
+
+      // Check if it's time to advance to the next frame
+      if (texture_manager::walk_anim_frame_counter >
+          texture_manager::kWalkAnimFrameCount) {
+        texture_manager::walk_anim_frame_counter -=
+            texture_manager::kWalkAnimFrameCount;
+      }
+
+      // Calculate the current frame based on the animation frame counter
+      const int current_frame =
+          static_cast<int>(texture_manager::walk_anim_frame_counter);
+
+      // Update the x position of the source rectangle for the current frame
+      texture_manager::walk_anim_rec.x =
+          static_cast<float>(current_frame) *
+          static_cast<float>(texture_manager::walk_animation.width) /
+          texture_manager::kWalkAnimFrameCount;
+
+      // Draw the current frame of the animation
+      DrawTextureRec(
+          texture_manager::walk_animation, texture_manager::walk_anim_rec,
+          Vector2{
+              player_pix_pos.X - texture_manager::walk_anim_rec.width / 2,
+              player_pix_pos.Y - texture_manager::walk_anim_rec.height / 2.5f},
+          WHITE);
+      /*texture_manager::penguin_red.Draw(
+          Vector2{player_pix_pos.X, player_pix_pos.Y});*/
     }
     
     // Draw colliders if in debug mode.

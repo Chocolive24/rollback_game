@@ -44,17 +44,17 @@ if (NOT EMSCRIPTEN)
     target_include_directories(photon PUBLIC externals/photon)
     message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 
-    #if(CMAKE_BUILD_TYPE MATCHES Release)
+    if(NOT USE_DEBUG)
         target_link_libraries(photon PUBLIC
             ${CMAKE_CURRENT_SOURCE_DIR}/externals/photon/Common-cpp/lib/Common-cpp_vc17_release_windows_md_x64.lib
             ${CMAKE_CURRENT_SOURCE_DIR}/externals/photon/Photon-cpp/lib/Photon-cpp_vc17_release_windows_md_x64.lib
         )
-    #else()
-        #target_link_libraries(photon PUBLIC
-        #    ${CMAKE_CURRENT_SOURCE_DIR}/externals/photon/Common-cpp/lib/Common-cpp_vc17_debug_windows_md_x64.lib
-        #    ${CMAKE_CURRENT_SOURCE_DIR}/externals/photon/Photon-cpp/lib/Photon-cpp_vc17_debug_windows_md_x64.lib
-        #)
-    #endif()
+    else()
+        target_link_libraries(photon PUBLIC
+            ${CMAKE_CURRENT_SOURCE_DIR}/externals/photon/Common-cpp/lib/Common-cpp_vc17_debug_windows_md_x64.lib
+            ${CMAKE_CURRENT_SOURCE_DIR}/externals/photon/Photon-cpp/lib/Photon-cpp_vc17_debug_windows_md_x64.lib
+        )
+    endif()
    
 endif()
 

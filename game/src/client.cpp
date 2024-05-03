@@ -3,6 +3,8 @@
 #include <imgui.h>
 #include <string>
 
+//TODO: FAIRE que simulation client utilise ce client avec une interface de network.
+
 void Client::Init(int input_profile_id) noexcept {
   network_manager_.RegisterClient(this);
   network_manager_.RegisterOnlineGameManager(&online_game_manager_);
@@ -10,6 +12,7 @@ void Client::Init(int input_profile_id) noexcept {
  
   online_game_manager_.Init(input_profile_id);
   online_game_manager_.RegisterNetworkInterface(&network_manager_);
+  //StartGame();
  
   game_renderer_.Init();
 }
@@ -28,8 +31,6 @@ void Client::Update() noexcept {
     fixed_timer_ -= game_constants::kFixedDeltaTime;
     time_since_last_fixed_update_ = 0.f;
   }
-
-  game_renderer_.Update(delta_time);
 }
 
 void Client::Draw(const raylib::RenderTexture2D& render_texture, 
@@ -79,4 +80,5 @@ void Client::StartGame() noexcept {
 
   // PlayerId is in range 0-1 but ClientId is in range 1-2.
   online_game_manager_.SetPlayerId(client_id_ - 1);
+  //online_game_manager_.SetPlayerId(0);
 }

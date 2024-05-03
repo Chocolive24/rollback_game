@@ -30,12 +30,10 @@ void SimulationClient::Update() noexcept {
 
   while (fixed_timer_ >= game_constants::kFixedDeltaTime) {
     online_game_manager_.FixedUpdateCurrentFrame();
-    game_renderer_.FixedUpdate();
+
     fixed_timer_ -= game_constants::kFixedDeltaTime;
     time_since_last_fixed_update_ = 0.f;
   }
-
-  game_renderer_.Update(delta_time);
 }
 
 void SimulationClient::Draw(
