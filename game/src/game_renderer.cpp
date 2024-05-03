@@ -1,12 +1,9 @@
 #include "game_renderer.h"
-
 #include "Metrics.h"
-#include "engine.h"
-#include "TextureManager.h"
-
-using namespace raylib;
 
 #include <iostream>
+
+using namespace raylib;
 
 GameRenderer::GameRenderer(LocalGameManager* game_manager) noexcept
     : game_manager_(game_manager) {
@@ -33,33 +30,17 @@ void GameRenderer::Draw(const RenderTexture2D& render_target,
     {
       ClearBackground(BLACK);
 
-      for (int y = 0; y < 720; y += 36) {
-        for (int x = 0; x < 1344; x += 64) {
-          texture_manager_.ice_ground.Draw(
-              Vector2{static_cast<float>(x), static_cast<float>(y)});
-        }
-      }
-
-      for (int x = 0; x < 1344; x += 188) {
-        texture_manager_.spikes.Draw(
-            Vector2{static_cast<float>(x), static_cast<float>(24)});
-
-        texture_manager_.spikes.Draw(
-            Vector2{static_cast<float>(x), static_cast<float>(720 - 24)},
-            180.f);
-      }
-
-      for (int y = 94; y < 720; y += 188) {
-        texture_manager_.spikes.Draw(
-            Vector2{static_cast<float>(24), static_cast<float>(y)}, -90);
-
-        texture_manager_.spikes.Draw(
-            Vector2{static_cast<float>(1280 - 24), static_cast<float>(y)}, 90);
-      }
-
       DrawWalls();
       DrawProjectiles(time_since_last_fixed_update);
       DrawPlayers(time_since_last_fixed_update);
+
+      constexpr int width = 5000;
+      constexpr int height = 5000;
+      DrawRectangle(-width, 0, width, height, BLACK); // Left
+      DrawRectangle(1280, 0, width, height, BLACK); // Right
+      DrawRectangle(0, -height, width, height, BLACK); // Up
+      DrawRectangle(0, 720, width, height, BLACK); // Down
+
     }
     EndMode2D();
 
@@ -149,7 +130,30 @@ void GameRenderer::UpdateCamera(const RenderTexture2D& render_target,
 }
 
 void GameRenderer::DrawWalls() noexcept {
-  for (std::size_t i = 0; i < game_constants::kArenaBorderWallCount; i++) {
+  for (int y = 0; y < 720; y += 36) {
+    for (int x = 0; x < 1344; x += 64) {
+      texture_manager_.ice_ground.Draw(
+          Vector2{static_cast<float>(x), static_cast<float>(y)});
+    }
+  }
+
+  for (int x = 0; x < 1344; x += 188) {
+    texture_manager_.spikes.Draw(
+        Vector2{static_cast<float>(x), static_cast<float>(24)});
+
+    texture_manager_.spikes.Draw(
+        Vector2{static_cast<float>(x), static_cast<float>(720 - 24)}, 180.f);
+  }
+
+  for (int y = 94; y < 720; y += 188) {
+    texture_manager_.spikes.Draw(
+        Vector2{static_cast<float>(24), static_cast<float>(y)}, -90);
+
+    texture_manager_.spikes.Draw(
+        Vector2{static_cast<float>(1280 - 24), static_cast<float>(y)}, 90);
+  }
+
+  for (std::size_t i = 0; i < game_constants::kArenaSquareWallCount; i++) {
     const auto pos = ArenaManager::border_wall_positions[i];
     const auto pixel_pos = Metrics::MetersToPixels(pos);
 
@@ -182,7 +186,7 @@ void GameRenderer::DrawWalls() noexcept {
 }
 
 void GameRenderer::DrawProjectiles(
-    float time_since_last_fixed_update) const noexcept {
+    float time_since_last_fixed_update) noexcept {
   for (std::size_t i = 0; i < ProjectileManager::kMaxProjectileCount; i++) {
     if (!game_manager_->projectile_manager().IsProjectileEnabled(i)) {
       // Projectile not enabled.
@@ -204,7 +208,11 @@ void GameRenderer::DrawProjectiles(
         game_manager_->projectile_manager().GetProjectileCircle(i).Radius();
     const auto pix_radius = Metrics::MetersToPixels(radius);
 
-    DrawCircle(proj_pix_pos_int.X, proj_pix_pos_int.Y, pix_radius, WHITE);
+    texture_manager_.snow_ball.Draw(Vector2{proj_pix_pos.X, proj_pix_pos.Y});
+
+#ifdef USE_DEBUG
+    DrawCircleLines(proj_pix_pos_int.X, proj_pix_pos_int.Y, pix_radius, RED);
+#endif
   }
 }
 
@@ -390,21 +398,6 @@ void GameRenderer::DrawPlayers(float time_since_last_fixed_update) noexcept {
         Metrics::MetersToPixels(game_constants::kPlayerMainColLength);
 
     DrawCircleLines(player_pix_pos.X, player_pix_pos.Y, main_col_pix_length * 0.5f, RED);
-
-    //DrawRectangleLines(player_pix_pos.X - main_col_pix_length * 0.5f,
-    //                   player_pix_pos.Y - main_col_pix_length * 0.5f,
-    //                   main_col_pix_length, main_col_pix_length, RED);
-
-    // const auto jump_col_pos =
-    //     game_manager_->player_manager().GetJumpColliderPosition(i);
-    // const auto jump_col_pix_pos = Metrics::MetersToPixels(jump_col_pos);
-    //
-    // const auto radius =
-    //     game_manager_->player_manager().GetJumpColliderShape(i).Radius();
-    //
-    // const auto pix_radius = Metrics::MetersToPixels(radius);
-    //
-    // DrawCircleLines(jump_col_pix_pos.X, jump_col_pix_pos.Y, pix_radius, RED);
 #endif
     // ================================
   }

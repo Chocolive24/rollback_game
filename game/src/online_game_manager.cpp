@@ -147,7 +147,8 @@ void OnlineGameManager::OnInputReceived(
 
   if (inputs_count <= 0)
   {
-    std::cerr << "remote input event is empty.\n";
+    std::cerr << "remote input event is empty at confirmed frame ." << 
+        rollback_manager_.confirmed_frame() << '\n';
     return;
   }
 

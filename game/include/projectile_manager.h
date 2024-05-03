@@ -10,6 +10,7 @@
  */
 struct Projectile {
   PhysicsEngine::ColliderRef collider_ref{};
+  float rotation = 0.f;
   std::int16_t collision_count = 0;
 };
 

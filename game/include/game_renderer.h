@@ -3,7 +3,7 @@
 #include "game_gui.h"
 #include "local_game_manager.h"
 #include "raylib_wrapper.h"
-#include "TextureManager.h"
+#include "texture_manager.h"
 
 /**
  * \brief GameRenderer is a class which draws the game into a given render target.
@@ -21,7 +21,7 @@ private:
   void UpdateCamera(const raylib::RenderTexture2D& render_target, 
 	  raylib::Vector2 render_target_pos);
   void DrawWalls() noexcept;
-  void DrawProjectiles(float time_since_last_fixed_update) const noexcept;
+  void DrawProjectiles(float time_since_last_fixed_update) noexcept;
   void DrawPlayers(float time_since_last_fixed_update) noexcept;
 
   LocalGameManager* game_manager_ = nullptr;

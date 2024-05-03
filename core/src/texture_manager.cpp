@@ -1,4 +1,4 @@
-#include "TextureManager.h"
+#include "texture_manager.h"
 
 using namespace raylib;
 
@@ -48,6 +48,7 @@ void TextureManager::CreateAllSprites() noexcept {
   ice_ground = CreateSprite("data/images/ice.png", Vector2{2.f, 2.f});
   spikes = CreateSprite("data/images/spkies.png", Vector2{2.f, 2.f});
   log = CreateSprite("data/images/Log.png", Vector2{3.25f, 3.f});
+  snow_ball = CreateSprite("data/images/snow_ball.png", Vector2{2.f, 2.f});
 
   player1_animations.Create("data/images/blue_penguin");
   player2_animations.Create("data/images/red_penguin");

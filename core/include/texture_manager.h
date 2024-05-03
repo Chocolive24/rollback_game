@@ -1,6 +1,5 @@
 #pragma once
 
-#include <array>
 #include <string_view>
 
 #include "raylib_wrapper.h"
@@ -76,6 +75,7 @@ public:
   Sprite ice_ground{};
   Sprite log{};
   Sprite spikes{};
+  Sprite snow_ball{};
 
   PenguinAnimations player1_animations{};
   PenguinAnimations player2_animations{};

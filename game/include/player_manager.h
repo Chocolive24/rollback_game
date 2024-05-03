@@ -70,7 +70,6 @@ public:
 
 private:
  void Move(const Player& player) const noexcept;
- void Shoot(const Player& player) const noexcept;
  std::array<Player, game_constants::kMaxPlayerCount> players_{};
  PhysicsEngine::World* world_ = nullptr;
  ProjectileManager* projectile_manager_ = nullptr;
