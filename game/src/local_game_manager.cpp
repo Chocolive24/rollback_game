@@ -77,12 +77,31 @@ void LocalGameManager::OnCollisionEnter(
 
     if (colliderRefA == player_col_ref || colliderRefB == player_col_ref)
     {
+      const auto other_player_idx = player_idx == 0 ? 1 : 0;
+      const auto& other_player_col_ref =
+          game_state_.player_manager.GetPlayerColRef(other_player_idx);
+      if (colliderRefA == other_player_col_ref ||
+          colliderRefB == other_player_col_ref) {
+        game_state_.player_manager.LaunchSpinTimer(player_idx);
+        game_state_.player_manager.LaunchSpinTimer(other_player_idx);
+        return;
+      }
+
       for (std::size_t wall_idx = 0; wall_idx < game_constants::kArenaBorderWallCount; wall_idx++)
       {
         const auto& wall_col_ref = arena_manager_.GetWallColRef(wall_idx);
         if (colliderRefA == wall_col_ref || colliderRefB == wall_col_ref)
         {
           game_state_.player_manager.ApplyOneDamageToPlayer(player_idx);
+          return;
+        }
+      }
+
+      for (std::size_t proj_idx = 0; proj_idx < ProjectileManager::kMaxProjectileCount; proj_idx++)
+      {
+        const auto& proj_col_ref = projectile_manager().GetProjectile(proj_idx).collider_ref;
+        if (colliderRefA == proj_col_ref || colliderRefB == proj_col_ref) {
+          game_state_.player_manager.LaunchSpinTimer(player_idx);
           return;
         }
       }

@@ -46,6 +46,14 @@ void PlayerManager::FixedUpdate() noexcept {
   for (auto& player : players_) {
     Move(player);
 
+    if (player.spin_timer > Math::Epsilon) {
+      player.spin_timer -= game_constants::kFixedDeltaTime;
+
+      if (player.spin_timer <= Math::Epsilon) {
+        player.spin_timer = 0.f;
+      }
+    }
+
     if (player.damage_timer > Math::Epsilon) {
       player.damage_timer -= game_constants::kFixedDeltaTime;
 
@@ -255,4 +263,37 @@ Math::Vec2F PlayerManager::GetJumpColliderPosition(
 Math::CircleF PlayerManager::GetJumpColliderShape(std::size_t idx) const noexcept {
    const auto& col = world_->GetCollider(players_[idx].jump_col_ref);
    return std::get<Math::CircleF>(col.Shape());
+}
+
+bool PlayerManager::IsPlayerWalking(std::size_t idx) const noexcept {
+   return players_[idx].input != 0 && players_[idx].input != 
+       static_cast<int>(input::PlayerInputType::kShoot);
+}
+
+bool PlayerManager::IsPlayerSpinning(std::size_t idx) const noexcept {
+   return players_[idx].spin_timer > Math::Epsilon;
+}
+
+bool PlayerManager::IsPlayerHurt(std::size_t idx) const noexcept {
+   return players_[idx].damage_timer > Math::Epsilon;
+}
+
+bool PlayerManager::IsPlayerFacingRight(std::size_t idx) const noexcept {
+   if (players_[idx].input & static_cast<int>(input::PlayerInputType::kRight)) {
+       return true;
+   }
+
+  if (players_[idx].input & static_cast<int>(input::PlayerInputType::kLeft)) {
+    return false;
+   }
+
+   const auto& body_ref =
+       world_->GetCollider(players_[idx].main_col_ref).GetBodyRef();
+   const auto& body = world_->GetBody(body_ref);
+
+   return body.Velocity().X > Math::Epsilon;
+}
+
+void PlayerManager::LaunchSpinTimer(std::size_t idx) noexcept {
+   players_[idx].spin_timer = kSpinCooldown;
 }

@@ -22,12 +22,12 @@ public:
         Math::Vec2F(6.40f, 7.20f), // down
       };
 
-  static constexpr std::array<Math::Vec2F, game_constants::kArenaBorderWallCount>
+  static constexpr std::array<Math::Vec2F, game_constants::kArenaSquareWallCount>
       square_wall_positions{
-        Math::Vec2F(12.80f * 0.25f, 7.20f * 0.25f),  // up-left
-        Math::Vec2F(12.80f * 0.75f, 7.20f * 0.25f),  // up-right
-        Math::Vec2F(12.80f * 0.25f, 7.20f * 0.75f),   // down-left
-        Math::Vec2F(12.80f * 0.75f, 7.20f * 0.75f)   // down-right
+        Math::Vec2F(12.80f * 0.275f, 7.20f * 0.275f),  // up-left
+          Math::Vec2F(12.80f * 0.725f, 7.20f * 0.275f),  // up-right
+          Math::Vec2F(12.80f * 0.275f, 7.20f * 0.725f),  // down-left
+          Math::Vec2F(12.80f * 0.725f, 7.20f * 0.725f)   // down-right
       };
 
   static constexpr std::array<Math::RectangleF, game_constants::kArenaBorderWallCount>

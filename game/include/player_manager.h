@@ -16,6 +16,7 @@ struct Player {
   Math::Vec2F dir_to_mouse{};
   float shoot_timer = 0.f;
   float damage_timer = 0.f;
+  float spin_timer = 0.f;
   std::int8_t hp = 5;
   input::PlayerInput input = 0;
 };
@@ -57,6 +58,13 @@ public:
   [[nodiscard]] Math::Vec2F GetJumpColliderPosition(std::size_t idx) const noexcept;
   [[nodiscard]] Math::CircleF GetJumpColliderShape(std::size_t idx) const noexcept;
 
+  [[nodiscard]] bool IsPlayerWalking(std::size_t idx) const noexcept;
+  [[nodiscard]] bool IsPlayerSpinning(std::size_t idx) const noexcept;
+  [[nodiscard]] bool IsPlayerHurt(std::size_t idx) const noexcept;
+  [[nodiscard]] bool IsPlayerFacingRight(std::size_t idx) const noexcept;
+
+  void LaunchSpinTimer(std::size_t idx) noexcept;
+
   static constexpr float kPlayerDamping = 0.75f;
   static constexpr float kPlayerMass = 1.f;
 
@@ -69,4 +77,5 @@ private:
 
   static constexpr float kShootCooldown = 0.5f;
   static constexpr float kDamageCooldown = 2.f;
+  static constexpr float kSpinCooldown = 1.f;
 };
