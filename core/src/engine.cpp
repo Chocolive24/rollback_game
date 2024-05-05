@@ -48,6 +48,9 @@ void Engine::ProcessFrame() {
     window_size_.Y = GetScreenHeight();
   }
 
+  const ImGuiIO& io = ImGui::GetIO();
+  are_mouse_inputs_enabled_ = !io.WantCaptureMouse;
+
   application_->Update();
 
   ImGui_ImplRaylib_ProcessEvents();

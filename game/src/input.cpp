@@ -4,6 +4,8 @@
 #include <Common-cpp/inc/Common.h>
 #include <raylib_wrapper.h>
 
+#include "engine.h"
+
 namespace input {
 
 extern std::array<Math::Vec2F, game_constants::kMaxPlayerCount> mouse_pos{};
@@ -25,7 +27,7 @@ PlayerInput GetPlayerInput(int input_profile_id) noexcept {
       if (IsKeyDown(raylib::KEY_D)) {
         player_1_inputs |= static_cast<std::uint8_t>(PlayerInputType::kRight);
       }
-      if (IsMouseButtonDown(raylib::MOUSE_BUTTON_LEFT)) {
+      if (IsMouseButtonDown(raylib::MOUSE_BUTTON_LEFT) && Engine::are_mouse_inputs_enabled()) {
         // Check if the mouse is not being used for window move.
         if (!raylib::IsWindowResized() && !raylib::IsWindowMinimized()) {
           player_1_inputs |= static_cast<std::uint8_t>(PlayerInputType::kShoot);
@@ -52,7 +54,8 @@ PlayerInput GetPlayerInput(int input_profile_id) noexcept {
       if (IsKeyDown(raylib::KEY_RIGHT)) {
         player_2_inputs |= static_cast<std::uint8_t>(PlayerInputType::kRight);
       }
-      if (IsMouseButtonDown(raylib::MOUSE_BUTTON_RIGHT)) {
+      if (IsMouseButtonDown(raylib::MOUSE_BUTTON_RIGHT) &&
+          Engine::are_mouse_inputs_enabled()) {
         player_2_inputs |= static_cast<std::uint8_t>(PlayerInputType::kShoot);
       }
       if (IsKeyPressed(raylib::KEY_SPACE)) {
@@ -66,7 +69,6 @@ PlayerInput GetPlayerInput(int input_profile_id) noexcept {
 }
 
 Math::Vec2F CalculateDirToMouse(const Math::Vec2F pos, PlayerId player_id) noexcept {
-  //return Math::Vec2F::Right();
   return  (mouse_pos[player_id] - pos).Normalized();
 }
 

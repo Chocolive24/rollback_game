@@ -165,30 +165,6 @@ Checksum PlayerManager::ComputeChecksum() const noexcept {
   return checksum;
 }
 
-void PlayerManager::OnCollisionEnter(
-    PhysicsEngine::ColliderRef colliderRefA,
-    PhysicsEngine::ColliderRef colliderRefB) noexcept {
-
-  // if (colliderRefA == jump_col_ref_ || colliderRefB == jump_col_ref_) {
-  //   if (colliderRefA == main_col_ref_ || colliderRefB == main_col_ref_) {
-  //     return;
-  //   }
-
-  //  can_jump_ = true;
-  //  is_jumping_ = false;
-  //}
-
-  // if (colliderRefA == platforms_manager_.platform_col_refs[0] ||
-  //     colliderRefB == platforms_manager_.platform_col_refs[0]) {
-  //   if (colliderRefA == player_controller_.jump_col_ref_ ||
-  //       colliderRefB == player_controller_.jump_col_ref_) {
-  //     std::cout << "trigger enter \n";
-  //     player_controller_.can_jump_ = true;
-  //     player_controller_.is_jumping_ = false;
-  //   }
-  // }
-}
-
 void PlayerManager::SetPlayerInput(const input::FrameInput& input, PlayerId player_id) {
   players_[player_id].input = input.input();
   players_[player_id].dir_to_mouse = input.dir_to_mouse();

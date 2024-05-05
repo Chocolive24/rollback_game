@@ -40,6 +40,10 @@ class Engine {
    */
   static Math::Vec2I window_size() noexcept { return window_size_; }
 
+  static bool are_mouse_inputs_enabled() noexcept {
+    return are_mouse_inputs_enabled_;
+  }
+
  private:
   /**
    * \brief Performs setup tasks before running the application.
@@ -57,4 +61,5 @@ class Engine {
 
   Application* application_ = nullptr;
   inline static Math::Vec2I window_size_{1280, 720};
+  inline static bool are_mouse_inputs_enabled_ = true;
 };

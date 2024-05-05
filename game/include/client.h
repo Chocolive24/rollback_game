@@ -3,6 +3,7 @@
 #include "network_manager.h"
 #include "game_renderer.h"
 #include "online_game_manager.h"
+#include "audio_manager.h"
 #include "types.h"
 
 enum class ClientState {
@@ -40,6 +41,8 @@ private:
   OnlineGameManager online_game_manager_{};
 
   GameRenderer game_renderer_{&online_game_manager_};
+
+  AudioManager audio_manager_{};
 
   float fixed_timer_ = game_constants::kFixedDeltaTime;
   float time_since_last_fixed_update_ = 0.f;

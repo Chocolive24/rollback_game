@@ -12,16 +12,20 @@ void Client::Init(int input_profile_id) noexcept {
  
   online_game_manager_.Init(input_profile_id);
   online_game_manager_.RegisterNetworkInterface(&network_manager_);
-  //StartGame();
  
   game_renderer_.Init();
+
+  audio_manager_.Init();
+  audio_manager_.PlayMusic(MusicType::kStartMenu);
 }
 
 void Client::Update() noexcept {
   const auto delta_time = raylib::GetFrameTime();
   fixed_timer_ += delta_time;
   time_since_last_fixed_update_ += delta_time;
+
   network_manager_.Service();
+  audio_manager_.Update();
 
   while (fixed_timer_ >= game_constants::kFixedDeltaTime) {
     if (state_ == ClientState::kInGame) {
@@ -80,5 +84,6 @@ void Client::StartGame() noexcept {
 
   // PlayerId is in range 0-1 but ClientId is in range 1-2.
   online_game_manager_.SetPlayerId(client_id_ - 1);
-  //online_game_manager_.SetPlayerId(0);
+
+  audio_manager_.PlayMusic(MusicType::kBattle);
 }
