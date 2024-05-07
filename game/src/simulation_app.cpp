@@ -7,21 +7,28 @@ void SimulationApp::Setup() noexcept {
   auto texture_size = Engine::window_size();
   texture_size.X /= 2;
   for (int i = 0; i < game_constants::kMaxPlayerCount; i++) {
-    clients_[i].Init(i, i);
+    mock_networks_[i].RegisterClient(&clients_[i]);
+    
+    clients_[i].Init(i);
+    clients_[i].SetClientId(i + 1); // simulate photon id which is in range [1 ; 2]
+    clients_[i].RegisterNetworkInterface(&mock_networks_[i]);
+
+    clients_[i].StartGame();
+
     render_targets_[i] =
         raylib::LoadRenderTexture(texture_size.X, texture_size.Y);
   }
 
-  clients_[0].RegisterOtherClient(&clients_[1]);
-  clients_[1].RegisterOtherClient(&clients_[0]);
+  mock_networks_[0].RegisterOtherClientNetwork(&mock_networks_[1]);
+  mock_networks_[1].RegisterOtherClientNetwork(&mock_networks_[0]);
 
  input::FrameInput::registerType();
 }
 
 void SimulationApp::Update() noexcept {
-  for (auto& client : clients_)
-  {
-    client.Update();
+  for (std::size_t i = 0; i < game_constants::kMaxPlayerCount; i++) {
+    mock_networks_[i].Service();
+    clients_[i].Update();
   }
 }
 
@@ -59,9 +66,11 @@ void SimulationApp::DrawImGui() noexcept {
 
   ImGui::Begin("Mock network values.");
   {
-    ImGui::SliderFloat("Min delay", &SimulationClient::min_packet_delay, 0.f, 1.f);
-    ImGui::SliderFloat("Max delay", &SimulationClient::max_packet_delay, 0.f, 1.f);
-    ImGui::SliderFloat("PacketLossPercentage", &SimulationClient::packet_loss_percentage, 0.f,
+    ImGui::SliderFloat("Min delay", &SimulationNetwork::min_packet_delay, 0.f, 1.f);
+    ImGui::SliderFloat("Max delay", &SimulationNetwork::max_packet_delay, 0.f,
+                       1.f);
+    ImGui::SliderFloat("PacketLossPercentage",
+                       &SimulationNetwork::packet_loss_percentage, 0.f,
                        1.f);
   }
   ImGui::End();

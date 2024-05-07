@@ -1,8 +1,9 @@
 #pragma once
 
 #include "application.h"
+#include "client.h"
 #include "game_constants.h"
-#include "simulation_client.h"
+#include "simulation_network.h"
 
 /**
  * \brief DebugApp is a class which simulates the network communications with
@@ -18,7 +19,10 @@ class SimulationApp final : public Application {
   void TearDown() noexcept override;
 
  private:
-  std::array<SimulationClient, game_constants::kMaxPlayerCount> clients_{};
+  //std::array<SimulationClient, game_constants::kMaxPlayerCount> clients_{};
+  std::array<SimulationNetwork, game_constants::kMaxPlayerCount>
+      mock_networks_{};
+  std::array<Client, game_constants::kMaxPlayerCount> clients_{};
   std::array<raylib::RenderTexture2D, game_constants::kMaxPlayerCount>
       render_targets_{};
 };
