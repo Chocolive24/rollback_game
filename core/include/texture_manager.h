@@ -26,6 +26,10 @@ class Sprite {
              raylib::Color color = raylib::Color{255, 255, 255, 255});
 };
 
+Sprite CreateSprite(std::string_view path, raylib::Vector2 scale,
+                    Pivot pivot = Pivot::kCenter);
+
+
 struct PenguinAnimations {
   raylib::Texture2D idle_animation;
   /**

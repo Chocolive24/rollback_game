@@ -1,6 +1,21 @@
 #include "rollback_manager.h"
 #include "local_game_manager.h"
 
+void RollbackManager::Deinit() noexcept {
+  current_frame_ = -1;
+  frame_to_confirm_ = 0;
+  confirmed_frame_ = -1;
+  last_remote_input_frame_ = -1;
+  confirmed_game_manager_.Deinit();
+
+  for (auto& inputs_vec : inputs_)
+  {
+    inputs_vec.clear();
+  }
+
+  last_inputs_.fill(input::FrameInput());
+}
+
 void RollbackManager::SetLocalPlayerInput(const input::FrameInput& local_input,
                                           PlayerId player_id) noexcept {
   inputs_[player_id][local_input.frame_nbr()] = local_input;

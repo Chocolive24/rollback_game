@@ -17,7 +17,7 @@ struct Player {
   float shoot_timer = 0.f;
   float damage_timer = 0.f;
   float spin_timer = 0.f;
-  std::int8_t hp = 5;
+  std::int8_t hp = 1;
   input::PlayerInput input = 0;
 };
 
@@ -33,6 +33,7 @@ public:
 
   void Init() noexcept;
   void FixedUpdate() noexcept;
+  void Deinit() noexcept;
 
   /**
    * \brief Copy is a method which copies the states of the players. It used when
@@ -42,9 +43,6 @@ public:
   void Rollback(const PlayerManager& player_manager) noexcept;
 
   [[nodiscard]] Checksum ComputeChecksum() const noexcept;
-
-  void OnCollisionEnter(PhysicsEngine::ColliderRef colliderRefA,
-                      PhysicsEngine::ColliderRef colliderRefB) noexcept;
 
   void SetPlayerInput(const input::FrameInput& input, PlayerId player_id);
 

@@ -82,6 +82,8 @@ void PlayerManager::FixedUpdate() noexcept {
   }
 }
 
+void PlayerManager::Deinit() noexcept { players_.fill(Player()); }
+
 void PlayerManager::Move(const Player& player) const noexcept {
   auto move_direction = Math::Vec2F::Zero();
 

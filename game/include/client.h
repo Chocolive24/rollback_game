@@ -27,6 +27,7 @@ class Client {
   }
   void Init(int input_profile_id) noexcept;
   void Update() noexcept;
+  void DrawMainMenu();
   void Draw(const raylib::RenderTexture2D& render_texture, raylib::Vector2 render_target_pos) noexcept;
   void DrawImGui() noexcept;
   void Deinit() noexcept;
@@ -37,13 +38,16 @@ class Client {
 
   void SetState(const ClientState state) noexcept { state_ = state; }
 
+  [[nodiscard]] bool is_in_game() const noexcept {
+    return state_ == ClientState::kInGame;
+  }
+
   [[nodiscard]] ClientId client_id() const noexcept { return client_id_; }
   void SetClientId(const ClientId client_id) noexcept {
     client_id_ = client_id;
   }
 
 private:
-  //NetworkManager network_manager_{PHOTON_APP_ID, L"1.0"};
   NetworkInterface* network_interface_ = nullptr;
   OnlineGameManager online_game_manager_{};
 
@@ -56,4 +60,5 @@ private:
   ClientState state_ = ClientState::kConnecting;
 
   ClientId client_id_ = game_constants::kInvalidClientId;
+  int input_profile_id_ = 0;
 };

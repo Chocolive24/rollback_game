@@ -22,7 +22,6 @@ public:
   void FixedUpdateCurrentFrame() noexcept;
   void Deinit() noexcept override;
 
-  void IncreaseCurrentFrame() noexcept;
   void OnInputReceived(const ExitGames::Common::Hashtable& event_content);
   void OnFrameConfirmationReceived(const ExitGames::Common::Hashtable& event_content);
 

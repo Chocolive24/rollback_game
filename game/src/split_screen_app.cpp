@@ -19,15 +19,10 @@ void SplitScreenApp::Setup() noexcept {
 }
 
 void SplitScreenApp::Update() noexcept {
-  for (std::size_t i = 0; i < game_constants::kMaxPlayerCount; i++)
-  {
+  for (std::size_t i = 0; i < game_constants::kMaxPlayerCount; i++) {
     network_managers_[i].Service();
     clients_[i].Update();
   }
-
-  //for (auto& client : clients_) {
-  //  client.Update();
-  //}
 }
 
 void SplitScreenApp::Draw() noexcept {
@@ -41,8 +36,6 @@ void SplitScreenApp::Draw() noexcept {
       render_targets_[i] =
           raylib::LoadRenderTexture(new_tex_size.X, new_tex_size.Y);
     }
-
-
 
     // NOTE: Render texture must be y-flipped due to default OpenGL coordinates
     // (left-bottom)
@@ -71,10 +64,6 @@ void SplitScreenApp::TearDown() noexcept {
     network_managers_[i].Disconnect();
     clients_[i].Deinit();
   }
-
-  //for (auto& client : clients_) {
-  //  client.Deinit();
-  //}
 
   for (const auto& render_target : render_targets_) {
     raylib::UnloadRenderTexture(render_target);

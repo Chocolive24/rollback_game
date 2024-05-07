@@ -16,6 +16,10 @@ void OnlineGameManager::Init(int input_profile_id) noexcept {
 }
 
 void OnlineGameManager::FixedUpdateCurrentFrame() noexcept {
+  if (game_state_.is_game_finished) {
+    return;
+  }
+
   rollback_manager_.IncreaseCurrentFrame();
 
   PollNetworkEvents();
@@ -32,10 +36,13 @@ void OnlineGameManager::FixedUpdateCurrentFrame() noexcept {
 
 void OnlineGameManager::Deinit() noexcept {
   LocalGameManager::Deinit();
-}
+  rollback_manager_.Deinit();
+  frame_inputs_.clear();
 
-void OnlineGameManager::IncreaseCurrentFrame() noexcept {
-  rollback_manager_.IncreaseCurrentFrame();
+  while (!network_event_queue_.empty())
+  {
+    network_event_queue_.pop();
+  }
 }
 
 void OnlineGameManager::PollNetworkEvents() noexcept {

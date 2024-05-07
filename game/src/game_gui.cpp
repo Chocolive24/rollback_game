@@ -17,12 +17,6 @@ void GameGui::Draw(
   const std::string player_2_life_txt =
       std::to_string(local_game_manager_->player_manager().GetPlayerHp(1));
 
-  
-  //raylib::DrawRaylibText(player_1_life_txt.c_str(), player_1_life_ui_pos_x,
-  //                       player_lives_ui_pos_y, 50, raylib::BLACK);
-  //raylib::DrawRaylibText(player_2_life_txt.c_str(), player_2_life_ui_pos_x,
-  //                       player_lives_ui_pos_y, 50, raylib::BLACK);
-
   raylib::DrawRaylibText(player_1_life_txt.c_str(), player_1_life_ui_pos_x,
                          player_lives_ui_pos_y, 50, raylib::BLUE);
   raylib::DrawRaylibText(player_2_life_txt.c_str(), player_2_life_ui_pos_x,

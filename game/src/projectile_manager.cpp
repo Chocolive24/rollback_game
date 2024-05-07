@@ -68,6 +68,10 @@ void ProjectileManager::FixedUpdate() noexcept {
   }
 }
 
+void ProjectileManager::Deinit() noexcept {
+  projectiles_.fill(Projectile());
+}
+
 
 void ProjectileManager::OnCollisionEnter(
     PhysicsEngine::ColliderRef colliderRefA,

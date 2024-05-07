@@ -38,6 +38,9 @@ void LocalGameManager::FixedUpdate() noexcept {
 
 void LocalGameManager::Deinit() noexcept {
   game_state_.world.Deinit();
+  game_state_.player_manager.Deinit();
+  game_state_.projectile_manager.Deinit();
+  game_state_.is_game_finished = false;
 }
 
 void LocalGameManager::SetPlayerInput(const input::FrameInput& input, PlayerId player_id) noexcept {

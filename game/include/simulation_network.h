@@ -9,7 +9,6 @@
  * value to simulate the network delay.
  */
 struct SimulationInput {
-  // std::vector<FrameInput> frame_inputs;
   std::vector<input::FrameInput> frame_inputs;
   float delay = 0.f;
 };
@@ -30,6 +29,8 @@ public:
   void Service() noexcept;
 
   void JoinRandomOrCreateRoom() noexcept override{}
+  void LeaveRoom() noexcept override{}
+
   void RaiseEvent(bool reliable, NetworkEventCode event_code,
     const ExitGames::Common::Hashtable& event_data) noexcept override;
   void ReceiveEvent(int player_nr, NetworkEventCode event_code,

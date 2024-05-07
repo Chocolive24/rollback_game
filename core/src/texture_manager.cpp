@@ -4,8 +4,8 @@ using namespace raylib;
 
 #include <string_view>
 
-Sprite CreateSprite(std::string_view path, Vector2 scale,
-                    Pivot pivot = Pivot::kCenter) {
+Sprite CreateSprite(std::string_view path, raylib::Vector2 scale,
+                    Pivot pivot) {
   Sprite sprite{};
   sprite.tex = LoadTexture(path.data());
   sprite.source = {0, 0, static_cast<float>(sprite.tex.width),

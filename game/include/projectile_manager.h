@@ -10,7 +10,6 @@
  */
 struct Projectile {
   PhysicsEngine::ColliderRef collider_ref{};
-  float rotation = 0.f;
   std::int16_t collision_count = 0;
 };
 
@@ -25,6 +24,7 @@ public:
   void Init(PhysicsEngine::World* world) noexcept;
   void CreateProjectile(Math::Vec2F position, Math::Vec2F mov_dir) noexcept;
   void FixedUpdate() noexcept;
+  void Deinit() noexcept;
   void OnCollisionEnter(PhysicsEngine::ColliderRef colliderRefA,
                       PhysicsEngine::ColliderRef colliderRefB) noexcept;
 

@@ -76,12 +76,6 @@ void SimulationNetwork::ReceiveEvent(
       break;
     }
     case NetworkEventCode::kFrameConfirmation: {
-     /* if (online_game_manager_.player_id() == kMasterClientId) {
-        const SimulationFrameToConfirm f{0, {}, 0.08f};
-        waiting_frame_queue_.push_back(f);
-        break;
-      }*/
-
       SimulationFrameToConfirm frame_to_confirm{};
 
       const auto check_sum_value = event_content.getValue(
@@ -116,8 +110,6 @@ void SimulationNetwork::ReceiveEvent(
     }
   }
 }
-
-
 
 void SimulationNetwork::PollInputPackets() {
   auto it = waiting_input_queue_.begin();

@@ -56,13 +56,13 @@ void GameRenderer::Draw(const RenderTexture2D& render_target,
       const std::string end_txt =
           local_player_hp <= 0 ? "You lost !" : "You won !";
 
-      constexpr int txt_size = 60;
+      constexpr int txt_size = 100;
 
       const auto render_target_center_x =
           render_target.texture.width / 2 -
           MeasureText(end_txt.c_str(), txt_size) / 2;
       const auto render_target_center_y =
-          render_target.texture.height / 2 - txt_size / 2;
+          render_target.texture.height / 4 - txt_size / 2;
 
       raylib::DrawRaylibText(end_txt.c_str(), render_target_center_x,
                              render_target_center_y, txt_size, raylib::GRAY);

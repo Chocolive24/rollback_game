@@ -8,15 +8,15 @@ void AudioManager::Init() {
 
   start_menu_theme_ = raylib::LoadMusicStream("data/sounds/start_menu.wav");
   start_menu_theme_.looping = true;
-  raylib::SetMusicVolume(start_menu_theme_, 0.2f);
+  raylib::SetMusicVolume(start_menu_theme_, global_volume_);
 
   battle_theme_ = raylib::LoadMusicStream("data/sounds/battle.wav");
   battle_theme_.looping = true;
-  raylib::SetMusicVolume(battle_theme_, 0.2f);
+  raylib::SetMusicVolume(battle_theme_, global_volume_);
 }
 
 void AudioManager::Update() {
-  if (current_music_ != nullptr) {
+  if (current_music_ != nullptr && is_audio_enabled) {
     raylib::UpdateMusicStream(*current_music_);
   }
 }

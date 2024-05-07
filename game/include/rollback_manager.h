@@ -31,6 +31,8 @@ class RollbackManager {
     }
   }
 
+  void Deinit() noexcept;
+
   void SetLocalPlayerInput(const input::FrameInput& local_input, PlayerId player_id) noexcept;
   void SetRemotePlayerInput(const std::vector<input::FrameInput>& new_remote_inputs,
                             PlayerId player_id);

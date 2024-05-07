@@ -19,7 +19,6 @@ class SimulationApp final : public Application {
   void TearDown() noexcept override;
 
  private:
-  //std::array<SimulationClient, game_constants::kMaxPlayerCount> clients_{};
   std::array<SimulationNetwork, game_constants::kMaxPlayerCount>
       mock_networks_{};
   std::array<Client, game_constants::kMaxPlayerCount> clients_{};

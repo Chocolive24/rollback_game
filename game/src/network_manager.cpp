@@ -6,11 +6,9 @@ NetworkManager::NetworkManager(
     const ExitGames::Common::JString& appID,
     const ExitGames::Common::JString& appVersion)
     : load_balancing_client_(*this, appID, appVersion) {
-  //FrameInput::registerType();
 }
 
 NetworkManager::~NetworkManager() noexcept {
-  //FrameInput::unregisterType();
 }
 
 void NetworkManager::Connect() {
@@ -28,6 +26,11 @@ void NetworkManager::JoinRandomOrCreateRoom() noexcept {
       true, true, 2); 
   if (!load_balancing_client_.opJoinRandomOrCreateRoom(game_id, room_options))
     EGLOG(ExitGames::Common::DebugLevel::ERRORS, L"Could not join or create room.");
+}
+
+void NetworkManager::LeaveRoom() noexcept {
+  load_balancing_client_.opLeaveRoom();
+  client_->SetClientId(game_constants::kInvalidClientId);
 }
 
 void NetworkManager::Disconnect() {
@@ -64,23 +67,13 @@ void NetworkManager::RaiseEvent(bool reliable,
 void NetworkManager::ReceiveEvent(int player_nr, NetworkEventCode event_code,
     const ExitGames::Common::Hashtable& event_content) noexcept {
 
-   // logging the string representation of the eventContent can be really useful
-  // for debugging, but use with care: for big events this might get expensive
-  //EGLOG(ExitGames::Common::DebugLevel::ALL,
-  //      L"an event of type %d from player Nr %d with the following content has "
-  //      L"just arrived: %ls",
-  //      static_cast<nByte>(event_code), player_nr,
-  //      event_content.toString(true).cstr());
-
-  //std::cout << "event content: "
-  //          << event_content.toString().UTF8Representation().cstr() << '\n';
-
-  /*if (online_game_manager_ == nullptr) 
-      return;*/
+ if (!client_->is_in_game())
+ {
+    return;
+ }
 
   const NetworkEvent network_event{event_code, event_content};
   client_->OnNetworkEventReceived(network_event);
-  //online_game_manager_->PushNetworkEvent(network_event);
 }
 
 
@@ -129,6 +122,7 @@ void NetworkManager::joinRoomEventAction(
 void NetworkManager::leaveRoomEventAction(int playerNr, bool isInactive) {
   std::cout << "player nr: " << playerNr << " is inactive: " << isInactive
             << '\n';
+  load_balancing_client_.opLeaveRoom();
 }
 
 void NetworkManager::customEventAction(int playerNr, nByte eventCode,
