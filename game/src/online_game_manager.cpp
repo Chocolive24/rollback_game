@@ -30,7 +30,9 @@ void OnlineGameManager::FixedUpdateCurrentFrame() noexcept {
   LocalGameManager::FixedUpdate();
 }
 
-void OnlineGameManager::Deinit() noexcept { LocalGameManager::Deinit(); }
+void OnlineGameManager::Deinit() noexcept {
+  LocalGameManager::Deinit();
+}
 
 void OnlineGameManager::IncreaseCurrentFrame() noexcept {
   rollback_manager_.IncreaseCurrentFrame();
@@ -132,6 +134,10 @@ void OnlineGameManager::SendFrameConfirmationEvent(
 
 void OnlineGameManager::OnInputReceived(
     const ExitGames::Common::Hashtable& event_content) {
+#ifdef TRACY_ENABLE
+  ZoneScoped;
+#endif  // TRACY_ENABLE
+
   std::vector<input::FrameInput> remote_frame_inputs{};
 
   const auto input_value =
@@ -158,7 +164,7 @@ void OnlineGameManager::OnInputReceived(
     remote_frame_inputs.push_back(frame_input);
   }
 
-  if (remote_frame_inputs.back().frame_nbr() <
+  if (remote_frame_inputs.back().frame_nbr() <=
       rollback_manager_.last_remote_input_frame()) {
     // received old input, no need to send confirm packet.
     return;
@@ -177,6 +183,10 @@ void OnlineGameManager::OnInputReceived(
 
 void OnlineGameManager::OnFrameConfirmationReceived(
     const ExitGames::Common::Hashtable& event_content) {
+#ifdef TRACY_ENABLE
+  ZoneScoped;
+#endif  // TRACY_ENABLE
+
   if (player_id_ == kMasterClientId) {
     frame_inputs_.erase(frame_inputs_.begin());
     return;
@@ -199,10 +209,10 @@ void OnlineGameManager::OnFrameConfirmationReceived(
   const int inputs_count =
       *ExitGames::Common::ValueObject<input::FrameInput*>(input_value).getSizes();
 
-  if (inputs_count <= 0)
-  {
-    std::cerr << "remote input event is empty.\n";
-    return;
+  if (inputs_count <= 0) {
+    std::cerr << "remote input event is empty at confirmed frame ."
+              << rollback_manager_.confirmed_frame() << '\n';
+    //return;
   }
 
   frame_inputs.reserve(inputs_count);
@@ -211,12 +221,13 @@ void OnlineGameManager::OnFrameConfirmationReceived(
     frame_inputs.push_back(frame_input);
   }
 
-  // If we did not receive the inputs before the frame to confirm, add them.
-  if (rollback_manager_.last_remote_input_frame() <
-      frame_inputs.back().frame_nbr()) {
-    const PlayerId other_client_id = player_id_ == 0 ? 1 : 0;
-    rollback_manager_.SetRemotePlayerInput(frame_inputs,
-                                           other_client_id);
+  if (!frame_inputs.empty())
+  {
+    // If we did not receive the inputs before the frame to confirm, add them.
+    if (rollback_manager_.last_remote_input_frame() < frame_inputs.back().frame_nbr()) {
+      const PlayerId other_client_id = player_id_ == 0 ? 1 : 0;
+      rollback_manager_.SetRemotePlayerInput(frame_inputs, other_client_id);
+    }
   }
 
   const int check_sum = rollback_manager_.ConfirmFrame();

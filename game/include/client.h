@@ -21,11 +21,17 @@ enum class ClientState {
  */
 class Client {
  public:
+  void RegisterNetworkInterface(NetworkInterface* network_interface) noexcept {
+    network_interface_ = network_interface;
+    online_game_manager_.RegisterNetworkInterface(network_interface);
+  }
   void Init(int input_profile_id) noexcept;
   void Update() noexcept;
   void Draw(const raylib::RenderTexture2D& render_texture, raylib::Vector2 render_target_pos) noexcept;
   void DrawImGui() noexcept;
   void Deinit() noexcept;
+
+  void OnNetworkEventReceived(const NetworkEvent& network_event) noexcept;
 
   void StartGame() noexcept;
 
@@ -37,7 +43,8 @@ class Client {
   }
 
 private:
-  NetworkManager network_manager_{PHOTON_APP_ID, L"1.0"};
+  //NetworkManager network_manager_{PHOTON_APP_ID, L"1.0"};
+  NetworkInterface* network_interface_ = nullptr;
   OnlineGameManager online_game_manager_{};
 
   GameRenderer game_renderer_{&online_game_manager_};

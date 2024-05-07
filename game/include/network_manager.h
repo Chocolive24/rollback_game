@@ -38,9 +38,9 @@ class NetworkManager final : public NetworkInterface,
     client_ = client;
   }
 
-  void RegisterOnlineGameManager(OnlineGameManager* network_game_manager) noexcept {
-    online_game_manager_ = network_game_manager;
-  }
+  //void RegisterOnlineGameManager(OnlineGameManager* network_game_manager) noexcept {
+  //  online_game_manager_ = network_game_manager;
+  //}
 
   /**
    * \brief Initiates a connection to the Photon server.
@@ -60,7 +60,7 @@ class NetworkManager final : public NetworkInterface,
   /**
    * \brief Joins a random room or creates a new room if no rooms are available.
    */
-  void JoinRandomOrCreateRoom() noexcept;
+  void JoinRandomOrCreateRoom() noexcept override;
 
   /**
    * \brief Creates a new room with the specified name and maximum number of
@@ -136,7 +136,7 @@ class NetworkManager final : public NetworkInterface,
   // Member variables.
   // =================
   Client* client_ = nullptr;
-  OnlineGameManager* online_game_manager_ = nullptr;
+  //OnlineGameManager* online_game_manager_ = nullptr;
   ExitGames::LoadBalancing::Client load_balancing_client_;
   ExitGames::Common::Logger mLogger;  // name must be mLogger because it is accessed by EGLOG()
 };

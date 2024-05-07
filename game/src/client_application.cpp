@@ -2,7 +2,11 @@
 #include "engine.h"
 
 void ClientApplication::Setup() noexcept {
+  network_manager_.RegisterClient(&client_);
+  network_manager_.Connect();
+
   client_.Init(game_constants::kLocalPlayer1InputId);
+  client_.RegisterNetworkInterface(&network_manager_);
 
   render_texture_ = raylib::LoadRenderTexture(raylib::GetScreenWidth(),
                                               raylib::GetScreenHeight());
@@ -11,6 +15,7 @@ void ClientApplication::Setup() noexcept {
 }
 
 void ClientApplication::Update() noexcept {
+  network_manager_.Service();
   client_.Update();
 }
 
@@ -34,6 +39,7 @@ void ClientApplication::DrawImGui() noexcept {
 }
 
 void ClientApplication::TearDown() noexcept {
+  network_manager_.Disconnect();
   client_.Deinit();
 
   input::FrameInput::registerType();

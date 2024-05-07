@@ -66,7 +66,7 @@ class RollbackManager {
   LocalGameManager* current_game_manager_ = nullptr;
 
   /**
-   * \brief confirmed_player_manager_ is a copy of the client's player_manager
+   * \brief confirmed_player_manager_ is a copy of the client's confirmed_game_manager
    * at the last confirmed frame state.
    */
   LocalGameManager confirmed_game_manager_{};

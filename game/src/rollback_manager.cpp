@@ -39,8 +39,7 @@ void RollbackManager::SetRemotePlayerInput(
         return frame_input.frame_nbr() == last_remote_input_frame_ + 1;
       });
 
-  // Check if rollback is necessary
-  bool must_rollback = last_remote_input_frame_ == -1;
+  bool must_rollback = false;
 
   // Iterate over the missing inputs and update the inputs array
   for (FrameNbr frame = last_remote_input_frame_ + 1;
@@ -66,7 +65,6 @@ void RollbackManager::SetRemotePlayerInput(
     inputs_[player_id][frame] = last_new_remote_input;
   }
 
-  //SimulateUntilCurrentFrame();
   // Rollback if necessary.
   if (must_rollback) {
     SimulateUntilCurrentFrame();

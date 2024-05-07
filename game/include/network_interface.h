@@ -22,6 +22,12 @@ public:
   NetworkInterface& operator=(const NetworkInterface& other) noexcept = default;
   virtual ~NetworkInterface() noexcept = default;
 
+  //virtual void Connect() noexcept = 0;
+  //virtual void Service() noexcept = 0;
+  //virtual void Disconnect() noexcept = 0;
+  virtual void JoinRandomOrCreateRoom() noexcept = 0;
+
+
   /**
    * \brief RaiseEvent is a method which raises an event over the network.
    *

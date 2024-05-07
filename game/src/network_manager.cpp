@@ -75,11 +75,12 @@ void NetworkManager::ReceiveEvent(int player_nr, NetworkEventCode event_code,
   //std::cout << "event content: "
   //          << event_content.toString().UTF8Representation().cstr() << '\n';
 
-  if (online_game_manager_ == nullptr) 
-      return;
+  /*if (online_game_manager_ == nullptr) 
+      return;*/
 
   const NetworkEvent network_event{event_code, event_content};
-  online_game_manager_->PushNetworkEvent(network_event);
+  client_->OnNetworkEventReceived(network_event);
+  //online_game_manager_->PushNetworkEvent(network_event);
 }
 
 

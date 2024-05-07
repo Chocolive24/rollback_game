@@ -3,15 +3,13 @@
 #include <imgui.h>
 #include <string>
 
-//TODO: FAIRE que simulation client utilise ce client avec une interface de network.
-
 void Client::Init(int input_profile_id) noexcept {
-  network_manager_.RegisterClient(this);
-  network_manager_.RegisterOnlineGameManager(&online_game_manager_);
-  network_manager_.Connect();
+  //network_manager_.RegisterClient(this);
+  //network_manager_.RegisterOnlineGameManager(&online_game_manager_);
+  //network_manager_.Connect();
  
   online_game_manager_.Init(input_profile_id);
-  online_game_manager_.RegisterNetworkInterface(&network_manager_);
+  //online_game_manager_.RegisterNetworkInterface(&network_manager_);
  
   game_renderer_.Init();
 
@@ -24,7 +22,7 @@ void Client::Update() noexcept {
   fixed_timer_ += delta_time;
   time_since_last_fixed_update_ += delta_time;
 
-  network_manager_.Service();
+  //network_manager_.Service();
   audio_manager_.Update();
 
   while (fixed_timer_ >= game_constants::kFixedDeltaTime) {
@@ -61,7 +59,7 @@ void Client::DrawImGui() noexcept {
         break;
       case ClientState::kInMainMenu:
         if (ImGui::Button("Join a Game", ImVec2(125, 25))) {
-          network_manager_.JoinRandomOrCreateRoom();
+          network_interface_->JoinRandomOrCreateRoom();
         }
         break;
       case ClientState::kInGame:
@@ -76,7 +74,11 @@ void Client::Deinit() noexcept {
   online_game_manager_.Deinit();
   game_renderer_.Deinit();
 
-  network_manager_.Disconnect();
+  //network_manager_.Disconnect();
+}
+
+void Client::OnNetworkEventReceived(const NetworkEvent& network_event) noexcept {
+  online_game_manager_.PushNetworkEvent(network_event);
 }
 
 void Client::StartGame() noexcept {

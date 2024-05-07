@@ -12,6 +12,7 @@ public:
   void TearDown() noexcept override;
 
 private:
+  NetworkManager network_manager_{PHOTON_APP_ID, L"1.0"};
   Client client_{};
   raylib::RenderTexture2D render_texture_{};
 };

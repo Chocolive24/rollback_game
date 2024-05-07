@@ -33,9 +33,7 @@ PlayerInput GetPlayerInput(int input_profile_id) noexcept {
           player_1_inputs |= static_cast<std::uint8_t>(PlayerInputType::kShoot);
         }
       }
-      if (IsKeyPressed(raylib::KEY_SPACE)) {
-        player_1_inputs |= static_cast<std::uint8_t>(PlayerInputType::kJump);
-      }
+
       return player_1_inputs;
     }
 
@@ -58,9 +56,7 @@ PlayerInput GetPlayerInput(int input_profile_id) noexcept {
           Engine::are_mouse_inputs_enabled()) {
         player_2_inputs |= static_cast<std::uint8_t>(PlayerInputType::kShoot);
       }
-      if (IsKeyPressed(raylib::KEY_SPACE)) {
-        player_2_inputs |= static_cast<std::uint8_t>(PlayerInputType::kJump);
-      }
+
       return player_2_inputs;
     }
     default:

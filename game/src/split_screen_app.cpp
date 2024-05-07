@@ -5,7 +5,12 @@ void SplitScreenApp::Setup() noexcept {
   auto texture_size = Engine::window_size();
   texture_size.X /= 2;
   for (int i = 0; i < game_constants::kMaxPlayerCount; i++) {
+    network_managers_[i].RegisterClient(&clients_[i]);
+    network_managers_[i].Connect();
+
     clients_[i].Init(i);
+    clients_[i].RegisterNetworkInterface(&network_managers_[i]);
+
     render_targets_[i] =
         raylib::LoadRenderTexture(texture_size.X, texture_size.Y);
   }
@@ -14,9 +19,15 @@ void SplitScreenApp::Setup() noexcept {
 }
 
 void SplitScreenApp::Update() noexcept {
-  for (auto& client : clients_) {
-    client.Update();
+  for (std::size_t i = 0; i < game_constants::kMaxPlayerCount; i++)
+  {
+    network_managers_[i].Service();
+    clients_[i].Update();
   }
+
+  //for (auto& client : clients_) {
+  //  client.Update();
+  //}
 }
 
 void SplitScreenApp::Draw() noexcept {
@@ -56,9 +67,14 @@ void SplitScreenApp::DrawImGui() noexcept {
 }
 
 void SplitScreenApp::TearDown() noexcept {
-  for (auto& client : clients_) {
-    client.Deinit();
+  for (std::size_t i = 0; i < game_constants::kMaxPlayerCount; i++) {
+    network_managers_[i].Disconnect();
+    clients_[i].Deinit();
   }
+
+  //for (auto& client : clients_) {
+  //  client.Deinit();
+  //}
 
   for (const auto& render_target : render_targets_) {
     raylib::UnloadRenderTexture(render_target);

@@ -52,6 +52,10 @@ void ProjectileManager::CreateProjectile(Math::Vec2F position,
 }
 
 void ProjectileManager::FixedUpdate() noexcept {
+#ifdef TRACY_ENABLE
+  ZoneScoped;
+#endif  // TRACY_ENABLE
+
   for (auto& proj : projectiles_) {
     auto& collider = world_->GetCollider(proj.collider_ref);
     if (!collider.Enabled()) 

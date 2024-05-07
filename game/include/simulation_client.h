@@ -49,6 +49,13 @@ class SimulationClient final : public NetworkInterface {
 private:
   void PollInputPackets();
   void PollConfirmFramePackets();
+
+public:
+  void JoinRandomOrCreateRoom() noexcept override {
+    //Mock method.
+  }
+
+private:
   OnlineGameManager online_game_manager_{};
   GameRenderer game_renderer_{&online_game_manager_};
 
