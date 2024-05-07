@@ -1,7 +1,9 @@
 #pragma once
 
 #include "application.h"
+#include "network_manager.h"
 #include "client.h"
+
 
 class ClientApplication final : public Application {
 public:

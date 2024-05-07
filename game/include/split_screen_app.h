@@ -1,6 +1,7 @@
 #pragma once
 
 #include "application.h"
+#include "network_manager.h"
 #include "client.h"
 
 #include <array>

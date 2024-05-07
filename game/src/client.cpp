@@ -1,15 +1,31 @@
 #include "client.h"
-
+#include "engine.h"
 #include <imgui.h>
 
 #include <string>
-
-#include "engine.h"
 
 void Client::Init(int input_profile_id) noexcept {
   input_profile_id_ = input_profile_id;
 
   game_renderer_.Init();
+
+  ice_ground = CreateSprite("data/images/ice.png", {2.f, 2.f});
+  photon_logo =
+      CreateSprite("data/images/by-photon_short_b.png", {1.f, 1.f});
+  raylib_logo =
+      CreateSprite("data/images/raylib_logo.png", {0.5f, 0.5f});
+  blue_spin_animation =
+      raylib::LoadTexture("data/images/blue_penguin/SpinAttack.png");
+  red_spin_animation =
+      raylib::LoadTexture("data/images/red_penguin/SpinAttack.png");
+
+  blue_spin_animation.width *= 10;
+  blue_spin_animation.height *= 10;
+  red_spin_animation.width *= 10;
+  red_spin_animation.height *= 10;
+
+  SetTextureWrap(blue_spin_animation, raylib::TEXTURE_WRAP_CLAMP);
+  SetTextureWrap(red_spin_animation, raylib::TEXTURE_WRAP_CLAMP);
 
   audio_manager_.Init();
   audio_manager_.PlayMusic(MusicType::kStartMenu);
@@ -64,11 +80,11 @@ void Client::DrawImGui() noexcept {
   float centerY = (window_size.Y * 0.5f - 200 * 0.5f);
 
   // Set the ImGui window position to the center
-  //ImGui::SetNextWindowPos(ImVec2(centerX, centerY));
+  ImGui::SetNextWindowPos(ImVec2(centerX, centerY));
 
   const std::string window_name = "Menu";
 
-  const auto flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
+  constexpr auto flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
                      ImGuiWindowFlags_NoCollapse;
 
   switch (state_) {
@@ -134,6 +150,12 @@ void Client::DrawImGui() noexcept {
 void Client::Deinit() noexcept {
   online_game_manager_.Deinit();
   game_renderer_.Deinit();
+
+  raylib::UnloadTexture(ice_ground.tex);
+  raylib::UnloadTexture(photon_logo.tex);
+  raylib::UnloadTexture(raylib_logo.tex);
+  raylib::UnloadTexture(red_spin_animation);
+  raylib::UnloadTexture(blue_spin_animation);
 }
 
 void Client::OnNetworkEventReceived(
@@ -152,8 +174,6 @@ void Client::StartGame() noexcept {
 }
 
 void Client::DrawMainMenu() {
-  static auto ice_ground = CreateSprite("data/images/ice.png", {2.f, 2.f});
-
   const auto window_size = Engine::window_size();
 
   for (int y = 0; y < window_size.Y; y += 36) {
@@ -163,34 +183,9 @@ void Client::DrawMainMenu() {
     }
   }
 
-  static Sprite photon_logo =
-      CreateSprite("data/images/by-photon_short_b.png", {1.f, 1.f});
   photon_logo.Draw({window_size.X * 0.5f, window_size.Y * 0.15f});
 
-  static Sprite raylib_logo =
-      CreateSprite("data/images/raylib_logo.png", {0.5f, 0.5f});
   raylib_logo.Draw({window_size.X * 0.5f, window_size.Y * 0.85f});
-
-  static raylib::Texture2D blue_spin_animation =
-      raylib::LoadTexture("data/images/blue_penguin/SpinAttack.png");
-  static raylib::Texture2D red_spin_animation =
-      raylib::LoadTexture("data/images/red_penguin/SpinAttack.png");
-  static constexpr std::int8_t kSpinAnimFrameCount = 7;
-  static constexpr float kSpinAnimFrameRate = 12.f;
-  static raylib::Rectangle spin_anim_rec{};
-  static float spin_anim_frame_counter = 0;
-
-  static bool init = false;
-  if (!init) {
-    blue_spin_animation.width *= 10;
-    blue_spin_animation.height *= 10;
-    red_spin_animation.width *= 10;
-    red_spin_animation.height *= 10;
-
-    init = true;
-  }
-  SetTextureWrap(blue_spin_animation, raylib::TEXTURE_WRAP_CLAMP);
-  SetTextureWrap(red_spin_animation, raylib::TEXTURE_WRAP_CLAMP);
 
   spin_anim_rec = {
       0.0f, 0.0f,

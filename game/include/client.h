@@ -1,23 +1,18 @@
 #pragma once
-
-#include "network_manager.h"
-#include "game_renderer.h"
+#include "network_interface.h"
 #include "online_game_manager.h"
 #include "audio_manager.h"
+#include "game_renderer.h"
 #include "types.h"
 
-enum class ClientState {
-  kConnecting,
-  kInMainMenu,
-  kInRoom,
-  kInGame
-};
+enum class ClientState { kConnecting, kInMainMenu, kInRoom, kInGame };
 
 /**
- * \brief Client is a class that has a network manager and an online game manager
- * to coordinate network code and game logic code.
+ * \brief Client is a class that has a network manager and an online game
+ * manager to coordinate network code and game logic code.
  *
- * It also has a game renderer to draw the game in a render target given by an application.
+ * It also has a game renderer to draw the game in a render target given by an
+ * application.
  */
 class Client {
  public:
@@ -28,7 +23,8 @@ class Client {
   void Init(int input_profile_id) noexcept;
   void Update() noexcept;
   void DrawMainMenu();
-  void Draw(const raylib::RenderTexture2D& render_texture, raylib::Vector2 render_target_pos) noexcept;
+  void Draw(const raylib::RenderTexture2D& render_texture,
+            raylib::Vector2 render_target_pos) noexcept;
   void DrawImGui() noexcept;
   void Deinit() noexcept;
 
@@ -47,7 +43,7 @@ class Client {
     client_id_ = client_id;
   }
 
-private:
+ private:
   NetworkInterface* network_interface_ = nullptr;
   OnlineGameManager online_game_manager_{};
 
@@ -61,4 +57,17 @@ private:
 
   ClientId client_id_ = game_constants::kInvalidClientId;
   int input_profile_id_ = 0;
+
+  // Main menu attributes.
+  // =====================
+
+  Sprite ice_ground{};
+  Sprite photon_logo{};
+  Sprite raylib_logo{};
+  raylib::Texture2D blue_spin_animation{};
+  raylib::Texture2D red_spin_animation{};
+  static constexpr std::int8_t kSpinAnimFrameCount = 7;
+  static constexpr float kSpinAnimFrameRate = 12.f;
+  raylib::Rectangle spin_anim_rec{};
+  float spin_anim_frame_counter = 0;
 };
